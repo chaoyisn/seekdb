@@ -61,6 +61,7 @@
 #include "observer/virtual_table/ob_virtual_data_access_service.h"
 
 #include "observer/ob_signal_handle.h"
+#include "observer/ai_column_worker.h"
 #include "observer/ob_internal_table_refresh_adapter.h"
 #include "observer/ob_ls_runtime_adapter.h"
 #include "observer/ob_server_duty_task.h"
@@ -427,6 +428,7 @@ private:
 
   common::ObMySQLProxy sql_proxy_;
   common::ObMySQLProxy ddl_sql_proxy_;
+  AiColumnWorker ai_column_worker_;
 
   // The OceanBase configuration relating to.
   ObServerReloadConfig reload_config_;

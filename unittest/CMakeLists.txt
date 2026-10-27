@@ -5,7 +5,8 @@ add_executable(sql_ai_column_tests
   sql/resolver/test_ai_column_resolver.cpp
   sql/resolver/test_ai_column_definition.cpp
   share/schema/test_ai_column_schema.cpp
-  observer/virtual_table/test_ai_column_metadata_table.cpp)
+  observer/virtual_table/test_ai_column_metadata_table.cpp
+  observer/test_ai_column_result.cpp)
 target_include_directories(sql_ai_column_tests PRIVATE "${DEP_DIR}/include")
 target_link_libraries(sql_ai_column_tests PRIVATE
   oceanbase "${DEP_DIR}/lib/libgtest_main.a" "${DEP_DIR}/lib/libgtest.a" Threads::Threads)

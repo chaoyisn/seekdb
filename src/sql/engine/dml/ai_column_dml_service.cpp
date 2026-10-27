@@ -111,6 +111,21 @@ int make_predicate(const ObTableSchema &table, const ObDMLBaseCtDef &ctdef,
 }
 } // namespace
 
+int AiColumnDmlService::execute_result_write(ObSQLSessionInfo &session,
+                                            common::sqlclient::ObISQLConnection &connection,
+                                            const ObString &sql, int64_t &affected_rows)
+{
+  int ret = OB_SUCCESS;
+  if (session.ai_column_write_once_) {
+    ret = OB_ERR_UNEXPECTED;
+  } else {
+    session.ai_column_write_once_ = true;
+    ret = connection.execute_write(sql, affected_rows);
+    session.ai_column_write_once_ = false;
+  }
+  return ret;
+}
+
 int AiColumnDmlService::after_row(ObTableModifyOp &op, const ObDMLBaseCtDef &ctdef,
                                  ObDmlEventType event)
 {
@@ -227,9 +242,7 @@ int AiColumnDmlService::after_row(ObTableModifyOp &op, const ObDMLBaseCtDef &ctd
       }
       if (OB_SUCC(ret) && !deleting) {
         int64_t affected_rows = 0;
-        session->ai_column_write_once_ = true;
-        ret = op.inner_conn_->execute_write(invalidate.string(), affected_rows);
-        session->ai_column_write_once_ = false;
+        ret = execute_result_write(*session, *op.inner_conn_, invalidate.string(), affected_rows);
         if (OB_SUCC(ret) && affected_rows != 1) {
           ret = OB_ERR_UNEXPECTED;
           LOG_WARN("AI invalidation must address exactly one business row", K(ret), K(affected_rows));

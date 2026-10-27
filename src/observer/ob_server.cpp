@@ -1261,6 +1261,9 @@ int ObServer::start()
     } else {
       FLOG_INFO("success to start oceanbase service");
     }
+    if (FAILEDx(ai_column_worker_.start())) {
+      LOG_ERROR("failed to start AI column worker", KR(ret));
+    }
     if (FAILEDx(standby_module_->start())) {
       LOG_ERROR("fail to start standby module", KR(ret));
     }
@@ -1559,6 +1562,10 @@ int ObServer::stop()
     // Otherwise session cleanup waits for a loader query that cannot publish its schema.
     stop_in_process_package_ddl(mods_ddl_service_launcher_, mods_system_package_load_service_);
   }
+
+  // Join model workers before SQL, schema, storage or logging services stop.
+  ai_column_worker_.stop();
+  ai_column_worker_.wait();
 
   FLOG_INFO("begin to stop OB_LOGGER");
   OB_LOGGER.stop();

@@ -62,6 +62,7 @@ OBSERVER_PRIVATE_HEADERS = [
     "ob_req_time_service.h",
     "ob_restore_sql_modifier.h",
     "ob_server.h",
+    "ai_column_worker.h",
     "ob_server_options.h",
     "ob_server_reload_config.h",
     "ob_server_runtime_access.h",
