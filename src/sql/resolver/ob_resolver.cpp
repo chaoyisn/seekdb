@@ -43,6 +43,7 @@
 #include "sql/resolver/ddl/ob_drop_database_resolver.h"
 #include "sql/resolver/ddl/ob_create_view_resolver.h"
 #include "sql/resolver/ddl/ob_explain_resolver.h"
+#include "sql/engine/basic/ob_file_scan_utils.h"
 #include "sql/resolver/ddl/ob_create_outline_resolver.h"
 #include "sql/resolver/ddl/ob_alter_outline_resolver.h"
 #include "sql/resolver/ddl/ob_drop_outline_resolver.h"
@@ -473,7 +474,19 @@ int ObResolver::resolve(IsPrepared if_prepared, const ParseNode &parse_tree, ObS
         break;
       }
       case T_EXPLAIN: {
-        REGISTER_STMT_RESOLVER(Explain);
+        if (NULL != real_parse_tree->str_value_ &&
+            0 == strncmp(real_parse_tree->str_value_, "COPY_TO_FILE", real_parse_tree->str_len_)) {
+          ret = ObFileScanUtils::resolve_copy_stmt(params_, *real_parse_tree, stmt);
+        } else if (NULL != real_parse_tree->str_value_ &&
+                   (0 == strncmp(real_parse_tree->str_value_, "DESCRIBE_FILE_TABLE", real_parse_tree->str_len_) ||
+                    0 == strncmp(real_parse_tree->str_value_, "DESCRIBE_SELECT", real_parse_tree->str_len_))) {
+          ret = ObFileScanUtils::resolve_describe_stmt(params_, *real_parse_tree, stmt);
+          if (OB_SUCC(ret) && NULL == stmt) {
+            REGISTER_STMT_RESOLVER(Explain);
+          }
+        } else {
+          REGISTER_STMT_RESOLVER(Explain);
+        }
         break;
       }
       case T_ALTER_SYSTEM_SET: {

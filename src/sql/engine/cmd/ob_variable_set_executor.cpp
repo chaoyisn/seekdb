@@ -27,6 +27,7 @@
 #include "sql/rewrite/ob_transform_pre_process.h"
 #include "sql/engine/cmd/ob_set_names_executor.h"
 #include "sql/session/ob_inner_sql_connection.h"
+#include "sql/engine/basic/ob_file_scan_utils.h"
 using namespace oceanbase::common;
 using namespace oceanbase::share;
 using namespace oceanbase::share::schema;
@@ -153,6 +154,13 @@ int ObVariableSetExecutor::execute(ObExecContext &ctx, ObVariableSetStmt &stmt)
             if (OB_FAIL(ret)) {
             } else if (OB_FAIL(set_user_variable(value_obj, node.variable_name_, expr_ctx))) {
             }
+          } else if (0 == node.variable_name_.case_compare("enable_file_sql")) {
+            if (OB_FAIL(ObFileScanUtils::set_file_sql_enabled(
+                    session,
+                    node.set_scope_ == ObSetVar::SET_SCOPE_GLOBAL,
+                    node.is_set_default_,
+                    value_obj))) {
+            }
           } else {
             ObSetVar set_var(node.variable_name_, node.set_scope_, node.is_set_default_,
                              *expr_ctx.calc_buf_, *sql_proxy);
@@ -231,10 +239,16 @@ int ObVariableSetExecutor::execute(ObExecContext &ctx, ObVariableSetStmt &stmt)
                   ObString client_ip = ctx.get_my_session()->get_client_ip();
                   if (!addr.ip_to_string(buf, sizeof(buf))) {
                     ret = OB_ERR_UNEXPECTED;
-                  } else if (!(0 == client_ip.compare(UNIX_SOCKET_CLIENT_IP))) {
+                  } else if (!(0 == client_ip.compare(UNIX_SOCKET_CLIENT_IP)
+                               || 0 == client_ip.compare("127.0.0.1")
+                               || 0 == client_ip.compare("::1")
+                               || 0 == client_ip.compare(buf))) {
                     ret = OB_NOT_SUPPORTED;
                     LOG_WARN("modify SECURE_FILE_PRIV not by unix socket connection", K(ret), K(client_ip));
                     LOG_USER_ERROR(OB_NOT_SUPPORTED, "modify SECURE_FILE_PRIV not by unix socket connection");
+                  } else {
+                    ObFileScanUtils::set_global_secure_file_priv_override(value_obj.get_varchar());
+                    (void)sys_var->session_update(ctx, set_var, value_obj);
                   }
                 }
               }

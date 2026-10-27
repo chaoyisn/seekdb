@@ -20,6 +20,7 @@
 #include "lib/json/ob_json_print_utils.h"
 #include "sql/pl/ob_pl_resolver.h"
 #include "sql/resolver/dml/ob_inlist_resolver.h"
+#include "sql/engine/basic/ob_file_scan_utils.h"
 
 namespace oceanbase
 {
@@ -1986,7 +1987,21 @@ int ObRawExprResolverImpl::process_system_variable_node(const ParseNode *node, O
   } else {
     ObString str;
     str.assign_ptr(const_cast<char *>(node->str_value_), static_cast<int32_t>(node->str_len_));
-    if (OB_FAIL(ObRawExprUtils::build_get_sys_var(ctx_.expr_factory_, str,
+    if (0 == str.case_compare("enable_file_sql")) {
+      ObConstRawExpr *c_expr = NULL;
+      if (OB_FAIL(ctx_.expr_factory_.create_raw_expr(T_INT, c_expr)) || OB_ISNULL(c_expr)) {
+        ret = OB_FAIL(ret) ? ret : OB_ALLOCATE_MEMORY_FAILED;
+      } else {
+        const bool is_global = (static_cast<sql::ObSetVar::SetScopeType>(node->value_) ==
+                                sql::ObSetVar::SET_SCOPE_GLOBAL);
+        const bool enabled = ObFileScanUtils::is_file_sql_enabled(ctx_.session_info_, is_global);
+        ObObj val;
+        val.set_int(enabled ? 1 : 0);
+        c_expr->set_value(val);
+        c_expr->set_expr_obj_meta(val.get_meta());
+        expr = c_expr;
+      }
+    } else if (OB_FAIL(ObRawExprUtils::build_get_sys_var(ctx_.expr_factory_, str,
                                                   static_cast<sql::ObSetVar::SetScopeType>(node->value_),
                                                   expr))) {
     } else {

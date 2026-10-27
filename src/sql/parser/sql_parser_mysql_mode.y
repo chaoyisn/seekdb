@@ -41,7 +41,6 @@
 #include "../../../src/sql/parser/sql_parser_base.h"
 
 #define GEN_EXPLAN_STMT(no_use, explain_stmt, explain_type, display_type, stmt, into_table, set_statement_id) \
-  (void)(no_use); \
   ParseNode *type_node = NULL; \
   ParseNode *display_node = NULL; \
   if (0 != explain_type) { \
@@ -51,7 +50,12 @@
     malloc_terminal_node(display_node, result->malloc_pool_, display_type); \
   } \
   malloc_non_terminal_node(explain_stmt, result->malloc_pool_, T_EXPLAIN, 5, \
-                           type_node, display_node, into_table, set_statement_id, stmt);
+                           type_node, display_node, into_table, set_statement_id, stmt); \
+  if (NULL != (no_use) && 1 == (no_use)->value_ && 0 == (explain_type) && 0 == (display_type) \
+      && NULL == (into_table) && NULL == (set_statement_id) && NULL != (stmt) && T_SELECT == (stmt)->type_) { \
+    (explain_stmt)->str_value_ = "DESCRIBE_SELECT"; \
+    (explain_stmt)->str_len_ = 15; \
+  }
 %}
 
 %destructor {destroy_tree($$);}<node>
@@ -514,6 +518,7 @@ END_P SET_VAR DELIMITER
 %type <node> vector_similarity_expr vector_similarity_metric
 %type <node> algorithm_opt lock_opt
 %type <node> flush_privileges_stmt opt_flush_privileges_scope
+%type <node> file_table_function file_table_func_call opt_file_table_named_args file_table_named_arg_list file_table_named_arg copy_stmt opt_copy_options copy_option_list copy_option copy_opt_val
 %start sql_stmt
 %%
 ////////////////////////////////////////////////////////////////
@@ -582,6 +587,7 @@ stmt:
   | drop_table_stmt         { $$ = $1; check_question_mark($$, result); }
   | drop_view_stmt          { $$ = $1; check_question_mark($$, result); }
   | explain_stmt            { $$ = $1; question_mark_issue($$, result); }
+  | copy_stmt               { $$ = $1; question_mark_issue($$, result); }
   | create_outline_stmt     { $$ = $1; question_mark_issue($$, result); }
   | alter_outline_stmt      { $$ = $1; question_mark_issue($$, result); }
   | drop_outline_stmt       { $$ = $1; check_question_mark($$, result); }
@@ -10848,6 +10854,10 @@ tbl_name
 {
   $$ = $1;
 }
+| file_table_function
+{
+  $$ = $1;
+}
 ;
 
 tbl_name:
@@ -12302,12 +12312,25 @@ explain_or_desc relation_factor opt_desc_column_option
   (void)($1);
   malloc_non_terminal_node($$, result->malloc_pool_, T_EXPLAIN, 5, $4, NULL, NULL, NULL, $5);
 }
+| explain_or_desc file_table_function
+{
+  (void)($1);
+  malloc_non_terminal_node($$, result->malloc_pool_, T_EXPLAIN, 5, NULL, NULL, NULL, NULL, $2);
+  $$->str_value_ = "DESCRIBE_FILE_TABLE";
+  $$->str_len_ = 19;
+}
 ;
 
 explain_or_desc:
 EXPLAIN {$$ = NULL;}
-| DESCRIBE {$$ = NULL;}
-| DESC  {$$ = NULL;}
+| DESCRIBE {
+  malloc_terminal_node($$, result->malloc_pool_, T_INT);
+  $$->value_ = 1;
+}
+| DESC  {
+  malloc_terminal_node($$, result->malloc_pool_, T_INT);
+  $$->value_ = 1;
+}
 ;
 
 explainable_stmt:
@@ -17479,6 +17502,135 @@ literal
 }
 ;
 
+file_table_function:
+file_table_func_call %prec LOWER_PARENS
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_TABLE_COLLECTION_EXPRESSION, 2, $1, NULL);
+  $$->value_ = 777;
+}
+| file_table_func_call relation_name
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_TABLE_COLLECTION_EXPRESSION, 2, $1, $2);
+  $$->value_ = 777;
+}
+| file_table_func_call AS relation_name
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_TABLE_COLLECTION_EXPRESSION, 2, $1, $3);
+  $$->value_ = 777;
+}
+;
+
+file_table_func_call:
+relation_factor '(' expr opt_file_table_named_args ')'
+{
+  if (NULL == $1 || NULL != $1->children_[0] || NULL == $1->str_value_ ||
+      ((0 != strncasecmp($1->str_value_, "read_csv", $1->str_len_) || 8 != $1->str_len_) &&
+       (0 != strncasecmp($1->str_value_, "read_json", $1->str_len_) || 9 != $1->str_len_) &&
+       (0 != strncasecmp($1->str_value_, "read_ndjson", $1->str_len_) || 11 != $1->str_len_) &&
+       (0 != strncasecmp($1->str_value_, "read_parquet", $1->str_len_) || 12 != $1->str_len_) &&
+       (0 != strncasecmp($1->str_value_, "glob", $1->str_len_) || 4 != $1->str_len_))) {
+    yyerror(&@1, result, "Unsupported table function in FROM clause\n");
+    YYABORT_PARSE_SQL_ERROR;
+  }
+  malloc_non_terminal_node($$, result->malloc_pool_, T_FUN_SYS, 2, $3, $4);
+  dup_node_string($1, $$, result->malloc_pool_);
+}
+;
+
+opt_file_table_named_args:
+/* EMPTY */
+{
+  $$ = NULL;
+}
+| ',' file_table_named_arg_list
+{
+  $$ = $2;
+}
+;
+
+file_table_named_arg_list:
+file_table_named_arg
+{
+  $$ = $1;
+}
+| file_table_named_arg_list ',' file_table_named_arg
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_LINK_NODE, 2, $1, $3);
+}
+;
+
+file_table_named_arg:
+column_name COMP_EQ expr
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_OP_EQ, 2, $1, $3);
+}
+;
+
+copy_stmt:
+COPY select_with_parens TO STRING_VALUE opt_copy_options
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_EXPLAIN, 3, $2, $4, $5);
+  $$->str_value_ = "COPY_TO_FILE";
+  $$->str_len_ = 12;
+}
+| COPY relation_factor TO STRING_VALUE opt_copy_options
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_EXPLAIN, 3, $2, $4, $5);
+  $$->str_value_ = "COPY_TO_FILE";
+  $$->str_len_ = 12;
+}
+;
+
+opt_copy_options:
+/* EMPTY */
+{
+  $$ = NULL;
+}
+| '(' copy_option_list ')'
+{
+  $$ = $2;
+}
+;
+
+copy_option_list:
+copy_option
+{
+  $$ = $1;
+}
+| copy_option_list ',' copy_option
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_LINK_NODE, 2, $1, $3);
+}
+;
+
+copy_option:
+column_name opt_equal_mark copy_opt_val
+{
+  (void)($2);
+  malloc_non_terminal_node($$, result->malloc_pool_, T_OP_EQ, 2, $1, $3);
+}
+| column_name
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_OP_EQ, 2, $1, NULL);
+}
+| NULLX opt_equal_mark copy_opt_val
+{
+  (void)($1);
+  (void)($2);
+  ParseNode *key_node = NULL;
+  make_name_node(key_node, result->malloc_pool_, "nullstr");
+  malloc_non_terminal_node($$, result->malloc_pool_, T_OP_EQ, 2, key_node, $3);
+}
+;
+
+copy_opt_val:
+column_name { $$ = $1; }
+| STRING_VALUE { $$ = $1; }
+| BOOL_VALUE { $$ = $1; }
+| INTNUM { $$ = $1; }
+| NULLX { $$ = $1; }
+;
+
 unreserved_keyword:
 unreserved_keyword_for_role_name { $$=$1;}
 | unreserved_keyword_ambiguous_roles { $$=$1;}
@@ -17752,7 +17904,7 @@ ACCOUNT
 |       JSON_ARRAYAGG
 |       JSON_OBJECTAGG
 |       JSON_QUERY
-|       JSON_TABLE
+|       JSON_TABLE %prec LOWER_PARENS
 |       KEYWORD
 |       KEY_BLOCK_SIZE
 |       KEY_VERSION
@@ -18111,7 +18263,7 @@ ACCOUNT
 |       UNCOMMITTED
 |       UNCONDITIONAL
 |       UNDEFINED
-|       UNNEST
+|       UNNEST %prec LOWER_PARENS
 |       UNICODE
 |       UNKNOWN
 |       UNLOCKED
@@ -18180,7 +18332,7 @@ ACCOUNT
 |       MICRO_INDEX_CLUSTERED
 |       INCONSISTENT 
 |       INDIVIDUAL
-|       HYBRID_SEARCH
+|       HYBRID_SEARCH %prec LOWER_PARENS
 ;
 
 unreserved_keyword_special:

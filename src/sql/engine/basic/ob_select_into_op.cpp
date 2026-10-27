@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "ob_select_into_op.h"
+#include "sql/engine/basic/ob_file_scan_utils.h"
 #include "sql/engine/cmd/ob_variable_set_executor.h"
 #include "lib/charset/ob_charset_string_helper.h"
 #include "sql/engine/px/ob_px_sqc_handler.h"
@@ -52,6 +53,9 @@ int ObSelectIntoOp::inner_open()
     opened_ = true;
     if (OB_FAIL(session->get_sql_select_limit(top_limit_cnt_))) {
     }
+  }
+  if (OB_SUCC(ret) && ObFileScanUtils::is_copy_csv_spec(MY_SPEC.outfile_name_)) {
+    return OB_SUCCESS;
   }
   if (OB_SUCC(ret) && !MY_SPEC.external_properties_.str_.empty()) {
     if (OB_FAIL(external_properties_.load_from_string(MY_SPEC.external_properties_.str_,
@@ -188,6 +192,10 @@ int ObSelectIntoOp::calc_outfile_path()
 }
 int ObSelectIntoOp::inner_get_next_row()
 {
+  if (ObFileScanUtils::is_copy_csv_spec(MY_SPEC.outfile_name_)) {
+    return ObFileScanUtils::execute_copy_to_csv(
+        ctx_, eval_ctx_, child_, MY_SPEC.select_exprs_, MY_SPEC.outfile_name_.get_varchar(), top_limit_cnt_, brs_, false);
+  }
   int ret = 0 == top_limit_cnt_ ? OB_ITER_END : OB_SUCCESS;
   int64_t row_count = 0;
   const ObItemType into_type = MY_SPEC.into_type_;
@@ -236,6 +244,10 @@ int ObSelectIntoOp::inner_get_next_row()
 
 int ObSelectIntoOp::inner_get_next_batch(const int64_t max_row_cnt)
 {
+  if (ObFileScanUtils::is_copy_csv_spec(MY_SPEC.outfile_name_)) {
+    return ObFileScanUtils::execute_copy_to_csv(
+        ctx_, eval_ctx_, child_, MY_SPEC.select_exprs_, MY_SPEC.outfile_name_.get_varchar(), top_limit_cnt_, brs_, true);
+  }
   int ret = OB_SUCCESS;
   const ObBatchRows *child_brs = NULL;
   int64_t batch_size = min(max_row_cnt, MY_SPEC.max_batch_size_);

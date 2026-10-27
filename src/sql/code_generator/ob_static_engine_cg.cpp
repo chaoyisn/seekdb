@@ -47,6 +47,7 @@
 #include "sql/engine/ob_operator_factory.h"
 #include "sql/engine/basic/ob_limit_op.h"
 #include "sql/engine/basic/ob_values_op.h"
+#include "sql/engine/basic/ob_file_scan_utils.h"
 #include "sql/engine/sort/ob_sort_op.h"
 #include "sql/engine/recursive_cte/ob_recursive_union_all_op.h"
 #include "sql/engine/set/ob_merge_union_op.h"
@@ -5515,6 +5516,10 @@ int ObStaticEngineCG::generate_spec(ObLogFunctionTable &op, ObFunctionTableSpec 
       if (OB_FAIL(mark_expr_self_produced(op.get_output_exprs().at(i)))) {
       }
     }
+    ObFileTableDef *file_table_def = nullptr;
+    if (ObFileScanUtils::is_file_table_expr(value_raw_expr, file_table_def) && nullptr != file_table_def) {
+      file_table_def->access_col_indices_.reuse();
+    }
     for (int64_t i = 0; OB_SUCC(ret) && i < op.get_stmt()->get_column_size(); ++i) {
       ObExpr *rt_expr = nullptr;
       const ColumnItem *col_item = op.get_stmt()->get_column_item(i);
@@ -5526,6 +5531,10 @@ int ObStaticEngineCG::generate_spec(ObLogFunctionTable &op, ObFunctionTableSpec 
         OZ (mark_expr_self_produced(col_item->expr_));
         OZ (generate_rt_expr(*col_item->expr_, rt_expr));
         OZ (spec.column_exprs_.push_back(rt_expr));
+        if (OB_SUCC(ret) && nullptr != file_table_def) {
+          OZ (file_table_def->access_col_indices_.push_back(
+              static_cast<int32_t>(col_item->column_id_ - OB_APP_MIN_COLUMN_ID)));
+        }
       }
     }
   }

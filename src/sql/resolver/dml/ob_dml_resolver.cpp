@@ -41,6 +41,7 @@
 #include "sql/resolver/dcl/ob_dcl_resolver.h"
 #include "sql/resolver/ddl/ob_ddl_resolver.h"
 #include "sql/hybrid_search/ob_hybrid_search_executor.h"
+#include "sql/engine/basic/ob_file_scan_utils.h"
 
 namespace oceanbase
 {
@@ -3927,6 +3928,9 @@ int ObDMLResolver::resolve_function_table_item(const ParseNode &parse_tree,
                                                TableItem *&tbl_item)
 {
   int ret = OB_SUCCESS;
+  if (T_TABLE_COLLECTION_EXPRESSION == parse_tree.type_ && 777 == parse_tree.value_) {
+    return ObFileScanUtils::resolve_file_table_item(params_, *this, parse_tree, get_stmt(), tbl_item);
+  }
   ObDMLStmt *stmt = get_stmt();
   ParseNode *alias_node = NULL;
   ObRawExpr *function_table_expr = NULL;
@@ -7475,6 +7479,30 @@ int ObDMLResolver::resolve_function_table_column_item(const TableItem &table_ite
   CK (OB_LIKELY(table_item.is_function_table()));
   CK (OB_NOT_NULL(table_item.function_table_expr_));
   if (OB_SUCC(ret)) {
+    ObFileTableDef *file_table_def = NULL;
+    if (ObFileScanUtils::is_file_table_item(table_item, &file_table_def) && NULL != file_table_def) {
+      ObDMLStmt *stmt = get_stmt();
+      CK (OB_NOT_NULL(stmt));
+      for (int64_t i = 0; OB_SUCC(ret) && i < file_table_def->columns_.count(); ++i) {
+        const ObFileColumnDef &fcol = file_table_def->columns_.at(i);
+        ColumnItem *col_item = stmt->get_column_item(table_item.table_id_, fcol.name_);
+        if (NULL == col_item) {
+          OZ (resolve_function_table_column_item(table_item,
+                                                 fcol.meta_,
+                                                 fcol.accuracy_,
+                                                 fcol.name_,
+                                                 OB_APP_MIN_COLUMN_ID + i,
+                                                 col_item));
+          if (OB_SUCC(ret) && OB_NOT_NULL(col_item) && OB_NOT_NULL(col_item->expr_) &&
+              !fcol.is_nullable_) {
+            col_item->expr_->set_result_flag(NOT_NULL_FLAG);
+          }
+        }
+        CK (OB_NOT_NULL(col_item));
+        OZ (col_items.push_back(*col_item));
+      }
+      return ret;
+    }
     if (table_item.function_table_expr_->get_result_type().is_ext()) {
       ret = resolve_function_table_column_item_udf(table_item, col_items);
     } else {
