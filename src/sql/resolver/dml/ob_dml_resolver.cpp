@@ -5668,6 +5668,34 @@ int ObDMLResolver::resolve_partitions(const ParseNode *part_node,
   return ret;
 }
 
+// This check belongs to assignment targets, not column name resolution: AI
+// result columns remain readable and ordinary omitted INSERT defaults stay NULL.
+int ObDMLResolver::check_ai_column_assignment(const ObColumnRefRawExpr *col_expr,
+                                               ObDMLStmt *stmt)
+{
+  int ret = OB_SUCCESS;
+  const ColumnItem *item = nullptr;
+  const ObColumnSchemaV2 *column = nullptr;
+  if (OB_ISNULL(col_expr) || OB_ISNULL(stmt) || OB_ISNULL(session_info_)) {
+    ret = OB_ERR_UNEXPECTED;
+  } else if (OB_ISNULL(item = stmt->get_column_item_by_id(
+                 col_expr->get_table_id(), col_expr->get_column_id()))) {
+    ret = OB_ERR_UNEXPECTED;
+  } else {
+    const uint64_t tid = OB_INVALID_ID == item->base_tid_ ? item->table_id_ : item->base_tid_;
+    const uint64_t cid = OB_INVALID_ID == item->base_cid_ ? item->column_id_ : item->base_cid_;
+    if (OB_FAIL(get_column_schema(tid, cid, column, true))) {
+    } else if (OB_ISNULL(column)) {
+      ret = OB_ERR_UNEXPECTED;
+    } else if (column->is_ai_column()) {
+      // is_inner() is deliberately insufficient: user PL also uses inner SQL.
+      ret = OB_NOT_SUPPORTED;
+      LOG_USER_ERROR(OB_NOT_SUPPORTED, "direct assignment to an AI result column");
+    }
+  }
+  return ret;
+}
+
 int ObDMLResolver::check_basic_column_generated(const ObColumnRefRawExpr *col_expr,
                                                 ObDMLStmt *dml_stmt,
                                                 bool &is_generated)

@@ -129,7 +129,8 @@ int ObDelUpdResolver::resolve_assignments(const ParseNode &parse_node,
         ObRawExpr *expr = value_list.at(i);
         bool is_generated_column = true;
         // Mysql only allows updating generated columns to their default value
-        if (OB_FAIL(check_basic_column_generated(ref_expr, stmt, is_generated_column))) {
+        if (OB_FAIL(check_ai_column_assignment(ref_expr, stmt))) {
+        } else if (OB_FAIL(check_basic_column_generated(ref_expr, stmt, is_generated_column))) {
         } else {
           if (T_DEFAULT == expr->get_expr_type()) {
             ObDefaultValueUtils utils(stmt, &params_, this);
@@ -2321,7 +2322,8 @@ int ObDelUpdResolver::resolve_insert_values(const ParseNode *node,
             uint64_t column_id = column_expr->get_column_id();
             ObDefaultValueUtils utils(del_upd_stmt, &params_, this);
             bool is_generated_column = false;
-            if (OB_FAIL(resolve_sql_expr(*value_node, expr))) {
+            if (OB_FAIL(check_ai_column_assignment(column_expr, del_upd_stmt))) {
+            } else if (OB_FAIL(resolve_sql_expr(*value_node, expr))) {
             } else if (OB_ISNULL(expr)) {
               ret = OB_ERR_UNEXPECTED;
               LOG_ERROR("fail to resolve sql expr", K(ret), K(expr));
