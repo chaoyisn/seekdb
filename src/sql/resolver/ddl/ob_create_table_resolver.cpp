@@ -16,6 +16,7 @@
 
 #define USING_LOG_PREFIX SQL_RESV
 #include "sql/resolver/ddl/ob_create_table_resolver.h"
+#include "sql/resolver/ddl/ob_ai_column_resolver.h"
 #include "sql/resolver/dml/ob_select_resolver.h"
 #include "sql/resolver/ddl/ob_fts_index_builder_util.h"
 #include "sql/rewrite/ob_transform_utils.h"
@@ -896,6 +897,10 @@ int ObCreateTableResolver::resolve_table_elements(const ParseNode *node,
       }
     }
 
+    if (OB_SUCC(ret) && RESOLVE_NON_COL != resolve_rule) {
+      ret = resolve_ai_columns(*node, table_schema);
+    }
+
     // A table must have at least one column as a visible column
     if (OB_SUCC(ret)) {
       // RESOLVE_NON_COL == resolve_rule when, only parse non-column definitions
@@ -950,6 +955,52 @@ int ObCreateTableResolver::resolve_table_elements(const ParseNode *node,
       } else if (OB_FAIL(resolve_primary_key_node_in_heap_table(primary_node_in_heap_table, stats, resolved_cols))) {
       }
     }
+  }
+  return ret;
+}
+
+int ObCreateTableResolver::resolve_ai_columns(const ParseNode &node, ObTableSchema &table)
+{
+  int ret = OB_SUCCESS;
+  ObSEArray<const ParseNode *, 4> definitions;
+  ObSEArray<ObColumnSchemaV2 *, 4> targets;
+  ObSEArray<uint64_t, 4> ai_ids;
+  for (int i = 0; OB_SUCC(ret) && i < node.num_child_; ++i) {
+    const ParseNode *element = node.children_[i];
+    if (element == nullptr) {
+      ret = OB_ERR_UNEXPECTED;
+    } else if (const ParseNode *definition = AiColumnResolver::find_definition(*element)) {
+      const ParseNode *name = element->children_[0]->children_[2];
+      ObColumnSchemaV2 *column = name == nullptr ? nullptr : table.get_column_schema(
+          ObString(static_cast<int32_t>(name->str_len_), name->str_value_));
+      if (column == nullptr) {
+        ret = OB_ERR_UNEXPECTED;
+      } else if (OB_FAIL(definitions.push_back(definition))) {
+      } else if (OB_FAIL(targets.push_back(column))) {
+      } else {
+        ret = ai_ids.push_back(column->get_column_id());
+      }
+    }
+  }
+  uint64_t next_id = cur_column_id_;
+  for (int64_t i = 0; OB_SUCC(ret) && !definitions.empty() && i < table.get_column_count(); ++i) {
+    next_id = MAX(next_id, table.get_column_schema_by_idx(i)->get_column_id());
+  }
+  for (int64_t i = 0; OB_SUCC(ret) && i < definitions.count(); ++i) {
+    AiColumnSchema definition;
+    ObSEArray<ObColumnSchemaV2, 3> hidden;
+    if (OB_FAIL(AiColumnResolver::resolve(params_, *definitions.at(i), table,
+                                         *targets.at(i), ai_ids, next_id, definition))) {
+    } else if (OB_FAIL(AiColumnResolver::make_hidden_columns(definition, hidden))) {
+    } else if (OB_FAIL(targets.at(i)->set_ai_column_schema(definition))) {
+    }
+    for (int64_t j = 0; OB_SUCC(ret) && j < hidden.count(); ++j) {
+      ret = table.add_column(hidden.at(j));
+    }
+  }
+  if (OB_SUCC(ret) && !definitions.empty()) {
+    cur_column_id_ = next_id;
+    table.set_max_used_column_id(next_id);
   }
   return ret;
 }

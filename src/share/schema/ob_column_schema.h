@@ -71,7 +71,10 @@ int assign(const ObColumnSchemaV2 &src_schema);
   
   inline void set_table_id(const uint64_t id) { table_id_ = id; }
   inline void set_column_id(const uint64_t id) { column_id_ = id; }
-  inline void set_schema_version(const int64_t schema_version) { schema_version_ = schema_version; }
+  inline void set_schema_version(const int64_t schema_version) {
+    schema_version_ = schema_version;
+    if (ai_column_schema_ != nullptr) { ai_column_schema_->set_definition_version(schema_version); }
+  }
   inline void set_rowkey_position(const int64_t rowkey_position) { rowkey_position_ = rowkey_position; }
   inline void set_order_in_rowkey(const common::ObOrderType order_in_rowkey) { order_in_rowkey_ = order_in_rowkey; }
   inline void set_udt_set_id(const uint64_t id) { udt_set_id_ = id; }

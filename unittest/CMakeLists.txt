@@ -3,6 +3,7 @@ find_package(Threads REQUIRED)
 add_executable(sql_ai_column_tests
   sql/parser/test_ai_column_parser.cpp
   sql/resolver/test_ai_column_resolver.cpp
+  sql/resolver/test_ai_column_definition.cpp
   share/schema/test_ai_column_schema.cpp
   observer/virtual_table/test_ai_column_metadata_table.cpp)
 target_include_directories(sql_ai_column_tests PRIVATE "${DEP_DIR}/include")

@@ -2091,10 +2091,13 @@ int ObDDLResolver::resolve_normal_column_attribute(ObColumnSchemaV2 &column,
           ret = OB_ERR_UNEXPECTED;
         } else if (OB_FAIL(AiColumnOptions::resolve(attr_node->children_[1], options))) {
           SQL_RESV_LOG(WARN, "invalid AI column options", K(ret));
-        } else {
+        } else if (stmt_->get_stmt_type() == stmt::T_ALTER_TABLE
+                   && static_cast<AlterColumnSchema &>(column).alter_type_ != OB_DDL_ADD_COLUMN) {
           ret = OB_NOT_SUPPORTED;
-          LOG_USER_ERROR(OB_NOT_SUPPORTED, "AI column metadata persistence");
+          LOG_USER_ERROR(OB_NOT_SUPPORTED, "modifying an AI column definition");
         }
+        // CREATE resolves all AI definitions after every ordinary column has a
+        // type; ADD resolves against the old schema plus earlier added columns.
         break;
       }
       case T_CONSTR_NOT_NULL: {

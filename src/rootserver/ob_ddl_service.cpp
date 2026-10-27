@@ -7765,6 +7765,11 @@ int ObDDLService::add_new_column_to_table_schema(
       // 225 is barrier version, after this adding column in system table need specify column_id
       ret = OB_OP_NOT_ALLOW;
       LOG_USER_ERROR(OB_OP_NOT_ALLOW, "inner table add column without column_id");
+    } else if (alter_column_schema.is_ai_column()
+               && alter_column_schema.get_column_id() != static_cast<uint64_t>(max_used_column_id + 1)) {
+      // A concurrent schema change must not redirect the pre-resolved hidden
+      // column/dependency references to unrelated physical columns.
+      ret = OB_SCHEMA_EAGAIN;
     } else {
       alter_column_schema.set_column_id(++max_used_column_id);
       alter_column_schema.set_rowkey_position(0);
