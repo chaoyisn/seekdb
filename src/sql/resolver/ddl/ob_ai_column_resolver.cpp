@@ -145,6 +145,23 @@ int AiColumnResolver::resolve(ObResolverParams &params, const ParseNode &definit
       ret = OB_NOT_SUPPORTED;
     }
   }
+  if (OB_SUCC(ret) && !embedding && arguments->num_child_ == 3) {
+    const ParseNode *config = arguments->children_[2];
+    if (config == nullptr) {
+      ret = OB_INVALID_ARGUMENT;
+    } else if (config->type_ == T_VARCHAR) {
+      ObString text(static_cast<int32_t>(config->str_len_), config->str_value_);
+      ObJsonObject *object = nullptr;
+      if (OB_FAIL(ObAIFuncJsonUtils::get_json_object_form_str(*params.allocator_, text, object))) {
+      } else if (object == nullptr || object->get_value("messages") != nullptr) {
+        ret = OB_INVALID_ARGUMENT;
+      }
+    } else if (config->type_ == T_INT || config->type_ == T_UINT64
+               || config->type_ == T_NUMBER || config->type_ == T_DOUBLE
+               || config->type_ == T_BOOL) {
+      ret = OB_INVALID_ARGUMENT;
+    }
+  }
   if (OB_SUCC(ret)) {
     const ParseNode &model = *arguments->children_[0];
     ObString model_name(static_cast<int32_t>(model.str_len_), model.str_value_);
@@ -172,12 +189,32 @@ int AiColumnResolver::resolve(ObResolverParams &params, const ParseNode &definit
       LOG_USER_ERROR(OB_ERR_BAD_FIELD_ERROR, name.col_name_.length(), name.col_name_.ptr(),
                      9, "AI column");
     } else if (input->get_column_id() == column.get_column_id() || input->is_ai_column()
-               || input->is_generated_column() || contains_id(ai_column_ids, input->get_column_id())) {
+               || contains_id(ai_column_ids, input->get_column_id())) {
       ret = OB_NOT_SUPPORTED;
-      LOG_USER_ERROR(OB_NOT_SUPPORTED, "AI column dependency on an AI or generated column");
+      LOG_USER_ERROR(OB_NOT_SUPPORTED, "AI column dependency on another AI column");
     } else if (OB_FAIL(ObRawExprUtils::init_column_expr(*input, params.session_info_, *name.ref_expr_))) {
-    } else if (!contains_id(dependencies, input->get_column_id())) {
-      ret = dependencies.push_back(input->get_column_id());
+    } else {
+      if (!contains_id(dependencies, input->get_column_id())) {
+        ret = dependencies.push_back(input->get_column_id());
+      }
+      // A virtual/stored generated input also depends on its source columns.
+      // Keep those references so business updates can invalidate the AI result,
+      // and reject an indirect AI-to-AI chain through a generated column.
+      ObSEArray<uint64_t, 4> sources;
+      if (OB_SUCC(ret) && input->is_generated_column()
+          && OB_FAIL(input->get_cascaded_column_ids(sources))) {
+      }
+      for (int64_t j = 0; OB_SUCC(ret) && j < sources.count(); ++j) {
+        const ObColumnSchemaV2 *source = table.get_column_schema(sources.at(j));
+        if (source == nullptr) {
+          ret = OB_ERR_UNEXPECTED;
+        } else if (source->is_ai_column() || contains_id(ai_column_ids, sources.at(j))) {
+          ret = OB_NOT_SUPPORTED;
+          LOG_USER_ERROR(OB_NOT_SUPPORTED, "AI column dependency on another AI column");
+        } else if (!contains_id(dependencies, sources.at(j))) {
+          ret = dependencies.push_back(sources.at(j));
+        }
+      }
     }
   }
   if (OB_SUCC(ret) && expression == nullptr) { ret = OB_ERR_UNEXPECTED; }
