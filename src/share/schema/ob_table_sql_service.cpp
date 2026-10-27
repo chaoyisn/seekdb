@@ -3180,6 +3180,23 @@ int ObTableSqlService::gen_column_dml_without_check(
         bin_extended_type_info.assign_ptr(extended_type_info_buf, static_cast<int32_t>(pos));
       }
     }
+    ObString ai_column_info;
+    if (OB_SUCC(ret) && column.is_ai_column()) {
+      const AiColumnSchema &definition = *column.get_ai_column_schema();
+      const int64_t size = definition.get_serialize_size();
+      char *buffer = nullptr;
+      int64_t pos = 0;
+      if (!definition.is_valid() || definition.get_column_id() != column.get_column_id()) {
+        ret = OB_INVALID_ARGUMENT;
+      } else if (size > OB_MAX_VARBINARY_LENGTH) {
+        ret = OB_SIZE_OVERFLOW;
+      } else if (nullptr == (buffer = static_cast<char *>(allocator.alloc(size)))) {
+        ret = OB_ALLOCATE_MEMORY_FAILED;
+      } else if (OB_FAIL(definition.serialize(buffer, size, pos))) {
+      } else {
+        ai_column_info.assign_ptr(buffer, static_cast<int32_t>(pos));
+      }
+    }
     ObString local_session_var;
     if (OB_SUCC(ret) && column.is_generated_column()
         && OB_FAIL(column.get_local_session_var().gen_local_session_var_str(allocator, local_session_var))) {
@@ -3211,6 +3228,7 @@ int ObTableSqlService::gen_column_dml_without_check(
                                         : dml.add_column("schema_version", column.get_schema_version()))
                          || OB_FAIL(dml.add_column("column_flags", column.get_stored_column_flags()))
                          || OB_FAIL(dml.add_column("extended_type_info", ObHexEscapeSqlStr(bin_extended_type_info)))
+                         || OB_FAIL(dml.add_column("ai_column_info", ObHexEscapeSqlStr(ai_column_info)))
                          || OB_FAIL(dml.add_column("prev_column_id", column.get_prev_column_id()))
                          || (OB_FAIL(dml.add_column("srs_id", column.get_srs_id())))
                          || (OB_FAIL(dml.add_column("udt_set_id", column.get_udt_set_id())))
