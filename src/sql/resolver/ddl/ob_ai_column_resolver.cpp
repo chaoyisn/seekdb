@@ -128,8 +128,12 @@ int AiColumnResolver::resolve(ObResolverParams &params, const ParseNode &definit
       ret = OB_ERR_INVALID_VECTOR_DIM;
     } else if (arguments->num_child_ == 3) {
       const ParseNode *dim = arguments->children_[2];
-      if (dim == nullptr || dim->type_ != T_INT || dim->value_ != dimension) {
+      if (dim == nullptr || dim->type_ != T_INT) {
+        ret = OB_INVALID_ARGUMENT;
+      } else if (dim->value_ != dimension) {
         ret = OB_ERR_INVALID_VECTOR_DIM;
+        LOG_USER_ERROR(OB_ERR_INVALID_VECTOR_DIM, static_cast<uint32_t>(dimension),
+                       static_cast<uint32_t>(dim->value_));
       }
     }
   } else if (OB_SUCC(ret)) {
@@ -191,7 +195,7 @@ int AiColumnResolver::resolve(ObResolverParams &params, const ParseNode &definit
     } else if (input->get_column_id() == column.get_column_id() || input->is_ai_column()
                || contains_id(ai_column_ids, input->get_column_id())) {
       ret = OB_NOT_SUPPORTED;
-      LOG_USER_ERROR(OB_NOT_SUPPORTED, "AI column dependency on another AI column");
+      LOG_WARN("AI column dependency on another AI column", K(ret));
     } else if (OB_FAIL(ObRawExprUtils::init_column_expr(*input, params.session_info_, *name.ref_expr_))) {
     } else {
       if (!contains_id(dependencies, input->get_column_id())) {
@@ -210,7 +214,7 @@ int AiColumnResolver::resolve(ObResolverParams &params, const ParseNode &definit
           ret = OB_ERR_UNEXPECTED;
         } else if (source->is_ai_column() || contains_id(ai_column_ids, sources.at(j))) {
           ret = OB_NOT_SUPPORTED;
-          LOG_USER_ERROR(OB_NOT_SUPPORTED, "AI column dependency on another AI column");
+          LOG_WARN("AI column dependency on another AI column", K(ret));
         } else if (!contains_id(dependencies, sources.at(j))) {
           ret = dependencies.push_back(sources.at(j));
         }
