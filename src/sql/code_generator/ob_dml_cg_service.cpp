@@ -2100,6 +2100,10 @@ int ObDmlCgService::generate_dml_base_ctdef(ObLogicalOperator &op,
     if (OB_FAIL(cg_.opt_ctx_->get_schema_guard()->get_table_schema(index_dml_info.ref_table_id_, table))) {
     } else if (table == nullptr) {
       ret = OB_SCHEMA_EAGAIN;
+    } else if (op.get_stmt() != nullptr && op.get_stmt()->get_query_ctx() != nullptr
+               && op.get_stmt()->get_query_ctx()->ai_column_internal_write_) {
+      // Keep ordinary index/trigger maintenance, skip only AI self-scheduling.
+      // Vector maintenance on a heap table can regenerate its hidden PK.
     } else if (table->has_ai_column()) {
       // The ordinary after-row list does not carry the per-row outcome of a
       // storage-level ignored conflict. Do not enqueue for a row that was not

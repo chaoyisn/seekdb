@@ -175,8 +175,10 @@ int evaluate(ObInnerSQLConnection &conn, const Task &task, ObSchemaGetterGuard &
   ObSqlString sql;
   OZ(sql.append("SELECT /*+ USE_PLAN_CACHE(NONE) NO_PARALLEL */ "));
   if (column->is_collection()) { OZ(sql.append("CAST(CONCAT('[',ARRAY_TO_STRING(")); }
+  else { OZ(sql.append("CAST(")); }
   OZ(sql.append(ai->get_normalized_expr()));
   if (column->is_collection()) { OZ(sql.append(",','),']') AS CHAR)")); }
+  else { OZ(sql.append(" AS CHAR)")); }
   OZ(sql.append(" AS ai_value FROM ")); OZ(source_table(sql, table, guard));
   OZ(sql.append(" WHERE ")); OZ(request_predicate(sql, table, task));
   ObISQLClient::ReadResult result;

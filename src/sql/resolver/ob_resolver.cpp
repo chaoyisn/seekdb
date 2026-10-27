@@ -164,6 +164,7 @@ int ObResolver::resolve(IsPrepared if_prepared, const ParseNode &parse_tree, ObS
     // writes disable plan cache explicitly, so this authority is not cached.
     params_.ai_column_internal_write_ = params_.session_info_->ai_column_write_once_;
     params_.session_info_->ai_column_write_once_ = false;
+    params_.query_ctx_->ai_column_internal_write_ = params_.ai_column_internal_write_;
     real_parse_tree = &parse_tree;
   }
 

@@ -739,6 +739,9 @@ public:
     };
   };
   bool has_hybrid_search_;
+  // Native result/invalidation writes must not recursively generate AI tasks.
+  // Root Resolver sets this only after consuming the one-shot C++ capability.
+  bool ai_column_internal_write_ = false;
 };
 
 } /* ns sql*/

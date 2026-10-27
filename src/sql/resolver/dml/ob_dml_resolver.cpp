@@ -17,6 +17,7 @@
 #define USING_LOG_PREFIX SQL_RESV
 #include "config_bridge.h"
 #include "ob_dml_resolver.h"
+#include "share/schema/ob_ai_column_schema.h"
 #include "sql/resolver/dml/ob_view_table_resolver.h"
 #include "sql/optimizer/ob_optimizer_util.h"
 #include "sql/resolver/dml/ob_default_value_utils.h"
@@ -5687,10 +5688,26 @@ int ObDMLResolver::check_ai_column_assignment(const ObColumnRefRawExpr *col_expr
     if (OB_FAIL(get_column_schema(tid, cid, column, true))) {
     } else if (OB_ISNULL(column)) {
       ret = OB_ERR_UNEXPECTED;
-    } else if (column->is_ai_column() && !params_.ai_column_internal_write_) {
-      // is_inner() is deliberately insufficient: user PL also uses inner SQL.
-      ret = OB_NOT_SUPPORTED;
-      LOG_USER_ERROR(OB_NOT_SUPPORTED, "direct assignment to an AI result column");
+    } else if (!params_.ai_column_internal_write_) {
+      bool protected_column = column->is_ai_column();
+      if (!protected_column && column->is_hidden()) {
+        const ObTableSchema *table = nullptr;
+        if (OB_FAIL(schema_checker_->get_table_schema(tid, table))) {
+        } else if (table == nullptr) {
+          ret = OB_SCHEMA_EAGAIN;
+        } else {
+          for (auto iter = table->column_begin(); !protected_column && iter != table->column_end(); ++iter) {
+            const share::schema::AiColumnSchema *ai = (*iter)->get_ai_column_schema();
+            protected_column = ai != nullptr && (cid == ai->get_state_column_id()
+                || cid == ai->get_request_column_id() || cid == ai->get_result_spec_column_id());
+          }
+        }
+      }
+      // User PL also uses inner SQL; it must not edit result ownership/state.
+      if (OB_SUCC(ret) && protected_column) {
+        ret = OB_NOT_SUPPORTED;
+        LOG_USER_ERROR(OB_NOT_SUPPORTED, "direct assignment to an AI result or state column");
+      }
     }
   }
   return ret;
