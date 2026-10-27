@@ -345,6 +345,7 @@ OBSERVER_UNITY_GROUPS = [
             "src/observer/virtual_table/ob_virtual_sql_plan_statistics.cpp",
             "src/observer/virtual_table/ob_virtual_table_iterator.cpp",
             "src/observer/virtual_table/ob_virtual_core_inner_table.cpp",
+            "src/observer/virtual_table/ob_ai_column_metadata_table.cpp",
             "src/observer/virtual_table/ob_virtual_table_iterator_factory.cpp",
             "src/observer/virtual_table/ob_virtual_table_projector.cpp",
             "src/observer/virtual_table/ob_virtual_table_scanner_iterator.cpp",

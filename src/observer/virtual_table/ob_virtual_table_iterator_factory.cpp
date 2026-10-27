@@ -17,6 +17,7 @@
 #define USING_LOG_PREFIX SERVER
 
 #include "ob_virtual_table_iterator_factory.h"
+#include "observer/virtual_table/ob_ai_column_metadata_table.h"
 #include "share/rc/ob_server_runtime.h"
 #include "observer/ob_server.h"
 #include "observer/ob_server_runtime_access.h"
@@ -1708,6 +1709,15 @@ int ObVTIterCreator::create_vt_iter(ObVTableScanParam &params,
             if (OB_FAIL(NEW_VIRTUAL_TABLE(ObAllVirtualChangeStreamRefreshStat, change_stream_refresh_stat))) {
             } else {
               vt_iter = static_cast<ObVirtualTableIterator *>(change_stream_refresh_stat);
+            }
+            break;
+          }
+          case OB_ALL_AI_COLUMN_TID:
+          {
+            AiColumnMetadataTable *metadata = nullptr;
+            if (OB_FAIL(NEW_VIRTUAL_TABLE(AiColumnMetadataTable, metadata))) {
+            } else {
+              vt_iter = metadata;
             }
             break;
           }

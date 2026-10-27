@@ -220,6 +220,7 @@ OBSERVER_PRIVATE_HEADERS = [
     "virtual_table/ob_virtual_open_cursor_table.h",
     "virtual_table/ob_virtual_show_trace.h",
     "virtual_table/ob_virtual_sql_plan_statistics.h",
+    "virtual_table/ob_ai_column_metadata_table.h",
     "virtual_table/ob_virtual_table_iterator.h",
     "virtual_table/ob_virtual_core_inner_table.h",
     "virtual_table/ob_virtual_table_iterator_factory.h",

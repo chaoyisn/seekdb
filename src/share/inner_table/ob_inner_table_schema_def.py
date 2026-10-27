@@ -6389,6 +6389,32 @@ def_table_schema(
 # Reserved position (placeholder before this line)
 # Placeholder suggestion for this section: Use actual table names for placeholders
 ################################################################################
+# The AI definition itself is persisted in __all_column.ai_column_info.
+# This local projection enumerates the same schema snapshot used by the query.
+def_table_schema(
+  owner = 'ai-column',
+  table_name = '__all_ai_column',
+  table_id = '12565',
+  table_type = 'VIRTUAL_TABLE',
+  gm_columns = [],
+  rowkey_columns = [],
+  normal_columns = [
+    ('table_id', 'int', 'false'),
+    ('column_id', 'int', 'false'),
+    ('column_name', 'varchar:OB_MAX_COLUMN_NAME_LENGTH', 'false'),
+    ('definition_version', 'int', 'false'),
+    ('expression', 'varchar:OB_MAX_MYSQL_VARCHAR_LENGTH', 'false'),
+    ('normalized_expr', 'varchar:OB_MAX_MYSQL_VARCHAR_LENGTH', 'false'),
+    ('sync_mode', 'varchar:16', 'false'),
+    ('max_retries', 'int', 'false'),
+    ('state_column_id', 'int', 'false'),
+    ('request_column_id', 'int', 'false'),
+    ('result_spec_column_id', 'int', 'false'),
+    ('dependency_column_ids', 'varchar:OB_MAX_MYSQL_VARCHAR_LENGTH', 'false'),
+  ],
+  vtable_route_policy = 'local',
+)
+
 # End of Mysql Virtual Table (10000, 15000]
 ################################################################################
 ################################### Placeholder Notice ###################################
