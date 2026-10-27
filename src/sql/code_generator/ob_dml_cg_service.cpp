@@ -1345,7 +1345,7 @@ int ObDmlCgService::check_upd_need_all_columns(ObLogDelUpd &op,
   if (OB_ISNULL(session) || OB_ISNULL(schema_guard) || OB_ISNULL(table_schema)) {
     ret = OB_ERR_UNEXPECTED;
   } else if (OB_FAIL(session->get_binlog_row_image(binlog_row_image))) {
-  } else if (binlog_row_image == ObBinlogRowImage::FULL) {
+  } else if (table_schema->has_ai_column() || binlog_row_image == ObBinlogRowImage::FULL) {
     // full mode
     need_all_columns = true;
   } else if (!is_primary_index) {
@@ -1467,7 +1467,7 @@ int ObDmlCgService::check_del_need_all_columns(ObLogDelUpd &op,
   if (OB_ISNULL(session) || OB_ISNULL(schema_guard) || OB_ISNULL(table_schema)) {
     ret = OB_ERR_UNEXPECTED;
   } else if (OB_FAIL(session->get_binlog_row_image(binlog_row_image))) {
-  } else if (binlog_row_image == ObBinlogRowImage::FULL) {
+  } else if (table_schema->has_ai_column() || binlog_row_image == ObBinlogRowImage::FULL) {
     // full mode
     need_all_columns = true;
   } else if (table_schema->is_multivalue_index_aux()) {
@@ -2095,8 +2095,29 @@ int ObDmlCgService::generate_dml_base_ctdef(ObLogicalOperator &op,
   int ret = OB_SUCCESS;
   dml_base_ctdef.is_primary_index_ = index_dml_info.is_primary_index_;
   dml_base_ctdef.is_vec_hnsw_index_vid_opt_ = index_dml_info.is_vec_hnsw_index_vid_opt_;
+  if (index_dml_info.is_primary_index_) {
+    const share::schema::ObTableSchema *table = nullptr;
+    if (OB_FAIL(cg_.opt_ctx_->get_schema_guard()->get_table_schema(index_dml_info.ref_table_id_, table))) {
+    } else if (table == nullptr) {
+      ret = OB_SCHEMA_EAGAIN;
+    } else if (table->has_ai_column()) {
+      // The ordinary after-row list does not carry the per-row outcome of a
+      // storage-level ignored conflict. Do not enqueue for a row that was not
+      // inserted; add that outcome before enabling IGNORE on this path.
+      if (op.is_dml_operator()
+          && (static_cast<ObLogDelUpd &>(op).is_ignore()
+              || static_cast<ObLogDelUpd &>(op).is_pdml())) {
+        ret = OB_NOT_SUPPORTED;
+        LOG_USER_ERROR(OB_NOT_SUPPORTED, "AI column DML with IGNORE or PDML");
+      } else {
+        dml_base_ctdef.has_ai_columns_ = true;
+        cg_.phy_plan_->set_has_nested_sql(true);
+      }
+    }
+  }
   dml_base_ctdef.column_ids_.set_capacity(index_dml_info.column_exprs_.count());
-  if (OB_FAIL(generate_dml_column_ids(op, index_dml_info.column_exprs_, dml_base_ctdef.column_ids_))) {
+  if (OB_FAIL(ret)) {
+  } else if (OB_FAIL(generate_dml_column_ids(op, index_dml_info.column_exprs_, dml_base_ctdef.column_ids_))) {
   } else if (OB_FAIL(cg_.generate_rt_exprs(old_row, dml_base_ctdef.old_row_))) {
   } else if (OB_FAIL(cg_.generate_rt_exprs(new_row, dml_base_ctdef.new_row_))) {
   } else if (index_dml_info.is_primary_index_) {

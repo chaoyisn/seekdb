@@ -4342,6 +4342,15 @@ void ObTableSchema::reset_column_info()
   name_hash_array_ = NULL;
 }
 
+bool ObTableSchema::has_ai_column() const
+{
+  bool found = false;
+  for (auto iter = column_begin(); !found && iter != column_end(); ++iter) {
+    found = *iter != nullptr && (*iter)->is_ai_column();
+  }
+  return found;
+}
+
 int ObTableSchema::get_column_ids(ObIArray<uint64_t> &column_ids) const
 {
   int ret = OB_SUCCESS;

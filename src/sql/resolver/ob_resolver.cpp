@@ -160,6 +160,10 @@ int ObResolver::resolve(IsPrepared if_prepared, const ParseNode &parse_tree, ObS
       || OB_ISNULL(params_.query_ctx_)) {
     ret = OB_NOT_INIT;
   } else {
+    // Consume before resolving any user PL/trigger nested SQL. Internal
+    // writes disable plan cache explicitly, so this authority is not cached.
+    params_.ai_column_internal_write_ = params_.session_info_->ai_column_write_once_;
+    params_.session_info_->ai_column_write_once_ = false;
     real_parse_tree = &parse_tree;
   }
 

@@ -5687,7 +5687,7 @@ int ObDMLResolver::check_ai_column_assignment(const ObColumnRefRawExpr *col_expr
     if (OB_FAIL(get_column_schema(tid, cid, column, true))) {
     } else if (OB_ISNULL(column)) {
       ret = OB_ERR_UNEXPECTED;
-    } else if (column->is_ai_column()) {
+    } else if (column->is_ai_column() && !params_.ai_column_internal_write_) {
       // is_inner() is deliberately insufficient: user PL also uses inner SQL.
       ret = OB_NOT_SUPPORTED;
       LOG_USER_ERROR(OB_NOT_SUPPORTED, "direct assignment to an AI result column");

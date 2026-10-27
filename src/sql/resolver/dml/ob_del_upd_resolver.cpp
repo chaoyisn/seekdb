@@ -1099,7 +1099,7 @@ bool ObDelUpdResolver::need_all_columns(const ObTableSchema &table_schema,
                                         const int64_t binlog_row_image)
 {
   // Returns true for MINIMAL too because the optimizer currently needs full rows.
-  return (table_schema.is_table_without_pk() ||
+  return (table_schema.has_ai_column() || table_schema.is_table_without_pk() ||
           table_schema.get_foreign_key_infos().count() > 0 ||
           table_schema.get_trigger_list().count() > 0 ||
           table_schema.has_check_constraint() ||
