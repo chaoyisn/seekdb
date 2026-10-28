@@ -60,7 +60,7 @@ int AiColumnRetryResolver::rewrite(ObResolverParams &params, const ParseNode &re
   int ret = OB_SUCCESS;
   update = nullptr;
   if (retry.num_child_ != 4) {
-    LOG_USER_ERROR(OB_NOT_SUPPORTED, "RETRY AI COLUMN mixed with another ALTER action");
+    LOG_USER_ERROR(OB_NOT_SUPPORTED, "combining AI COLUMN RETRY with another ALTER action");
     return OB_NOT_SUPPORTED;
   }
   if (retry.children_ == nullptr || retry.children_[0] == nullptr || retry.children_[1] == nullptr
@@ -84,7 +84,7 @@ int AiColumnRetryResolver::rewrite(ObResolverParams &params, const ParseNode &re
   const auto *ai = column == nullptr ? nullptr : column->get_ai_column_schema();
   if (OB_SUCC(ret) && ai == nullptr) {
     ret = OB_NOT_SUPPORTED;
-    LOG_USER_ERROR(OB_NOT_SUPPORTED, "RETRY requires an AI column");
+    LOG_USER_ERROR(OB_NOT_SUPPORTED, "retrying a column that is not an AI column");
   }
   const auto *state = ai == nullptr ? nullptr : table->get_column_schema(ai->get_state_column_id());
   if (OB_SUCC(ret) && state == nullptr) { ret = OB_SCHEMA_EAGAIN; }
