@@ -1015,6 +1015,11 @@ int ObInsertResolver::resolve_column_ref_expr(const ObQualifiedName &q_name, ObR
       // related issue: 
     }
   }
+  if (OB_SUCC(ret) && real_ref_expr != nullptr && real_ref_expr->is_column_ref_expr()) {
+    const auto *expr = static_cast<const ObColumnRefRawExpr *>(real_ref_expr);
+    const ColumnItem *column = get_stmt() != nullptr ? get_stmt()->get_column_item_by_id(expr->get_table_id(), expr->get_column_id()) : nullptr;
+    if (column != nullptr) { ret = record_ai_column_read(*column); }
+  }
   return ret;
 }
 
