@@ -629,6 +629,10 @@ public:
     filter_ds_stat_cache_.reuse();
     type_demotion_flag_ = 0;
     has_hybrid_search_ = false;
+    ai_column_internal_write_ = false;
+    ai_column_reads_.reset();
+    ai_column_retry_table_id_ = common::OB_INVALID_ID;
+    ai_column_retry_column_id_ = common::OB_INVALID_ID;
   }
 
   int64_t get_new_stmt_id() { return stmt_count_++; }

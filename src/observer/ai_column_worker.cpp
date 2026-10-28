@@ -11,6 +11,7 @@
 #include "sql/engine/expr/ob_expr_ai/ob_ai_func_client.h"
 #include "common/json_type/ob_json_parse.h"
 #include "lib/thread/ob_thread_name.h"
+#include "lib/utility/ob_defer.h"
 #include <charconv>
 #include <cmath>
 #include <limits>
@@ -183,6 +184,10 @@ int evaluate(ObInnerSQLConnection &conn, const Task &task, ObSchemaGetterGuard &
   OZ(sql.append(" AS ai_value FROM ")); OZ(source_table(sql, table, guard));
   OZ(sql.append(" WHERE ")); OZ(request_predicate(sql, table, task));
   ObISQLClient::ReadResult result;
+  const int64_t saved_timeout = conn.get_user_timeout();
+  DEFER(conn.set_user_timeout(saved_timeout););
+  // One model attempt must fit inside the renewable 60-second task lease.
+  conn.set_user_timeout(30 * 1000 * 1000);
   ObAIFuncClient::AiColumnAttemptGuard attempt;
   OZ(conn.execute_read(sql.string(), result));
   if (OB_SUCC(ret) && result.get_result() == nullptr) { ret = OB_ERR_UNEXPECTED; }
@@ -219,6 +224,7 @@ void AiColumnWorker::run1()
     }
     auto *conn = dynamic_cast<ObInnerSQLConnection *>(guard.get_ptr());
     if (OB_SUCC(ret) && conn != nullptr) {
+      conn->set_user_timeout(5 * 1000 * 1000);
       ret = process_one(*conn);
       if (ret != OB_SUCCESS && ret != OB_ITER_END && conn->rollback() != OB_SUCCESS) {
         guard.reset();
@@ -293,6 +299,18 @@ int AiColumnWorker::process_one(ObInnerSQLConnection &conn)
     const AiColumnSchema *definition = column == nullptr ? nullptr : column->get_ai_column_schema();
     const bool obsolete = definition == nullptr || definition->get_definition_version() != task.version;
     if (!obsolete && (task.state == SUCCEEDED || task.state == FAILED || (task.state == RETRY_WAIT && !task.due))) { continue; }
+    // Revalidate ownership immediately before any external side effect and
+    // renew all surviving group members, including results staged earlier.
+    ObSqlString renew;
+    OZ(renew.append_fmt("UPDATE /*+ USE_PLAN_CACHE(NONE) */ %s SET "
+        "lease_expire_ts=DATE_ADD(NOW(6),INTERVAL 60 SECOND) WHERE ", TASKS));
+    OZ(key(renew, table_id, request));
+    OZ(renew.append(" AND owner_id=")); OZ(text(renew, owner));
+    OZ(renew.append(" AND lease_expire_ts>NOW(6)"));
+    int64_t renewed = 0;
+    OZ(write(conn, renew, &renewed));
+    if (OB_SUCC(ret) && renewed == 0) { ret = OB_STATE_NOT_MATCH; }
+    if (OB_FAIL(ret)) { break; }
     bool is_null = true;
     ObString payload;
     const int model_error = obsolete ? OB_SCHEMA_EAGAIN : evaluate(conn, task, schema, *table, alloc, is_null, payload);
