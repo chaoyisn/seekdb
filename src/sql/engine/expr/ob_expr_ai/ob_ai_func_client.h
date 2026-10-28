@@ -28,6 +28,17 @@ namespace common
 class ObAIFuncClient: public ObAIFuncHandle
 {
 public:
+  // The durable AI-column queue owns retry/backoff. This native scope prevents
+  // hidden transport retries from multiplying one persisted task attempt.
+  class AiColumnAttemptGuard {
+  public:
+    AiColumnAttemptGuard();
+    ~AiColumnAttemptGuard();
+  private:
+    bool previous_;
+    AiColumnAttemptGuard(const AiColumnAttemptGuard &) = delete;
+    AiColumnAttemptGuard &operator=(const AiColumnAttemptGuard &) = delete;
+  };
   ObAIFuncClient();
   virtual ~ObAIFuncClient();
   int init(common::ObIAllocator &allocator, const ObString &url, ObArray<ObString> &headers);

@@ -23,6 +23,21 @@ namespace common
 {
 
 const int64_t ObAIFuncClient::CURL_MAX_TIMEOUT_SEC = INT_MAX/1000;
+namespace {
+thread_local bool ai_column_single_attempt = false;
+}
+
+ObAIFuncClient::AiColumnAttemptGuard::AiColumnAttemptGuard()
+  : previous_(ai_column_single_attempt)
+{
+  ai_column_single_attempt = true;
+}
+
+ObAIFuncClient::AiColumnAttemptGuard::~AiColumnAttemptGuard()
+{
+  ai_column_single_attempt = previous_;
+}
+
 ObAIFuncClient::ObAIFuncClient()
     : allocator_(nullptr), url_(nullptr), header_list_(nullptr),
       curlm_(nullptr), curl_(nullptr), curl_handles_(), response_buffers_() 
@@ -145,7 +160,8 @@ int ObAIFuncClient::send_post(ObJsonObject *data, ObJsonObject *&response)
     if (OB_FAIL(init_easy_handle(curl_, data, response_buf))) {
     } 
     // retry if need
-    for (int64_t i = 0; OB_SUCC(ret) && i <= max_retry_times_; ++i) {
+    const int64_t retry_limit = ai_column_single_attempt ? 0 : max_retry_times_;
+    for (int64_t i = 0; OB_SUCC(ret) && i <= retry_limit; ++i) {
       http_code = 0;
       if (CURLE_OK != (res = curl_easy_perform(curl_))) {
         LOG_WARN("perform curl failed", K(res));
@@ -160,6 +176,7 @@ int ObAIFuncClient::send_post(ObJsonObject *data, ObJsonObject *&response)
         break;
       } else {
         LOG_WARN("retryable http status code", K(http_code), K(i));
+        if (ai_column_single_attempt) { break; }
         int64_t delay_ms = 1000 * (1 << i) + rand() % 1000;
         ob_usleep(delay_ms * 1000);
         response_buf.reset();
@@ -280,11 +297,13 @@ int ObAIFuncClient::send_post_batch(common::ObIAllocator &allocator,
     if (OB_FAIL(init(allocator, url, headers))) {
     }
     // retry if need
-    for (int64_t i = 0; OB_SUCC(ret) && i < max_retry_times_; ++i) {
+    const int64_t attempts = ai_column_single_attempt ? 1 : max_retry_times_;
+    for (int64_t i = 0; OB_SUCC(ret) && i < attempts; ++i) {
       ret = send_post_batch(data_array, responses);
       if (is_timeout()) {
         ret = OB_TIMEOUT;
       } else if (OB_CURL_ERROR == ret) {
+        if (ai_column_single_attempt) { break; }
         ret = OB_SUCCESS;
         int64_t delay_ms = 1000 * (1 << i) + rand() % 1000;
         ob_usleep(delay_ms * 1000);

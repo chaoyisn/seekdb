@@ -8,6 +8,7 @@
 #include "share/schema/ob_column_schema.h"
 #include "sql/engine/dml/ai_column_dml_service.h"
 #include "sql/engine/expr/ob_expr_uuid.h"
+#include "sql/engine/expr/ob_expr_ai/ob_ai_func_client.h"
 #include "common/json_type/ob_json_parse.h"
 #include "lib/thread/ob_thread_name.h"
 #include <charconv>
@@ -182,6 +183,7 @@ int evaluate(ObInnerSQLConnection &conn, const Task &task, ObSchemaGetterGuard &
   OZ(sql.append(" AS ai_value FROM ")); OZ(source_table(sql, table, guard));
   OZ(sql.append(" WHERE ")); OZ(request_predicate(sql, table, task));
   ObISQLClient::ReadResult result;
+  ObAIFuncClient::AiColumnAttemptGuard attempt;
   OZ(conn.execute_read(sql.string(), result));
   if (OB_SUCC(ret) && result.get_result() == nullptr) { ret = OB_ERR_UNEXPECTED; }
   if (OB_SUCC(ret)) { ret = result.get_result()->next(); }
