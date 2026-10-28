@@ -185,6 +185,8 @@ class ObSQLSessionInfo: public common::ObVersionProvider, public ObBasicSessionI
   OB_UNIS_VERSION(1);
 public:
   friend class LinkExecCtxGuard;
+  friend class AiColumnDmlService;
+  friend class ObResolver;
   // notice!!! register exec ctx to session for later access
   // used for temp session, such as session for rpc processor, px worker, das processor, etc
   // not used for main session
@@ -908,6 +910,8 @@ private:
   // else can commit
   // in_transaction_ has been merged into trans_flags_.
 //  int64_t has_write_stmt_in_trans_;
+  // A native issuer grants one resolver invocation; never a SQL variable.
+  bool ai_column_write_once_;
   bool inner_flag_; // whether it is a virtual session for an internal request
   // After version 2.2, this variable is no longer used
   bool is_max_availability_mode_;

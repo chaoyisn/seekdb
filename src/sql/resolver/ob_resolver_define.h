@@ -340,6 +340,7 @@ struct ObResolverParams
        force_trace_log_(false),
        expr_factory_(NULL),
        stmt_factory_(NULL),
+       ai_column_internal_write_(false),
        is_from_show_resolver_(false),
        is_restore_(false),
        is_from_create_view_(false),
@@ -408,6 +409,7 @@ public:
   ObRawExprFactory *expr_factory_;
   ObStmtFactory *stmt_factory_;
   
+  bool ai_column_internal_write_;
   bool is_from_show_resolver_;
   bool is_restore_;
   // Query table creation, creating views cannot include temporary tables;

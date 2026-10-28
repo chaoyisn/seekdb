@@ -44,6 +44,41 @@ ObColumnSchemaV2::ObColumnSchemaV2(ObIAllocator *allocator)
 
 ObColumnSchemaV2::~ObColumnSchemaV2()
 {
+  clear_ai_column_schema();
+}
+
+void ObColumnSchemaV2::clear_ai_column_schema()
+{
+  if (ai_column_schema_ != nullptr) {
+    ai_column_schema_->reset();
+    ai_column_schema_->~AiColumnSchema();
+    free(ai_column_schema_);
+    ai_column_schema_ = nullptr;
+  }
+}
+
+int ObColumnSchemaV2::set_ai_column_schema(const AiColumnSchema &definition)
+{
+  int ret = OB_SUCCESS;
+  if (!definition.is_valid() || definition.get_column_id() != column_id_) {
+    ret = OB_INVALID_ARGUMENT;
+  } else if (&definition != ai_column_schema_) {
+    void *memory = alloc(sizeof(AiColumnSchema));
+    if (memory == nullptr) {
+      ret = OB_ALLOCATE_MEMORY_FAILED;
+    } else {
+      AiColumnSchema *replacement = new (memory) AiColumnSchema(get_allocator());
+      if (OB_FAIL(replacement->assign(definition))) {
+        replacement->reset();
+        replacement->~AiColumnSchema();
+        free(replacement);
+      } else {
+        clear_ai_column_schema();
+        ai_column_schema_ = replacement;
+      }
+    }
+  }
+  return ret;
 }
 
 int ObColumnSchemaV2::assign(const ObColumnSchemaV2 &src_schema)
@@ -94,6 +129,9 @@ int ObColumnSchemaV2::assign(const ObColumnSchemaV2 &src_schema)
       }
     }
 
+    if (OB_SUCC(ret) && src_schema.ai_column_schema_ != nullptr
+        && OB_FAIL(set_ai_column_schema(*src_schema.ai_column_schema_))) {
+    }
     if (OB_FAIL(ret)) {
       error_ret_ = ret;
     }
@@ -128,6 +166,7 @@ int64_t ObColumnSchemaV2::get_convert_size() const
     convert_size += extended_type_info_.at(i).length() + 1;
   }
   convert_size += local_session_vars_.get_deep_copy_size();
+  if (ai_column_schema_ != nullptr) { convert_size += ai_column_schema_->get_convert_size(); }
   return convert_size;
 }
 
@@ -156,6 +195,7 @@ bool ObColumnSchemaV2::is_func_idx_column() const
 
 void ObColumnSchemaV2::reset()
 {
+  clear_ai_column_schema();
   table_id_ = OB_INVALID_ID;
   column_id_ = OB_INVALID_ID;
   schema_version_ = 0;
@@ -194,6 +234,7 @@ void ObColumnSchemaV2::reset()
 OB_DEF_SERIALIZE(ObColumnSchemaV2)
 {
   int ret = OB_SUCCESS;
+  const bool has_ai_column = is_ai_column();
   bool has_column_ref = (column_ref_idxs_ != NULL);
   LST_DO_CODE(OB_UNIS_ENCODE,
               table_id_,
@@ -238,6 +279,8 @@ OB_DEF_SERIALIZE(ObColumnSchemaV2)
                 local_session_vars_);
   }
 
+  OB_UNIS_ENCODE(has_ai_column);
+  if (has_ai_column) { OB_UNIS_ENCODE(*ai_column_schema_); }
   return ret;
 }
 
@@ -249,6 +292,10 @@ OB_DEF_DESERIALIZE(ObColumnSchemaV2)
   ObString column_name;
   ObString comment;
   bool has_column_ref = false;
+  bool has_ai_column = false;
+  // Old UNIS payloads end before the optional AI definition. Clear any prior
+  // definition even when deserializing into a reused object.
+  clear_ai_column_schema();
 
   LST_DO_CODE(OB_UNIS_DECODE,
               table_id_,
@@ -297,12 +344,19 @@ OB_DEF_DESERIALIZE(ObColumnSchemaV2)
                 lob_chunk_size_,
                 local_session_vars_);
   }
+  OB_UNIS_DECODE(has_ai_column);
+  if (OB_SUCC(ret) && has_ai_column) {
+    AiColumnSchema definition;
+    OB_UNIS_DECODE(definition);
+    if (OB_SUCC(ret)) { ret = set_ai_column_schema(definition); }
+  }
   return ret;
 }
 
 OB_DEF_SERIALIZE_SIZE(ObColumnSchemaV2)
 {
   int64_t len = 0;
+  const bool has_ai_column = is_ai_column();
   bool has_column_ref = (column_ref_idxs_ != NULL);
   LST_DO_CODE(OB_UNIS_ADD_LEN,
               table_id_,
@@ -341,6 +395,8 @@ OB_DEF_SERIALIZE_SIZE(ObColumnSchemaV2)
               skip_index_attr_,
               lob_chunk_size_,
               local_session_vars_);
+  OB_UNIS_ADD_LEN(has_ai_column);
+  if (has_ai_column) { OB_UNIS_ADD_LEN(*ai_column_schema_); }
   return len;
 }
 
@@ -567,6 +623,9 @@ int ObColumnSchemaV2::convert_column_id(const hash::ObHashMap<uint64_t, uint64_t
     } else {
       set_next_column_id(new_column_id);
     }
+  }
+  if (OB_SUCC(ret) && ai_column_schema_ != nullptr) {
+    ret = ai_column_schema_->convert_column_ids(column_id_map);
   }
   return ret;
 }

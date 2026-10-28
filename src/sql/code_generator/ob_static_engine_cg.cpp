@@ -5698,6 +5698,7 @@ int ObStaticEngineCG::set_properties_post(const ObLogPlan &log_plan, ObPhysicalP
   }
 
   if (OB_SUCC(ret)) {
+    OZ(phy_plan.ai_column_reads_.assign(log_plan.get_stmt()->get_query_ctx()->ai_column_reads_));
     //set other params
     //set user var assignment property
     // Keep the recursive assignment flag captured before query transformations.

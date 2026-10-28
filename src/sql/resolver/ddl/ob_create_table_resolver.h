@@ -77,6 +77,7 @@ private:
   int add_hidden_tablet_seq_col();
   int check_column_name_duplicate(const ParseNode *node);
   int resolve_primary_key_node(const ParseNode &pk_node, common::ObArray<ObColumnResolveStat> &stats);
+  int resolve_ai_columns(const ParseNode &node, share::schema::ObTableSchema &table);
   int resolve_table_elements(const ParseNode *node,
                              common::ObArray<int> &idx_index_node,
                              common::ObArray<int> &foreign_key_node_position_list,

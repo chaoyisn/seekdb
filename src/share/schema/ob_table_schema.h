@@ -1329,6 +1329,8 @@ public:
   virtual int calc_part_func_expr_num(int64_t &part_func_expr_num) const;
   virtual int calc_subpart_func_expr_num(int64_t &subpart_func_expr_num) const;
 
+  bool has_ai_column() const;
+
   // checking the column is partition key or subpartition key.
   int is_tbl_partition_key(const uint64_t column_id, bool &result) const;
   int is_tbl_partition_key(const share::schema::ObColumnSchemaV2 &orig_column_schema,

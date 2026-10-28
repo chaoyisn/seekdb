@@ -342,7 +342,8 @@ all_column_def = dict(
       ('sub_data_type', 'int', 'false', '0'),
       ('skip_index_attr', 'int', 'false', '0'),
       ('lob_chunk_size', 'int', 'false', 'OB_DEFAULT_LOB_CHUNK_SIZE'),
-      ('local_session_vars', 'longtext', 'true')
+      ('local_session_vars', 'longtext', 'true'),
+      ('ai_column_info', 'varbinary:OB_MAX_VARBINARY_LENGTH', 'true')
   ]
   )
 
@@ -2466,6 +2467,40 @@ all_objauth_mysql_def = dict(
   )
 def_table_schema(**all_objauth_mysql_def)
 def_table_schema(**gen_history_table_def(1134, all_objauth_mysql_def))
+
+# A task is inserted by the business session in T1, never by a separate
+# autocommit connection. request_id is shared by the affected AI columns of
+# one row change; column_id distinguishes the members of that publish group.
+def_table_schema(
+    owner = 'ai-column',
+    table_name = '__all_ai_column_task',
+    table_id = '1135',
+    table_type = 'SYSTEM_TABLE',
+    gm_columns = ['gmt_create', 'gmt_modified'],
+    is_cluster_private = False,
+    meta_record_in_sys = False,
+    rowkey_columns = [
+        ('table_id', 'int'),
+        ('column_id', 'int'),
+        ('request_id', 'varchar:64'),
+    ],
+    normal_columns = [
+        ('definition_version', 'int', 'false'),
+        ('rowkey_predicate', 'longtext', 'false'),
+        # PENDING=0, RUNNING=1, SUCCEEDED=2, RETRY_WAIT=3, FAILED=4.
+        ('state', 'int', 'false', 0),
+        ('retry_count', 'int', 'false', 0),
+        ('max_retries', 'int', 'false'),
+        ('eligible_ts', 'timestamp:6', 'false'),
+        ('owner_id', 'varchar:64', 'true'),
+        ('lease_expire_ts', 'timestamp:6', 'true'),
+        # Terminal results remain staged until the whole group can publish.
+        # A NULL payload in SUCCEEDED is distinct from PENDING/FAILED.
+        ('result_payload', 'longtext', 'true'),
+        ('last_error', 'int', 'false', 0),
+    ],
+)
+
 
 
 # Reserved position (placeholder before this line)
@@ -6388,6 +6423,32 @@ def_table_schema(
 # Reserved position (placeholder before this line)
 # Placeholder suggestion for this section: Use actual table names for placeholders
 ################################################################################
+# The AI definition itself is persisted in __all_column.ai_column_info.
+# This local projection enumerates the same schema snapshot used by the query.
+def_table_schema(
+  owner = 'ai-column',
+  table_name = '__all_ai_column',
+  table_id = '12565',
+  table_type = 'VIRTUAL_TABLE',
+  gm_columns = [],
+  rowkey_columns = [],
+  normal_columns = [
+    ('table_id', 'int', 'false'),
+    ('column_id', 'int', 'false'),
+    ('column_name', 'varchar:OB_MAX_COLUMN_NAME_LENGTH', 'false'),
+    ('definition_version', 'int', 'false'),
+    ('expression', 'varchar:OB_MAX_MYSQL_VARCHAR_LENGTH', 'false'),
+    ('normalized_expr', 'varchar:OB_MAX_MYSQL_VARCHAR_LENGTH', 'false'),
+    ('sync_mode', 'varchar:16', 'false'),
+    ('max_retries', 'int', 'false'),
+    ('state_column_id', 'int', 'false'),
+    ('request_column_id', 'int', 'false'),
+    ('result_spec_column_id', 'int', 'false'),
+    ('dependency_column_ids', 'varchar:OB_MAX_MYSQL_VARCHAR_LENGTH', 'false'),
+  ],
+  vtable_route_policy = 'local',
+)
+
 # End of Mysql Virtual Table (10000, 15000]
 ################################################################################
 ################################### Placeholder Notice ###################################

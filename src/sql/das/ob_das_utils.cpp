@@ -16,6 +16,7 @@
 
 #define USING_LOG_PREFIX SQL_DAS
 #include "sql/das/ob_das_utils.h"
+#include "sql/engine/dml/ai_column_dml_context.h"
 #include "data_plane/blocksstable/ob_datum_row.h"
 #include "share/ob_server_struct.h"
 #include "share/schema/ob_multi_version_schema_service.h"
@@ -42,7 +43,8 @@ int ObDASUtils::check_nested_sql_mutating(ObTableID ref_table_id, ObExecContext 
   //only this sql(trigger or pl udf) needs to check mutating
   if (OB_ISNULL(cur_parent_ctx)) {
     //do nothing
-  } else if (cur_parent_ctx->get_das_ctx().is_fk_cascading_) {
+  } else if ((cur_parent_ctx->get_das_ctx().is_fk_cascading_
+             || (cur_parent_ctx->get_das_ctx().flags_ & AI_COLUMN_NESTED_DAS_FLAG) != 0)) {
     cur_parent_ctx = nullptr;
   } else if (OB_ISNULL(cur_parent_ctx->get_pl_stack_ctx())) {
     cur_parent_ctx = nullptr;
@@ -69,7 +71,8 @@ int ObDASUtils::check_nested_sql_mutating(ObTableID ref_table_id, ObExecContext 
       cur_parent_ctx = cur_parent_ctx->get_parent_ctx();
       if (OB_ISNULL(cur_parent_ctx)) {
         //do nothing
-      } else if (cur_parent_ctx->get_das_ctx().is_fk_cascading_) {
+      } else if ((cur_parent_ctx->get_das_ctx().is_fk_cascading_
+             || (cur_parent_ctx->get_das_ctx().flags_ & AI_COLUMN_NESTED_DAS_FLAG) != 0)) {
         cur_parent_ctx = nullptr;
       } else if (OB_ISNULL(cur_parent_ctx->get_pl_stack_ctx())) {
         cur_parent_ctx = nullptr;

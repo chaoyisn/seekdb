@@ -22,6 +22,7 @@
 #include "lib/container/ob_array.h"
 #include "lib/hash/ob_hashmap.h"
 #include "share/schema/ob_schema_struct.h"
+#include "share/schema/ob_ai_column_schema.h"
 #include "share/schema/ob_schema_utils.h"
 #include "common/rowkey/ob_rowkey_info.h"
 
@@ -70,7 +71,10 @@ int assign(const ObColumnSchemaV2 &src_schema);
   
   inline void set_table_id(const uint64_t id) { table_id_ = id; }
   inline void set_column_id(const uint64_t id) { column_id_ = id; }
-  inline void set_schema_version(const int64_t schema_version) { schema_version_ = schema_version; }
+  inline void set_schema_version(const int64_t schema_version) {
+    schema_version_ = schema_version;
+    if (ai_column_schema_ != nullptr) { ai_column_schema_->set_definition_version(schema_version); }
+  }
   inline void set_rowkey_position(const int64_t rowkey_position) { rowkey_position_ = rowkey_position; }
   inline void set_order_in_rowkey(const common::ObOrderType order_in_rowkey) { order_in_rowkey_ = order_in_rowkey; }
   inline void set_udt_set_id(const uint64_t id) { udt_set_id_ = id; }
@@ -332,6 +336,11 @@ int assign(const ObColumnSchemaV2 &src_schema);
     add_column_flag(UNUSED_COLUMN_FLAG);
   }
 
+  bool is_ai_column() const { return ai_column_schema_ != nullptr; }
+  const AiColumnSchema *get_ai_column_schema() const { return ai_column_schema_; }
+  int set_ai_column_schema(const AiColumnSchema &definition);
+  void clear_ai_column_schema();
+
   //other methods
   int64_t get_convert_size(void) const;
   void reset();
@@ -398,6 +407,9 @@ private:
   ObSkipIndexColumnAttr skip_index_attr_;
   int64_t lob_chunk_size_;
   share::ObLocalSessionVar local_session_vars_;
+  // Allocated only for AI columns, using this schema's allocator. Keep ordinary
+  // columns on the existing stored-column/default-value/index execution paths.
+  AiColumnSchema *ai_column_schema_ = nullptr;
 };
 
 inline int32_t ObColumnSchemaV2::get_data_length() const

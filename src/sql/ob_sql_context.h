@@ -629,6 +629,10 @@ public:
     filter_ds_stat_cache_.reuse();
     type_demotion_flag_ = 0;
     has_hybrid_search_ = false;
+    ai_column_internal_write_ = false;
+    ai_column_reads_.reset();
+    ai_column_retry_table_id_ = common::OB_INVALID_ID;
+    ai_column_retry_column_id_ = common::OB_INVALID_ID;
   }
 
   int64_t get_new_stmt_id() { return stmt_count_++; }
@@ -739,6 +743,14 @@ public:
     };
   };
   bool has_hybrid_search_;
+  // Native result/invalidation writes must not recursively generate AI tasks.
+  // Root Resolver sets this only after consuming the one-shot C++ capability.
+  bool ai_column_internal_write_ = false;
+  // User-bound base table/AI-column ID pairs, captured before transformations.
+  common::ObSEArray<uint64_t, 8> ai_column_reads_;
+  uint64_t ai_column_retry_table_id_ = common::OB_INVALID_ID;
+  uint64_t ai_column_retry_column_id_ = common::OB_INVALID_ID;
+
 };
 
 } /* ns sql*/

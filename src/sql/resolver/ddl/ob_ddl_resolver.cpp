@@ -17,6 +17,7 @@
 #define USING_LOG_PREFIX SQL_RESV
 #include "config_bridge.h"
 #include "ob_ddl_resolver.h"
+#include "ob_ai_column_options.h"
 #include "data_plane/blocksstable/ob_index_block_util.h"
 #include "sql/resolver/dml/ob_dml_resolver.h"
 #include "sql/resolver/ddl/ob_index_builder_util.h"
@@ -2084,6 +2085,21 @@ int ObDDLResolver::resolve_normal_column_attribute(ObColumnSchemaV2 &column,
     for (int64_t i = 0; OB_SUCC(ret) && i < attrs_node->num_child_; ++i) {
       ParseNode *attr_node = attrs_node->children_[i];
       switch (attr_node->type_) {
+      case T_AI_COLUMN_DEFINITION: {
+        AiColumnOptions options;
+        if (attr_node->num_child_ != 2) {
+          ret = OB_ERR_UNEXPECTED;
+        } else if (OB_FAIL(AiColumnOptions::resolve(attr_node->children_[1], options))) {
+          SQL_RESV_LOG(WARN, "invalid AI column options", K(ret));
+        } else if (stmt_->get_stmt_type() == stmt::T_ALTER_TABLE
+                   && static_cast<AlterColumnSchema &>(column).alter_type_ != OB_DDL_ADD_COLUMN) {
+          ret = OB_NOT_SUPPORTED;
+          LOG_USER_ERROR(OB_NOT_SUPPORTED, "modifying an AI column definition");
+        }
+        // CREATE resolves all AI definitions after every ordinary column has a
+        // type; ADD resolves against the old schema plus earlier added columns.
+        break;
+      }
       case T_CONSTR_NOT_NULL: {
         if (OB_FAIL(resolve_normal_column_attribute_constr_not_null(column, attr_node, resolve_stat))) {
         }

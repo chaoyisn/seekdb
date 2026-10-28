@@ -34,6 +34,7 @@
 #include "sql/resolver/ddl/ob_fork_database_resolver.h"
 #include "sql/resolver/ddl/ob_create_table_like_resolver.h"
 #include "sql/resolver/ddl/ob_alter_table_resolver.h"
+#include "sql/resolver/ddl/ai_column_retry_resolver.h"
 #include "sql/resolver/ddl/ob_drop_table_resolver.h"
 #include "sql/resolver/ddl/ob_create_index_resolver.h"
 #include "sql/resolver/ddl/ob_drop_index_resolver.h"
@@ -160,7 +161,17 @@ int ObResolver::resolve(IsPrepared if_prepared, const ParseNode &parse_tree, ObS
       || OB_ISNULL(params_.query_ctx_)) {
     ret = OB_NOT_INIT;
   } else {
+    // Consume before resolving any user PL/trigger nested SQL. Internal
+    // writes disable plan cache explicitly, so this authority is not cached.
+    params_.ai_column_internal_write_ = params_.session_info_->ai_column_write_once_;
+    params_.session_info_->ai_column_write_once_ = false;
+    params_.query_ctx_->ai_column_internal_write_ = params_.ai_column_internal_write_;
     real_parse_tree = &parse_tree;
+    if (parse_tree.type_ == T_RETRY_AI_COLUMN) {
+      ParseNode *update = nullptr;
+      ret = AiColumnRetryResolver::rewrite(params_, parse_tree, update);
+      real_parse_tree = update;
+    }
   }
 
   if (OB_SUCC(ret)) {
@@ -402,6 +413,7 @@ int ObResolver::resolve(IsPrepared if_prepared, const ParseNode &parse_tree, ObS
       case T_SHOW_DATABASES:
       case T_SHOW_VARIABLES:
       case T_SHOW_COLUMNS:
+      case T_SHOW_AI_COLUMNS:
       case T_SHOW_SCHEMA:
       case T_SHOW_CREATE_DATABASE:
       case T_SHOW_CREATE_TABLE:

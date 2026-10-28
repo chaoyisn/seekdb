@@ -1665,6 +1665,7 @@ int ObSelectResolver::expand_target_list(
 
   for (int64_t i = 0; OB_SUCC(ret) && i < column_items.count(); ++i) {
     const ColumnItem &col_item = column_items.at(i);
+    OZ(record_ai_column_read(col_item));
     SelectItem tmp_select_item;
     if (table_item.is_generated_table() || table_item.is_temp_table()) {
       if (OB_ISNULL(table_item.ref_query_) || i >= table_item.ref_query_->get_select_item_size()) {
@@ -3231,6 +3232,17 @@ int ObSelectResolver::resolve_column_ref_expr(
   }
   if (OB_SUCC(ret) && OB_FAIL(resolve_column_ref_in_all_namespace(q_name, real_ref_expr))) {
     LOG_WARN_IGNORE_COL_NOTFOUND(ret, "resolve column ref in all namespace failed", K(ret));
+  } else if (OB_SUCC(ret) && real_ref_expr != nullptr && real_ref_expr->is_column_ref_expr()) {
+    const auto *expr = static_cast<const ObColumnRefRawExpr *>(real_ref_expr);
+    const ColumnItem *column = nullptr;
+    for (ObDMLResolver *cur = this; column == nullptr && cur != nullptr; cur = cur->get_parent_namespace_resolver()) {
+      if (cur->get_stmt() != nullptr) {
+        column = cur->get_stmt()->get_column_item_by_id(expr->get_table_id(), expr->get_column_id());
+      }
+    }
+    if (column != nullptr) {
+      ret = record_ai_column_read(*column);
+    }
   }
   return ret;
 }

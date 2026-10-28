@@ -834,6 +834,7 @@ int ObInsertResolver::check_insert_select_field(ObInsertStmt &insert_stmt,
     const ObColumnRefRawExpr *value_desc = values_desc.at(i);
     if (OB_ISNULL(value_desc)) {
       ret = OB_ERR_UNEXPECTED;
+    } else if (OB_FAIL(check_ai_column_assignment(value_desc, &insert_stmt))) {
     } else if (OB_FAIL(ObDMLResolver::check_basic_column_generated(value_desc,
                                                                    &insert_stmt,
                                                                    is_generated_column))) {
@@ -1013,6 +1014,11 @@ int ObInsertResolver::resolve_column_ref_expr(const ObQualifiedName &q_name, ObR
       // as it takes lots of CPU cycles when inserting many rows
       // related issue: 
     }
+  }
+  if (OB_SUCC(ret) && real_ref_expr != nullptr && real_ref_expr->is_column_ref_expr()) {
+    const auto *expr = static_cast<const ObColumnRefRawExpr *>(real_ref_expr);
+    const ColumnItem *column = get_stmt() != nullptr ? get_stmt()->get_column_item_by_id(expr->get_table_id(), expr->get_column_id()) : nullptr;
+    if (column != nullptr) { ret = record_ai_column_read(*column); }
   }
   return ret;
 }

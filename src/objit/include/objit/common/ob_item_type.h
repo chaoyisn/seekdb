@@ -2274,6 +2274,12 @@ typedef enum ObItemType
   T_FORK_DATABASE = 4917,
   T_DIFF_TABLE = 4918,
   T_MERGE_TABLE = 4919,
+  // AI column syntax nodes are distinct from synchronous generated columns.
+  T_AI_COLUMN_DEFINITION = 4930,
+  T_AI_COLUMN_OPTIONS = 4931,
+  T_AI_COLUMN_OPTION = 4932,
+  T_RETRY_AI_COLUMN = 4933,
+  T_SHOW_AI_COLUMNS = 4934,
   T_MAX //Attention: add a new type before T_MAX
 } ObItemType;
 

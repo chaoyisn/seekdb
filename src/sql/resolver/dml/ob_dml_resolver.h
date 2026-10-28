@@ -294,6 +294,7 @@ public:
                                             const ObTableSchema &parent_table_schema,
                                             const ObForeignKeyInfo *fk_info);
   virtual int resolve_column_ref_expr(const ObQualifiedName &q_name, ObRawExpr *&real_ref_expr);
+  int record_ai_column_read(const ColumnItem &column);
   int resolve_sql_expr(const ParseNode &node, ObRawExpr *&expr,
                        ObArray<ObQualifiedName> *input_columns = NULL);
   int resolve_partition_expr(const TableItem &table_item,
@@ -487,6 +488,7 @@ protected:
   int generate_ddl_sample_info_if_needed(TableItem &table_item);
 
 protected:
+  int check_ai_column_assignment(const ObColumnRefRawExpr *col_expr, ObDMLStmt *stmt);
   int check_basic_column_generated(const ObColumnRefRawExpr *col_expr,
                                   ObDMLStmt *dml_stmt,
                                   bool &is_generated);

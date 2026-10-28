@@ -281,6 +281,10 @@ class ObAIFuncUtils
 public:
   ObAIFuncUtils() {}
   virtual ~ObAIFuncUtils() {}
+  static int prepare_ai_column_config(common::ObIAllocator &allocator,
+                                      common::ObJsonObject *config,
+                                      common::ObString &system_prompt,
+                                      common::ObJsonObject *&provider_config);
   static bool is_completion_type(const ObAIFuncExprInfo *info) {return info->type_ == share::EndpointType::COMPLETION;}
   static bool is_dense_embedding_type(const ObAIFuncExprInfo *info) {return info->type_ == share::EndpointType::DENSE_EMBEDDING;}
   static bool is_rerank_type(const ObAIFuncExprInfo *info) {return info->type_ == share::EndpointType::RERANK;}

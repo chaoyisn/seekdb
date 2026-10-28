@@ -17,6 +17,7 @@
 #define USING_LOG_PREFIX SQL_RESV
 #include "config_bridge.h"
 #include "ob_dml_resolver.h"
+#include "share/schema/ob_ai_column_schema.h"
 #include "sql/resolver/dml/ob_view_table_resolver.h"
 #include "sql/optimizer/ob_optimizer_util.h"
 #include "sql/resolver/dml/ob_default_value_utils.h"
@@ -2247,6 +2248,34 @@ int ObDMLResolver::resolve_column_ref_expr(const ObQualifiedName &q_name, ObRawE
   int ret = OB_SUCCESS;
   if (OB_FAIL(resolve_table_column_expr(q_name, real_ref_expr))) {
     LOG_WARN_IGNORE_COL_NOTFOUND(ret, "resolve table column failed", K(q_name), K(ret));
+  } else if (real_ref_expr != nullptr && real_ref_expr->is_column_ref_expr()) {
+    const auto *expr = static_cast<const ObColumnRefRawExpr *>(real_ref_expr);
+    const ColumnItem *column = get_stmt()->get_column_item_by_id(expr->get_table_id(), expr->get_column_id());
+    if (column != nullptr) { ret = record_ai_column_read(*column); }
+  }
+  return ret;
+}
+
+int ObDMLResolver::record_ai_column_read(const ColumnItem &column)
+{
+  int ret = OB_SUCCESS;
+  const ObTableSchema *table = nullptr;
+  if (params_.query_ctx_ == nullptr || params_.ai_column_internal_write_
+      || column.base_tid_ == OB_INVALID_ID) { return ret; }
+  OZ(schema_checker_->get_table_schema(column.base_tid_, table));
+  if (OB_SUCC(ret) && table != nullptr) {
+    const ObColumnSchemaV2 *schema = table->get_column_schema(column.base_cid_);
+    if (schema != nullptr && schema->is_ai_column()
+        && !(current_scope_ == T_UPDATE_SCOPE
+             && params_.query_ctx_->ai_column_retry_table_id_ == column.base_tid_
+             && params_.query_ctx_->ai_column_retry_column_id_ == column.base_cid_)) {
+      auto &reads = params_.query_ctx_->ai_column_reads_;
+      bool found = false;
+      for (int64_t i = 0; i + 1 < reads.count(); i += 2) {
+        found = found || (reads.at(i) == column.base_tid_ && reads.at(i + 1) == column.base_cid_);
+      }
+      if (!found) { OZ(reads.push_back(column.base_tid_)); OZ(reads.push_back(column.base_cid_)); }
+    }
   }
   return ret;
 }
@@ -5001,9 +5030,9 @@ int ObDMLResolver::resolve_all_basic_table_columns(const TableItem &table_item, 
           continue;
         } else if (OB_FAIL(resolve_basic_column_item(table_item, column_schema->get_column_name_str(),
                                                      include_hidden, col_item))) {
-        } else if (column_items != NULL) {
-          if (OB_FAIL(column_items->push_back(*col_item))) {
-          }
+        } else {
+          if (stmt->is_select_stmt()) { OZ(record_ai_column_read(*col_item)); }
+          if (OB_SUCC(ret) && column_items != NULL) { OZ(column_items->push_back(*col_item)); }
         }
       }
       if (ret != OB_ITER_END) {
@@ -5662,6 +5691,53 @@ int ObDMLResolver::resolve_partitions(const ParseNode *part_node,
         if (OB_FAIL(table_item.part_ids_.assign(part_ids))) {
         } else if (OB_FAIL(table_item.part_names_.assign(part_names))) {
         }
+      }
+    }
+  }
+  return ret;
+}
+
+// This check belongs to assignment targets, not column name resolution: AI
+// result columns remain readable and ordinary omitted INSERT defaults stay NULL.
+int ObDMLResolver::check_ai_column_assignment(const ObColumnRefRawExpr *col_expr,
+                                               ObDMLStmt *stmt)
+{
+  int ret = OB_SUCCESS;
+  const ColumnItem *item = nullptr;
+  const ObColumnSchemaV2 *column = nullptr;
+  if (OB_ISNULL(col_expr) || OB_ISNULL(stmt) || OB_ISNULL(session_info_)) {
+    ret = OB_ERR_UNEXPECTED;
+  } else if (OB_ISNULL(item = stmt->get_column_item_by_id(
+                 col_expr->get_table_id(), col_expr->get_column_id()))) {
+    ret = OB_ERR_UNEXPECTED;
+  } else {
+    const uint64_t tid = OB_INVALID_ID == item->base_tid_ ? item->table_id_ : item->base_tid_;
+    const uint64_t cid = OB_INVALID_ID == item->base_cid_ ? item->column_id_ : item->base_cid_;
+    if (OB_FAIL(get_column_schema(tid, cid, column, true))) {
+    } else if (OB_ISNULL(column)) {
+      ret = OB_ERR_UNEXPECTED;
+    } else if (!params_.ai_column_internal_write_
+               && !(params_.query_ctx_ != nullptr
+                    && params_.query_ctx_->ai_column_retry_table_id_ == tid
+                    && params_.query_ctx_->ai_column_retry_column_id_ == cid)) {
+      bool protected_column = column->is_ai_column();
+      if (!protected_column && column->is_hidden()) {
+        const ObTableSchema *table = nullptr;
+        if (OB_FAIL(schema_checker_->get_table_schema(tid, table))) {
+        } else if (table == nullptr) {
+          ret = OB_SCHEMA_EAGAIN;
+        } else {
+          for (auto iter = table->column_begin(); !protected_column && iter != table->column_end(); ++iter) {
+            const share::schema::AiColumnSchema *ai = (*iter)->get_ai_column_schema();
+            protected_column = ai != nullptr && (cid == ai->get_state_column_id()
+                || cid == ai->get_request_column_id() || cid == ai->get_result_spec_column_id());
+          }
+        }
+      }
+      // User PL also uses inner SQL; it must not edit result ownership/state.
+      if (OB_SUCC(ret) && protected_column) {
+        ret = OB_NOT_SUPPORTED;
+        LOG_USER_ERROR(OB_NOT_SUPPORTED, "direct assignment to an AI result or state column");
       }
     }
   }

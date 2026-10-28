@@ -345,6 +345,7 @@ OBSERVER_UNITY_GROUPS = [
             "src/observer/virtual_table/ob_virtual_sql_plan_statistics.cpp",
             "src/observer/virtual_table/ob_virtual_table_iterator.cpp",
             "src/observer/virtual_table/ob_virtual_core_inner_table.cpp",
+            "src/observer/virtual_table/ob_ai_column_metadata_table.cpp",
             "src/observer/virtual_table/ob_virtual_table_iterator_factory.cpp",
             "src/observer/virtual_table/ob_virtual_table_projector.cpp",
             "src/observer/virtual_table/ob_virtual_table_scanner_iterator.cpp",
@@ -404,6 +405,8 @@ OBSERVER_RETRIEVAL_COMPOSITION_SOURCES = [
 
 OBSERVER_STANDALONE_SOURCES = [
     struct(path = "src/observer/ob_server.cpp", language = "c++", kind = "source"),
+    struct(path = "src/observer/ai_column_worker.cpp", language = "c++", kind = "source"),
+    struct(path = "src/observer/ai_column_result.cpp", language = "c++", kind = "source"),
     struct(path = "src/observer/ob_service.cpp", language = "c++", kind = "source"),
 ]
 
