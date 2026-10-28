@@ -176,11 +176,11 @@ int evaluate(ObInnerSQLConnection &conn, const Task &task, ObSchemaGetterGuard &
   if (ai == nullptr || ai->get_definition_version() != task.version) { return OB_SCHEMA_EAGAIN; }
   ObSqlString sql;
   OZ(sql.append("SELECT /*+ USE_PLAN_CACHE(NONE) NO_PARALLEL */ "));
-  if (column->is_collection()) { OZ(sql.append("CAST(CONCAT('[',ARRAY_TO_STRING(")); }
-  else { OZ(sql.append("CAST(")); }
+  // Native CAST serializes VECTOR values as their JSON array text and also
+  // materializes completion LOBs; no array/string type-promotion is needed.
+  OZ(sql.append("CAST("));
   OZ(sql.append(ai->get_normalized_expr()));
-  if (column->is_collection()) { OZ(sql.append(",','),']') AS CHAR)")); }
-  else { OZ(sql.append(" AS CHAR)")); }
+  OZ(sql.append(" AS CHAR)"));
   OZ(sql.append(" AS ai_value FROM ")); OZ(source_table(sql, table, guard));
   OZ(sql.append(" WHERE ")); OZ(request_predicate(sql, table, task));
   ObISQLClient::ReadResult result;
