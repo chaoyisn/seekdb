@@ -1,5 +1,7 @@
 #define USING_LOG_PREFIX SQL_ENG
 #include "sql/engine/dml/ai_column_dml_service.h"
+#include "sql/engine/dml/ai_column_dml_context.h"
+#include "lib/utility/ob_defer.h"
 #include "sql/engine/dml/ob_table_modify_op.h"
 #include "sql/engine/expr/ob_expr_uuid.h"
 #include "share/schema/ob_ai_column_schema.h"
@@ -131,6 +133,15 @@ int AiColumnDmlService::after_row(ObTableModifyOp &op, const ObDMLBaseCtDef &ctd
 {
   int ret = OB_SUCCESS;
   if (!ctdef.has_ai_columns_) { return ret; }
+  ObDASCtx &das = op.get_exec_ctx().get_das_ctx();
+  const uint64_t saved_ai_flag = das.flags_ & AI_COLUMN_NESTED_DAS_FLAG;
+  const bool saved_iter_uncommitted = das.iter_uncommitted_row_;
+  DEFER(das.flags_ = (das.flags_ & ~AI_COLUMN_NESTED_DAS_FLAG) | saved_ai_flag;
+        das.iter_uncommitted_row_ = saved_iter_uncommitted;);
+  das.flags_ |= AI_COLUMN_NESTED_DAS_FLAG;
+  // An after-row invalidation must see the row just written by this statement.
+  das.iter_uncommitted_row_ = true;
+  const char *stage = "prepare";
   const ObTableSchema *table = nullptr;
   const ObDatabaseSchema *database = nullptr;
   ObSchemaGetterGuard *guard = op.get_exec_ctx().get_sql_ctx()->schema_guard_;
@@ -233,25 +244,36 @@ int AiColumnDmlService::after_row(ObTableModifyOp &op, const ObDMLBaseCtDef &ctd
       if (OB_FAIL(invalidate.append(" WHERE "))) {
       } else { ret = invalidate.append(predicate.string()); }
     }
+    if (OB_SUCC(ret)) { stage = "begin nested session"; }
     if (OB_SUCC(ret) && OB_FAIL(op.begin_nested_session(true))) {
     } else if (OB_SUCC(ret)) {
       // All writes use the original business session and transaction. No
       // model call is made here. A failure rolls back the enclosing statement.
       for (int64_t i = 0; OB_SUCC(ret) && i < cleanup.count(); ++i) {
+        stage = "remove obsolete tasks";
         ret = op.execute_write(cleanup.at(i).ptr());
       }
       if (OB_SUCC(ret) && !deleting) {
         int64_t affected_rows = 0;
+        stage = "invalidate business row";
         ret = execute_result_write(*session, *op.inner_conn_, invalidate.string(), affected_rows);
         if (OB_SUCC(ret) && affected_rows != 1) {
+          FLOG_INFO("AI invalidation row count mismatch", K(affected_rows));
           ret = OB_ERR_UNEXPECTED;
           LOG_WARN("AI invalidation must address exactly one business row", K(ret), K(affected_rows));
         }
-        if (OB_SUCC(ret)) { ret = op.execute_write(enqueue.ptr()); }
+        if (OB_SUCC(ret)) {
+          stage = "insert persistent tasks";
+          ret = op.execute_write(enqueue.ptr());
+        }
       }
+      if (OB_SUCC(ret)) { stage = "end nested session"; }
       const int end_ret = op.end_nested_session();
       if (OB_SUCC(ret)) { ret = end_ret; }
     }
+  }
+  if (OB_FAIL(ret)) {
+    FLOG_INFO("AI column T1 failed", K(ret), K(stage), K(event), KP(op.inner_conn_));
   }
   return ret;
 }

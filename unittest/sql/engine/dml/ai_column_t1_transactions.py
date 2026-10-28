@@ -7,16 +7,20 @@ worker cannot drain these tasks before the short transactional assertions.
 import argparse
 import json
 import time
+import re
 from pathlib import Path
 import pymysql
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--port', required=True, type=int)
 parser.add_argument('--report', required=True, type=Path)
+parser.add_argument('--namespace', default='ai_column_t1_supplemental')
 args = parser.parse_args()
-db = 'ai_column_t1_supplemental'
-model = 'ai_t1_supp_model'
-endpoint = 'ai_t1_supp_endpoint'
+if not re.fullmatch(r'[a-zA-Z_][a-zA-Z_0-9]{0,60}', args.namespace):
+    raise ValueError('Invalid isolated test namespace')
+db = args.namespace
+model = args.namespace + '_model'
+endpoint = args.namespace + '_endpoint'
 checks = []
 started = time.time()
 conn = pymysql.connect(host='127.0.0.1', port=args.port, user='root',
@@ -25,6 +29,7 @@ peer = pymysql.connect(host='127.0.0.1', port=args.port, user='root',
                        autocommit=True, read_timeout=30, write_timeout=30)
 
 def sql(query, connection=conn):
+    print('SQL:', query, flush=True)
     with connection.cursor() as cur:
         cur.execute(query)
         return cur.fetchall()
@@ -120,7 +125,7 @@ finally:
     peer.close()
     payload = {'kind':'supplemental real-server T1 integration','exit_code':exit_code,
                'passed':sum(c['passed'] for c in checks),'checks':checks,
-               'elapsed_seconds':time.time()-started,
+               'elapsed_seconds':time.time()-started,'namespace':db,
                'cleanup':'Inspect owned database/models and preserve server logs before rerun.'}
     args.report.write_text(json.dumps(payload,indent=2,ensure_ascii=False))
     print(json.dumps(payload,indent=2,ensure_ascii=False))

@@ -525,6 +525,7 @@ SQL_PRIVATE_HEADERS = [
     "engine/dml/ob_conflict_checker.h",
     "engine/dml/ob_dml_service.h",
     "engine/dml/ai_column_dml_service.h",
+    "engine/dml/ai_column_dml_context.h",
     "engine/dml/ob_table_delete_op.h",
     "engine/dml/ob_table_insert_op.h",
     "engine/dml/ob_table_insert_up_op.h",
