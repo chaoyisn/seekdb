@@ -103,6 +103,17 @@ public:
 
   int process(TokenizeContext &ctx);
 
+  // Same as process(ctx), but with the current character already resolved by the
+  // caller. The parser processes every character through all segmenters, so this
+  // avoids re-reading and re-validating the cursor once per segmenter.
+  int process(TokenizeContext &ctx,
+              const char *ch,
+              const uint8_t char_len,
+              const ObFTCharUtil::CharType type)
+  {
+    return do_process(ctx, ch, char_len, type);
+  }
+
   virtual int do_process(TokenizeContext &ctx,
                          const char *ch,
                          const uint8_t char_len,

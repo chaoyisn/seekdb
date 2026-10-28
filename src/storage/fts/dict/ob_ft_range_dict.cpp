@@ -378,6 +378,29 @@ int ObFTRangeDict::match_with_hit(const ObString &single_word,
   return last_hit.dict_->match_with_hit(single_word, last_hit, hit);
 }
 
+// Compare two single characters of the dictionary with binary semantics.
+//
+// The IK dictionaries are always built with CS_TYPE_UTF8MB4_BIN, where the
+// collation order is the code point order, and UTF-8 keeps code point order in
+// byte order. Both operands here are single characters without trailing spaces,
+// so a byte comparison returns exactly the same ordering as the collation-aware
+// ObString::compare() it replaces, without paying for the charset dispatch,
+// argument validation and UTF-8 decoding on every range probe.
+static inline int compare_single_word(const ObString &left, const ObString &right)
+{
+  const int64_t common = OB_MIN(left.length(), right.length());
+  if (common > 0) {
+    const int cmp = memcmp(left.ptr(), right.ptr(), static_cast<size_t>(common));
+    if (0 != cmp) {
+      return cmp < 0 ? -1 : 1;
+    }
+  }
+  if (left.length() == right.length()) {
+    return 0;
+  }
+  return left.length() < right.length() ? -1 : 1;
+}
+
 int ObFTRangeDict::find_first_char_range(const ObString &single_word, ObIFTDict *&dict) const
 {
   int ret = OB_SUCCESS;
@@ -386,9 +409,9 @@ int ObFTRangeDict::find_first_char_range(const ObString &single_word, ObIFTDict 
   while (low <= high) {
     int64_t mid = low + (high - low) / 2;
     const ObFTRange &range = range_dicts_[mid];
-    if (single_word.compare(range.start_.get_word()) < 0) {
+    if (compare_single_word(single_word, range.start_.get_word()) < 0) {
       high = mid - 1;
-    } else if (single_word.compare(range.end_.get_word()) > 0) {
+    } else if (compare_single_word(single_word, range.end_.get_word()) > 0) {
       low = mid + 1;
     } else {
       dict = range.dict_;

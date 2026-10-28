@@ -67,6 +67,24 @@ public:
 
   int find(const ObFTSingleWord &word, ObFTWordCode &code) const;
 
+  // Byte-wise hash used to index the DAT code map.
+  //
+  // The keys of this map are single characters and equality is byte equality
+  // (see ObFTSingleWord::operator==), so a plain byte hash is exactly as
+  // discriminating as the collation hash used before, while avoiding the
+  // charset dispatch + UTF-8 decode that ObString::hash() performs for every
+  // character of every tokenized document. Both insert() and find() go through
+  // this function, so the map stays self-consistent.
+  static inline uint64_t word_hash(const char *ptr, int32_t len)
+  {
+    uint64_t hash = 0xcbf29ce484222325ULL;
+    for (int32_t i = 0; i < len; ++i) {
+      hash ^= static_cast<uint64_t>(static_cast<uint8_t>(ptr[i]));
+      hash *= 0x100000001b3ULL;
+    }
+    return hash;
+  }
+
 private:
   struct Header header_;
 } __attribute__((packed));
