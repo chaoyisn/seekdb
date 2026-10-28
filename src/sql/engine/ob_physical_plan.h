@@ -528,6 +528,9 @@ private:
 private:
   bool insertup_can_do_gts_opt_;
   int64_t px_worker_share_plan_enabled_;
+public:
+  // Retained in cached plans; readiness is checked on every execution.
+  common::ObSEArray<uint64_t, 8> ai_column_reads_;
 };
 
 inline void ObPhysicalPlan::set_affected_last_insert_id(bool affected_last_insert_id)

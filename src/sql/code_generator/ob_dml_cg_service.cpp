@@ -2115,6 +2115,10 @@ int ObDmlCgService::generate_dml_base_ctdef(ObLogicalOperator &op,
         LOG_USER_ERROR(OB_NOT_SUPPORTED, "AI column DML with IGNORE or PDML");
       } else {
         dml_base_ctdef.has_ai_columns_ = true;
+        const auto *query = op.get_stmt()->get_query_ctx();
+        if (query != nullptr && query->ai_column_retry_table_id_ == table->get_table_id()) {
+          dml_base_ctdef.retry_ai_column_id_ = query->ai_column_retry_column_id_;
+        }
         cg_.phy_plan_->set_has_nested_sql(true);
       }
     }

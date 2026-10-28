@@ -27,6 +27,7 @@
 #include "sql/monitor/show_trace/ob_show_trace.h"
 #include "sql/engine/table/ob_table_scan_op.h"
 #include "share/ob_ddl_checksum.h"
+#include "sql/engine/dml/ai_column_dml_service.h"
 
 using namespace oceanbase::sql;
 using namespace oceanbase::common;
@@ -462,6 +463,7 @@ OB_INLINE int ObResultSet::do_open_plan(ObExecContext &ctx)
 
   if (OB_FAIL(ret)) {
   } else if (OB_FAIL(start_stmt())) {
+  } else if (OB_FAIL(AiColumnDmlService::check_strict_read(ctx, physical_plan_->ai_column_reads_))) {
   } else {
     /* Set exec_result_ to the executor's runtime environment for returning data */
     /* execute plan,

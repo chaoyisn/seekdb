@@ -122,4 +122,11 @@ TEST_F(AiColumnParser, rejects_retry_with_multiple_columns)
 {
   EXPECT_NE(OB_SUCCESS, parse("ALTER TABLE t RETRY AI COLUMN a,b WHERE status='FAILED'"));
 }
+TEST_F(AiColumnParser, mixed_retry_is_rejected_by_resolver_not_misparsed)
+{
+  ASSERT_EQ(OB_SUCCESS, parse("ALTER TABLE docs RETRY AI COLUMN tags WHERE id=1, ADD COLUMN x INT"));
+  const ParseNode *retry = find_node(result_.result_tree_, T_RETRY_AI_COLUMN);
+  ASSERT_NE(nullptr, retry);
+  EXPECT_EQ(5, retry->num_child_);
+}
 } // namespace

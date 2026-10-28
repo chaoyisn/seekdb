@@ -2,6 +2,7 @@
 #include "sql/engine/dml/ai_column_dml_service.h"
 #include "sql/engine/dml/ai_column_dml_context.h"
 #include "lib/utility/ob_defer.h"
+#include "observer/ob_inner_sql_connection.h"
 #include "sql/engine/dml/ob_table_modify_op.h"
 #include "sql/engine/expr/ob_expr_uuid.h"
 #include "share/schema/ob_ai_column_schema.h"
@@ -128,6 +129,71 @@ int AiColumnDmlService::execute_result_write(ObSQLSessionInfo &session,
   return ret;
 }
 
+int AiColumnDmlService::check_strict_read(ObExecContext &ctx, const ObIArray<uint64_t> &reads)
+{
+  int ret = OB_SUCCESS;
+  if (reads.empty()) { return ret; }
+  if (reads.count() % 2 != 0 || ctx.get_my_session() == nullptr) { return OB_ERR_UNEXPECTED; }
+  ObSQLSessionInfo &session = *ctx.get_my_session();
+  bool enabled = false;
+  OZ(session.get_sys_variable(share::SYS_VAR_AI_COLUMN_STRICT_READ, enabled));
+  if (OB_FAIL(ret) || !enabled) { return ret; }
+  ObSchemaGetterGuard *schema = ctx.get_sql_ctx()->schema_guard_;
+  if (schema == nullptr) { return OB_ERR_UNEXPECTED; }
+  sqlclient::ObISQLConnectionGuard connection;
+  OZ(observer::ObInnerSQLConnection::create_connection_with_external_session(&session, connection));
+  auto *conn = dynamic_cast<observer::ObInnerSQLConnection *>(connection.get_ptr());
+  if (OB_SUCC(ret) && conn == nullptr) { ret = OB_ERR_UNEXPECTED; }
+  if (OB_FAIL(ret)) { return ret; }
+  ObDASCtx &das = ctx.get_das_ctx();
+  const uint64_t saved_ai_flag = das.flags_ & AI_COLUMN_NESTED_DAS_FLAG;
+  DEFER(das.flags_ = (das.flags_ & ~AI_COLUMN_NESTED_DAS_FLAG) | saved_ai_flag;);
+  das.flags_ |= AI_COLUMN_NESTED_DAS_FLAG;
+  ObSQLSessionInfo::StmtSavedValue saved_session;
+  observer::ObInnerSQLConnection::SavedValue saved_conn;
+  OZ(conn->begin_nested_session(saved_session, saved_conn, true));
+  if (OB_FAIL(ret)) { return ret; }
+  uint64_t unfinished_table = 0, unfinished_column = 0;
+  for (int64_t i = 0; OB_SUCC(ret) && i < reads.count(); i += 2) {
+    const ObTableSchema *table = nullptr;
+    const ObDatabaseSchema *database = nullptr;
+    OZ(schema->get_table_schema(reads.at(i), table));
+    if (OB_SUCC(ret) && table == nullptr) { ret = OB_SCHEMA_EAGAIN; }
+    const auto *column = OB_SUCC(ret) ? table->get_column_schema(reads.at(i + 1)) : nullptr;
+    const auto *ai = column == nullptr ? nullptr : column->get_ai_column_schema();
+    const auto *state = ai == nullptr ? nullptr : table->get_column_schema(ai->get_state_column_id());
+    if (OB_SUCC(ret) && state == nullptr) { ret = OB_SCHEMA_EAGAIN; }
+    OZ(schema->get_database_schema(table->get_database_id(), database));
+    if (OB_SUCC(ret) && database == nullptr) { ret = OB_SCHEMA_EAGAIN; }
+    ObSqlString sql;
+    OZ(sql.append("SELECT /*+ USE_PLAN_CACHE(NONE) NO_PARALLEL */ 1 AS unfinished FROM "));
+    if (OB_SUCC(ret)) { OZ(append_identifier(sql, database->get_database_name_str())); }
+    OZ(sql.append("."));
+    if (OB_SUCC(ret)) { OZ(append_identifier(sql, table->get_table_name_str())); }
+    OZ(sql.append(" WHERE "));
+    if (OB_SUCC(ret)) { OZ(append_identifier(sql, state->get_column_name_str())); }
+    OZ(sql.append("<>1 LIMIT 1"));
+    {
+      ObISQLClient::ReadResult result;
+      OZ(conn->execute_read(sql.string(), result));
+      if (OB_SUCC(ret) && result.get_result() == nullptr) { ret = OB_ERR_UNEXPECTED; }
+      if (OB_SUCC(ret)) {
+        const int next = result.get_result()->next();
+        if (next == OB_SUCCESS) {
+          unfinished_table = reads.at(i); unfinished_column = reads.at(i + 1);
+          ret = OB_AI_COLUMN_NOT_READY;
+        } else if (next != OB_ITER_END) { ret = next; }
+      }
+    }
+  }
+  const int end_ret = conn->end_nested_session(saved_session, saved_conn);
+  if (OB_SUCC(ret)) { ret = end_ret; }
+  if (ret == OB_AI_COLUMN_NOT_READY) {
+    LOG_USER_ERROR(OB_AI_COLUMN_NOT_READY, unfinished_table, unfinished_column);
+  }
+  return ret;
+}
+
 int AiColumnDmlService::after_row(ObTableModifyOp &op, const ObDMLBaseCtDef &ctdef,
                                  ObDmlEventType event)
 {
@@ -168,7 +234,9 @@ int AiColumnDmlService::after_row(ObTableModifyOp &op, const ObDMLBaseCtDef &ctd
     for (auto iter = table->column_begin(); OB_SUCC(ret) && iter != table->column_end(); ++iter) {
       const AiColumnSchema *ai = (*iter)->get_ai_column_schema();
       if (ai == nullptr) { continue; }
-      bool changed = inserting || deleting || key_changed;
+      const bool retry = ctdef.retry_ai_column_id_ != OB_INVALID_ID;
+      if (retry && ai->get_column_id() != ctdef.retry_ai_column_id_) { continue; }
+      bool changed = retry || inserting || deleting || key_changed;
       for (int64_t i = 0; OB_SUCC(ret) && !changed && i < ai->get_dependencies().count(); ++i) {
         ret = column_changed(ctdef, ai->get_dependencies().at(i), op.get_eval_ctx(), changed);
       }

@@ -14708,6 +14708,10 @@ alter_with_opt_hint TABLE relation_factor alter_table_actions
    * Preserve identifier quoting, including `status`, in the predicate AST. */
   malloc_non_terminal_node($$, result->malloc_pool_, T_RETRY_AI_COLUMN, 4, $3, $7, $8, $1);
 }
+| alter_with_opt_hint TABLE relation_factor RETRY AI COLUMN column_name opt_where ',' alter_table_actions
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_RETRY_AI_COLUMN, 5, $3, $7, $8, $1, $10);
+}
 ;
 
 
