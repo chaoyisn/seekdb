@@ -49,13 +49,13 @@ int ObSystemPackageLoadTask::init()
 int ObSystemPackageLoadTask::start(common::ObTimer &timer)
 {
   int ret = OB_SUCCESS;
-  const bool did_repeat = true;
   if (OB_UNLIKELY(!inited_)) {
     ret = OB_NOT_INIT;
   } else {
     if (timer.task_exist(*this)) {
       // ignore duplicate schedule
-    } else if (OB_FAIL(timer.schedule(*this, SCHEDULE_INTERVAL_US, did_repeat))) {
+    } else if (OB_FAIL(timer.schedule_repeate_task_immediately(*this, SCHEDULE_INTERVAL_US))) {
+      LOG_WARN("fail to schedule task", K(ret));
     } else {
       LOG_INFO("finish schedule timer task", K(SCHEDULE_INTERVAL_US));
     }
@@ -90,8 +90,17 @@ int ObSystemPackageLoadTask::load_system_package_()
     ret = OB_ERR_UNEXPECTED;
   } else if (OB_FAIL(GET_ADMIN_JOB_COUNT(LOAD_MYSQL_SYS_PACKAGE, job_count))) {
   } else if (0 == job_count) {
-    // job not exists, try insert inprogress job
+    // job not exists, try insert inprogress job and load packages immediately
     if (OB_FAIL(ADMIN_JOB_CREATE_WITH_RET(job_id, JOB_TYPE_LOAD_MYSQL_SYS_PACKAGE))) {
+      LOG_WARN("fail to create admin job", K(ret));
+    } else if (OB_FAIL(pl::ObPLPackageManager::load_all_common_sys_package(
+                           *sql_proxy,
+                           false/*from_file*/))) {
+      LOG_WARN("fail to load common sys package", K(ret));
+    } else if (OB_FAIL(ADMIN_JOB_COMPLETE(job_id, 0/*result_code*/))) {
+      LOG_WARN("fail to complete admin job", K(ret));
+    } else {
+      GCTX.sys_package_ready_ = true;
     }
   } else if (OB_FAIL(ADMIN_JOB_FIND(LOAD_MYSQL_SYS_PACKAGE, job_id))) {
     if (ret == OB_ENTRY_NOT_EXIST) {
