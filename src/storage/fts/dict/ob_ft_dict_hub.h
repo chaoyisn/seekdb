@@ -102,7 +102,7 @@ class ObFTDictHub
 public:
   ObFTDictHub()
       : is_inited_(false), dict_map_(), rw_dict_lock_(),
-        ik_dict_lock_(), ik_dict_allocator_(lib::ObMemAttr("FTDictHub")),
+        ik_dict_lock_(), ik_dict_ready_(false), ik_dict_allocator_(lib::ObMemAttr("FTDictHub")),
         ik_main_container_(nullptr), ik_quan_container_(nullptr), ik_stop_container_(nullptr),
         ik_dict_main_(nullptr), ik_dict_quan_(nullptr), ik_dict_stop_(nullptr)
   {}
@@ -119,6 +119,8 @@ public:
   int get_ik_dicts(ObIFTDict *&dict_main, ObIFTDict *&dict_quan, ObIFTDict *&dict_stop);
 
 private:
+  void clear_ik_dicts();
+
   int get_dict_info(const ObFTDictInfoKey &key, ObFTDictInfo &info);
 
   int put_dict_info(const ObFTDictInfoKey &key, const ObFTDictInfo &info);
@@ -132,6 +134,7 @@ private:
 
   // Cached immutable IK dictionaries for zero-allocation tokenization
   common::SpinRWLock ik_dict_lock_;
+  bool ik_dict_ready_;
   common::ObArenaAllocator ik_dict_allocator_;
   ObFTCacheRangeContainer *ik_main_container_;
   ObFTCacheRangeContainer *ik_quan_container_;

@@ -42,7 +42,14 @@ int ObFTDictHub::init()
 
 int ObFTDictHub::destroy()
 {
-  int ret = OB_SUCCESS;
+  clear_ik_dicts();
+  is_inited_ = false;
+  return OB_SUCCESS;
+}
+
+void ObFTDictHub::clear_ik_dicts()
+{
+  ATOMIC_STORE(&ik_dict_ready_, false);
   if (OB_NOT_NULL(ik_dict_main_)) {
     OB_DELETEx(ObFTRangeDict, &ik_dict_allocator_, ik_dict_main_);
     ik_dict_main_ = nullptr;
@@ -68,8 +75,6 @@ int ObFTDictHub::destroy()
     ik_stop_container_ = nullptr;
   }
   ik_dict_allocator_.reset();
-  is_inited_ = false;
-  return ret;
 }
 int ObFTDictHub::build_cache(const ObFTDictDesc &desc, ObFTCacheRangeContainer &container)
 {
@@ -145,13 +150,13 @@ int ObFTDictHub::get_ik_dicts(ObIFTDict *&dict_main, ObIFTDict *&dict_quan, ObIF
   int ret = OB_SUCCESS;
   if (!is_inited_) {
     ret = OB_NOT_INIT;
-  } else if (OB_LIKELY(nullptr != ik_dict_main_ && nullptr != ik_dict_quan_ && nullptr != ik_dict_stop_)) {
+  } else if (OB_LIKELY(ATOMIC_LOAD(&ik_dict_ready_))) {
     dict_main = ik_dict_main_;
     dict_quan = ik_dict_quan_;
     dict_stop = ik_dict_stop_;
   } else {
     common::SpinWLockGuard guard(ik_dict_lock_);
-    if (nullptr != ik_dict_main_ && nullptr != ik_dict_quan_ && nullptr != ik_dict_stop_) {
+    if (ATOMIC_LOAD(&ik_dict_ready_)) {
       dict_main = ik_dict_main_;
       dict_quan = ik_dict_quan_;
       dict_stop = ik_dict_stop_;
@@ -196,8 +201,12 @@ int ObFTDictHub::get_ik_dicts(ObIFTDict *&dict_main, ObIFTDict *&dict_quan, ObIF
             dict_main = ik_dict_main_;
             dict_quan = ik_dict_quan_;
             dict_stop = ik_dict_stop_;
+            ATOMIC_STORE(&ik_dict_ready_, true);
           }
         }
+      }
+      if (OB_FAIL(ret)) {
+        clear_ik_dicts();
       }
     }
   }

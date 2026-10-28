@@ -164,28 +164,15 @@ int ObAddWord::casedown_word(const ObFTWord &src, ObFTWord &dst)
   if (OB_UNLIKELY(src.empty())) {
     ret = OB_INVALID_ARGUMENT;
   } else if (flag_.casedown()) {
-    const ObString &src_str = src.get_word().get_string();
-    bool need_casedown = false;
-    for (int64_t i = 0; i < src_str.length(); ++i) {
-      const uint8_t c = static_cast<uint8_t>(src_str[i]);
-      if ((c >= 'A' && c <= 'Z') || c == 0xEF) {
-        need_casedown = true;
-        break;
-      }
-    }
-    if (!need_casedown) {
-      dst = src;
+    ObString dst_str;
+    if (OB_FAIL(ObCharset::tolower(
+                    word_meta_.get_collation_type(),
+                    src.get_word().get_string(),
+                    dst_str,
+                    allocator_))) {
     } else {
-      ObString dst_str;
-      if (OB_FAIL(ObCharset::tolower(
-                      word_meta_.get_collation_type(),
-                      src_str,
-                      dst_str,
-                      allocator_))) {
-      } else {
-        ObFTWord tmp(dst_str.length(), dst_str.ptr(), word_meta_);
-        dst = tmp;
-      }
+      ObFTWord tmp(dst_str.length(), dst_str.ptr(), word_meta_);
+      dst = tmp;
     }
   } else {
     dst = src;

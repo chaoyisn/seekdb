@@ -1,0 +1,31 @@
+SET NAMES utf8mb4;
+SELECT tokenize('École', 'space') AS tokens;
+tokens
+["école"]
+SELECT tokenize('中华人民共和国人民大会堂', 'ik') AS tokens;
+tokens
+["人民大会堂", "中华人民共和国"]
+DROP TABLE IF EXISTS fts_word_map_reuse;
+CREATE TABLE fts_word_map_reuse (id INT PRIMARY KEY, content VARCHAR(2000)) CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+INSERT INTO fts_word_map_reuse VALUES (1,'kiwi kiwi pear'),(2,'mango'),(3,''),(4,NULL),(5,'kiwi'),(6,'pear pear pear'),(7,'École');
+ALTER TABLE fts_word_map_reuse ADD FULLTEXT INDEX ft(content) WITH PARSER space;
+SELECT id FROM fts_word_map_reuse WHERE MATCH(content) AGAINST('kiwi') ORDER BY id;
+id
+1
+5
+SELECT id FROM fts_word_map_reuse WHERE MATCH(content) AGAINST('pear') ORDER BY id;
+id
+1
+6
+UPDATE fts_word_map_reuse SET content='kiwi' WHERE id=2;
+DELETE FROM fts_word_map_reuse WHERE id=5;
+INSERT INTO fts_word_map_reuse VALUES(8,'mango mango');
+SELECT id FROM fts_word_map_reuse WHERE MATCH(content) AGAINST('kiwi') ORDER BY id;
+id
+1
+2
+SELECT id FROM fts_word_map_reuse WHERE MATCH(content) AGAINST('pear') ORDER BY id;
+id
+1
+6
+DROP TABLE fts_word_map_reuse;

@@ -50,9 +50,11 @@ int ObIKCJKProcessor::do_process(TokenizeContext &ctx,
                                   hit.char_cnt_,
                                   ObIKTokenType::IK_CHINESE_TOKEN))) {
         } else {
+          hits_.at(write_idx).dict_ = hit.dict_;
           hits_.at(write_idx++) = hit;
         }
       } else if (hit.is_prefix()) {
+        hits_.at(write_idx).dict_ = hit.dict_;
         hits_.at(write_idx++) = hit;
       } else if (hit.is_unmatch()) {
         // drop unmatch
