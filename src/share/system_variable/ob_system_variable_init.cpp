@@ -133,16 +133,16 @@ static struct VarsInit{
       ObSysVars[3].info_ = "The character set in which statements are sent by the client" ;
       ObSysVars[3].name_ = "character_set_client" ;
       ObSysVars[3].data_type_ = ObIntType ;
-      ObSysVars[3].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
       ObSysVars[3].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NULLABLE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[3].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[3].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
-      ObSysVars[3].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
       ObSysVars[3].id_ = SYS_VAR_CHARACTER_SET_CLIENT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_CHARACTER_SET_CLIENT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_CHARACTER_SET_CLIENT] = 3 ;
-      ObSysVars[3].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[3].base_value_ = "45" ;
+      ObSysVars[3].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
+      ObSysVars[3].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[3].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
+      ObSysVars[3].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
+      ObSysVars[3].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[3].alias_ = "OB_SV_CHARACTER_SET_CLIENT" ;
     }();
 
@@ -151,16 +151,16 @@ static struct VarsInit{
       ObSysVars[4].info_ = "The character set which should be translated to after receiving the statement" ;
       ObSysVars[4].name_ = "character_set_connection" ;
       ObSysVars[4].data_type_ = ObIntType ;
-      ObSysVars[4].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
       ObSysVars[4].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE | ObSysVarFlag::NULLABLE ;
-      ObSysVars[4].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[4].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
-      ObSysVars[4].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
       ObSysVars[4].id_ = SYS_VAR_CHARACTER_SET_CONNECTION ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_CHARACTER_SET_CONNECTION)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_CHARACTER_SET_CONNECTION] = 4 ;
-      ObSysVars[4].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[4].base_value_ = "45" ;
+      ObSysVars[4].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
+      ObSysVars[4].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[4].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
+      ObSysVars[4].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
+      ObSysVars[4].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[4].alias_ = "OB_SV_CHARACTER_SET_CONNECTION" ;
     }();
 
@@ -169,16 +169,16 @@ static struct VarsInit{
       ObSysVars[5].info_ = "The character set of the default database" ;
       ObSysVars[5].name_ = "character_set_database" ;
       ObSysVars[5].data_type_ = ObIntType ;
-      ObSysVars[5].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
       ObSysVars[5].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NULLABLE | ObSysVarFlag::MYSQL_ONLY ;
-      ObSysVars[5].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[5].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
-      ObSysVars[5].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
       ObSysVars[5].id_ = SYS_VAR_CHARACTER_SET_DATABASE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_CHARACTER_SET_DATABASE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_CHARACTER_SET_DATABASE] = 5 ;
-      ObSysVars[5].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[5].base_value_ = "45" ;
+      ObSysVars[5].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
+      ObSysVars[5].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[5].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
+      ObSysVars[5].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
+      ObSysVars[5].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[5].alias_ = "OB_SV_CHARACTER_SET_DATABASE" ;
     }();
 
@@ -187,16 +187,16 @@ static struct VarsInit{
       ObSysVars[6].info_ = "The character set which server should translate to before shipping result sets or error message back to the client" ;
       ObSysVars[6].name_ = "character_set_results" ;
       ObSysVars[6].data_type_ = ObIntType ;
-      ObSysVars[6].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
       ObSysVars[6].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NULLABLE | ObSysVarFlag::INFLUENCE_PLAN ;
-      ObSysVars[6].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[6].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
-      ObSysVars[6].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset" ;
       ObSysVars[6].id_ = SYS_VAR_CHARACTER_SET_RESULTS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_CHARACTER_SET_RESULTS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_CHARACTER_SET_RESULTS] = 6 ;
-      ObSysVars[6].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[6].base_value_ = "45" ;
+      ObSysVars[6].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset" ;
+      ObSysVars[6].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[6].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
+      ObSysVars[6].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
+      ObSysVars[6].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[6].alias_ = "OB_SV_CHARACTER_SET_RESULTS" ;
     }();
 
@@ -205,16 +205,16 @@ static struct VarsInit{
       ObSysVars[7].info_ = "The server character set" ;
       ObSysVars[7].name_ = "character_set_server" ;
       ObSysVars[7].data_type_ = ObIntType ;
-      ObSysVars[7].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
       ObSysVars[7].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NULLABLE | ObSysVarFlag::MYSQL_ONLY ;
-      ObSysVars[7].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[7].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
-      ObSysVars[7].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
       ObSysVars[7].id_ = SYS_VAR_CHARACTER_SET_SERVER ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_CHARACTER_SET_SERVER)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_CHARACTER_SET_SERVER] = 7 ;
-      ObSysVars[7].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[7].base_value_ = "45" ;
+      ObSysVars[7].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
+      ObSysVars[7].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[7].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
+      ObSysVars[7].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
+      ObSysVars[7].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[7].alias_ = "OB_SV_CHARACTER_SET_SERVER" ;
     }();
 
@@ -223,15 +223,15 @@ static struct VarsInit{
       ObSysVars[8].info_ = "The character set used by the server for storing identifiers." ;
       ObSysVars[8].name_ = "character_set_system" ;
       ObSysVars[8].data_type_ = ObIntType ;
-      ObSysVars[8].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
       ObSysVars[8].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::READONLY ;
-      ObSysVars[8].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[8].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
       ObSysVars[8].id_ = SYS_VAR_CHARACTER_SET_SYSTEM ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_CHARACTER_SET_SYSTEM)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_CHARACTER_SET_SYSTEM] = 8 ;
-      ObSysVars[8].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[8].base_value_ = "45" ;
+      ObSysVars[8].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[8].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
+      ObSysVars[8].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
+      ObSysVars[8].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[8].alias_ = "OB_SV_CHARACTER_SET_SYSTEM" ;
     }();
 
@@ -240,16 +240,16 @@ static struct VarsInit{
       ObSysVars[9].info_ = "The collation which the server should translate to after receiving the statement" ;
       ObSysVars[9].name_ = "collation_connection" ;
       ObSysVars[9].data_type_ = ObIntType ;
-      ObSysVars[9].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_collation" ;
       ObSysVars[9].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NULLABLE | ObSysVarFlag::INFLUENCE_PLAN | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[9].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[9].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_collation" ;
-      ObSysVars[9].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_collation_not_null" ;
       ObSysVars[9].id_ = SYS_VAR_COLLATION_CONNECTION ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_COLLATION_CONNECTION)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_COLLATION_CONNECTION] = 9 ;
-      ObSysVars[9].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[9].base_value_ = "45" ;
+      ObSysVars[9].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_collation_not_null" ;
+      ObSysVars[9].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[9].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_collation" ;
+      ObSysVars[9].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_collation" ;
+      ObSysVars[9].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[9].alias_ = "OB_SV_COLLATION_CONNECTION" ;
     }();
 
@@ -258,16 +258,16 @@ static struct VarsInit{
       ObSysVars[10].info_ = "The collation of the default database" ;
       ObSysVars[10].name_ = "collation_database" ;
       ObSysVars[10].data_type_ = ObIntType ;
-      ObSysVars[10].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_collation" ;
       ObSysVars[10].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NULLABLE | ObSysVarFlag::NEED_SERIALIZE | ObSysVarFlag::MYSQL_ONLY ;
-      ObSysVars[10].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[10].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_collation" ;
-      ObSysVars[10].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_collation_not_null" ;
       ObSysVars[10].id_ = SYS_VAR_COLLATION_DATABASE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_COLLATION_DATABASE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_COLLATION_DATABASE] = 10 ;
-      ObSysVars[10].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[10].base_value_ = "45" ;
+      ObSysVars[10].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_collation_not_null" ;
+      ObSysVars[10].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[10].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_collation" ;
+      ObSysVars[10].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_collation" ;
+      ObSysVars[10].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[10].alias_ = "OB_SV_COLLATION_DATABASE" ;
     }();
 
@@ -276,16 +276,16 @@ static struct VarsInit{
       ObSysVars[11].info_ = "The server collation" ;
       ObSysVars[11].name_ = "collation_server" ;
       ObSysVars[11].data_type_ = ObIntType ;
-      ObSysVars[11].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_collation" ;
       ObSysVars[11].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NULLABLE | ObSysVarFlag::NEED_SERIALIZE | ObSysVarFlag::MYSQL_ONLY ;
-      ObSysVars[11].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[11].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_collation" ;
-      ObSysVars[11].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_collation_not_null" ;
       ObSysVars[11].id_ = SYS_VAR_COLLATION_SERVER ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_COLLATION_SERVER)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_COLLATION_SERVER] = 11 ;
-      ObSysVars[11].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[11].base_value_ = "45" ;
+      ObSysVars[11].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_collation_not_null" ;
+      ObSysVars[11].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[11].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_collation" ;
+      ObSysVars[11].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_collation" ;
+      ObSysVars[11].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[11].alias_ = "OB_SV_COLLATION_SERVER" ;
     }();
 
@@ -307,17 +307,17 @@ static struct VarsInit{
     [&] (){
       ObSysVars[13].default_value_ = "0" ;
       ObSysVars[13].info_ = "" ;
-      ObSysVars[13].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_last_insert_id" ;
       ObSysVars[13].name_ = "last_insert_id" ;
       ObSysVars[13].data_type_ = ObUInt64Type ;
       ObSysVars[13].min_val_ = "0" ;
       ObSysVars[13].max_val_ = "18446744073709551615" ;
       ObSysVars[13].flags_ = ObSysVarFlag::SESSION_SCOPE ;
-      ObSysVars[13].base_class_ = "ObSessionSpecialIntSysVar" ;
       ObSysVars[13].id_ = SYS_VAR_LAST_INSERT_ID ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_LAST_INSERT_ID)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_LAST_INSERT_ID] = 13 ;
       ObSysVars[13].base_value_ = "0" ;
+      ObSysVars[13].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_last_insert_id" ;
+      ObSysVars[13].base_class_ = "ObSessionSpecialIntSysVar" ;
     ObSysVars[13].alias_ = "OB_SV_LAST_INSERT_ID" ;
     }();
 
@@ -329,30 +329,30 @@ static struct VarsInit{
       ObSysVars[14].min_val_ = "1024" ;
       ObSysVars[14].max_val_ = "1073741824" ;
       ObSysVars[14].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::SESSION_READONLY | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[14].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_max_allowed_packet" ;
       ObSysVars[14].id_ = SYS_VAR_MAX_ALLOWED_PACKET ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_MAX_ALLOWED_PACKET)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_MAX_ALLOWED_PACKET] = 14 ;
       ObSysVars[14].base_value_ = "4194304" ;
+      ObSysVars[14].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_max_allowed_packet" ;
     ObSysVars[14].alias_ = "OB_SV_MAX_ALLOWED_PACKET" ;
     }();
 
     [&] (){
       ObSysVars[15].default_value_ = "281018368" ;
-      ObSysVars[15].on_update_func_ = "ObSysVarOnUpdateFuncs::update_sql_mode" ;
+      ObSysVars[15].info_ = "" ;
       ObSysVars[15].name_ = "sql_mode" ;
       ObSysVars[15].data_type_ = ObUInt64Type ;
-      ObSysVars[15].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_sql_mode" ;
-      ObSysVars[15].info_ = "" ;
       ObSysVars[15].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::INFLUENCE_PLAN | ObSysVarFlag::NEED_SERIALIZE | ObSysVarFlag::MYSQL_ONLY ;
-      ObSysVars[15].base_class_ = "ObSqlModeVar" ;
-      ObSysVars[15].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_sql_mode" ;
-      ObSysVars[15].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_sql_mode" ;
       ObSysVars[15].id_ = SYS_VAR_SQL_MODE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_SQL_MODE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_SQL_MODE] = 15 ;
-      ObSysVars[15].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[15].base_value_ = "12582912" ;
+      ObSysVars[15].on_update_func_ = "ObSysVarOnUpdateFuncs::update_sql_mode" ;
+      ObSysVars[15].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_sql_mode" ;
+      ObSysVars[15].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[15].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_sql_mode" ;
+      ObSysVars[15].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_sql_mode" ;
+      ObSysVars[15].base_class_ = "ObSqlModeVar" ;
     ObSysVars[15].alias_ = "OB_SV_SQL_MODE" ;
     }();
 
@@ -362,29 +362,29 @@ static struct VarsInit{
       ObSysVars[16].name_ = "time_zone" ;
       ObSysVars[16].data_type_ = ObVarcharType ;
       ObSysVars[16].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::INFLUENCE_PLAN | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[16].base_class_ = "ObTimeZoneSysVar" ;
-      ObSysVars[16].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_time_zone" ;
       ObSysVars[16].id_ = SYS_VAR_TIME_ZONE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_TIME_ZONE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_TIME_ZONE] = 16 ;
       ObSysVars[16].base_value_ = "+08:00" ;
+      ObSysVars[16].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_time_zone" ;
+      ObSysVars[16].base_class_ = "ObTimeZoneSysVar" ;
     ObSysVars[16].alias_ = "OB_SV_TIME_ZONE" ;
     }();
 
     [&] (){
       ObSysVars[17].default_value_ = "READ-COMMITTED" ;
-      ObSysVars[17].on_update_func_ = "ObSysVarOnUpdateFuncs::update_tx_isolation" ;
-      ObSysVars[17].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_tx_isolation" ;
+      ObSysVars[17].info_ = "Transaction Isolcation Levels: READ-UNCOMMITTED READ-COMMITTED REPEATABLE-READ SERIALIZABLE" ;
       ObSysVars[17].name_ = "tx_isolation" ;
       ObSysVars[17].data_type_ = ObVarcharType ;
-      ObSysVars[17].info_ = "Transaction Isolcation Levels: READ-UNCOMMITTED READ-COMMITTED REPEATABLE-READ SERIALIZABLE" ;
       ObSysVars[17].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[17].base_class_ = "ObSessionSpecialVarcharSysVar" ;
-      ObSysVars[17].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_tx_isolation" ;
       ObSysVars[17].id_ = SYS_VAR_TX_ISOLATION ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_TX_ISOLATION)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_TX_ISOLATION] = 17 ;
       ObSysVars[17].base_value_ = "READ-COMMITTED" ;
+      ObSysVars[17].on_update_func_ = "ObSysVarOnUpdateFuncs::update_tx_isolation" ;
+      ObSysVars[17].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_tx_isolation" ;
+      ObSysVars[17].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_tx_isolation" ;
+      ObSysVars[17].base_class_ = "ObSessionSpecialVarcharSysVar" ;
     ObSysVars[17].alias_ = "OB_SV_TX_ISOLATION" ;
     }();
 
@@ -421,12 +421,12 @@ static struct VarsInit{
       ObSysVars[20].info_ = "control row cells to logged" ;
       ObSysVars[20].name_ = "binlog_row_image" ;
       ObSysVars[20].data_type_ = ObIntType ;
-      ObSysVars[20].enum_names_ = "[u'MINIMAL', u'NOBLOB', u'FULL']" ;
       ObSysVars[20].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::INFLUENCE_PLAN | ObSysVarFlag::NEED_SERIALIZE ;
       ObSysVars[20].id_ = SYS_VAR_BINLOG_ROW_IMAGE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_BINLOG_ROW_IMAGE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_BINLOG_ROW_IMAGE] = 20 ;
       ObSysVars[20].base_value_ = "2" ;
+      ObSysVars[20].enum_names_ = "['MINIMAL', 'NOBLOB', 'FULL']" ;
     ObSysVars[20].alias_ = "OB_SV_BINLOG_ROW_IMAGE" ;
     }();
 
@@ -435,16 +435,16 @@ static struct VarsInit{
       ObSysVars[21].info_ = "" ;
       ObSysVars[21].name_ = "character_set_filesystem" ;
       ObSysVars[21].data_type_ = ObIntType ;
-      ObSysVars[21].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
       ObSysVars[21].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NULLABLE ;
-      ObSysVars[21].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[21].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
-      ObSysVars[21].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
       ObSysVars[21].id_ = SYS_VAR_CHARACTER_SET_FILESYSTEM ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_CHARACTER_SET_FILESYSTEM)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_CHARACTER_SET_FILESYSTEM] = 21 ;
-      ObSysVars[21].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[21].base_value_ = "63" ;
+      ObSysVars[21].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_charset_not_null" ;
+      ObSysVars[21].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[21].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_charset" ;
+      ObSysVars[21].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_charset" ;
+      ObSysVars[21].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[21].alias_ = "OB_SV_CHARACTER_SET_FILESYSTEM" ;
     }();
 
@@ -535,17 +535,17 @@ static struct VarsInit{
     [&] (){
       ObSysVars[28].default_value_ = "0" ;
       ObSysVars[28].info_ = "This variable is a synonym for the last_insert_id variable. It exists for compatibility with other database systems." ;
-      ObSysVars[28].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_identity" ;
       ObSysVars[28].name_ = "identity" ;
       ObSysVars[28].data_type_ = ObUInt64Type ;
       ObSysVars[28].min_val_ = "0" ;
       ObSysVars[28].max_val_ = "18446744073709551615" ;
       ObSysVars[28].flags_ = ObSysVarFlag::SESSION_SCOPE ;
-      ObSysVars[28].base_class_ = "ObSessionSpecialIntSysVar" ;
       ObSysVars[28].id_ = SYS_VAR_IDENTITY ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_IDENTITY)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_IDENTITY] = 28 ;
       ObSysVars[28].base_value_ = "0" ;
+      ObSysVars[28].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_identity" ;
+      ObSysVars[28].base_class_ = "ObSessionSpecialIntSysVar" ;
     ObSysVars[28].alias_ = "OB_SV_IDENTITY" ;
     }();
 
@@ -642,28 +642,28 @@ static struct VarsInit{
       ObSysVars[35].data_type_ = ObNumberType ;
       ObSysVars[35].min_val_ = "0" ;
       ObSysVars[35].flags_ = ObSysVarFlag::SESSION_SCOPE ;
-      ObSysVars[35].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_max_min_timestamp" ;
       ObSysVars[35].id_ = SYS_VAR_TIMESTAMP ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_TIMESTAMP)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_TIMESTAMP] = 35 ;
       ObSysVars[35].base_value_ = "0" ;
+      ObSysVars[35].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_max_min_timestamp" ;
     ObSysVars[35].alias_ = "OB_SV_TIMESTAMP" ;
     }();
 
     [&] (){
       ObSysVars[36].default_value_ = "0" ;
       ObSysVars[36].info_ = "" ;
-      ObSysVars[36].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_tx_read_only" ;
       ObSysVars[36].name_ = "tx_read_only" ;
       ObSysVars[36].data_type_ = ObIntType ;
       ObSysVars[36].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[36].on_update_func_ = "ObSysVarOnUpdateFuncs::update_tx_read_only_no_scope" ;
-      ObSysVars[36].base_class_ = "ObSessionSpecialBoolSysVar" ;
-      ObSysVars[36].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_tx_read_only" ;
       ObSysVars[36].id_ = SYS_VAR_TX_READ_ONLY ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_TX_READ_ONLY)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_TX_READ_ONLY] = 36 ;
       ObSysVars[36].base_value_ = "0" ;
+      ObSysVars[36].on_update_func_ = "ObSysVarOnUpdateFuncs::update_tx_read_only_no_scope" ;
+      ObSysVars[36].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_tx_read_only" ;
+      ObSysVars[36].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_tx_read_only" ;
+      ObSysVars[36].base_class_ = "ObSessionSpecialBoolSysVar" ;
     ObSysVars[36].alias_ = "OB_SV_TX_READ_ONLY" ;
     }();
 
@@ -701,11 +701,11 @@ static struct VarsInit{
       ObSysVars[39].min_val_ = "0" ;
       ObSysVars[39].max_val_ = "4294967295" ;
       ObSysVars[39].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::SESSION_READONLY ;
-      ObSysVars[39].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_max_user_connections" ;
       ObSysVars[39].id_ = SYS_VAR_MAX_USER_CONNECTIONS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_MAX_USER_CONNECTIONS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_MAX_USER_CONNECTIONS] = 39 ;
       ObSysVars[39].base_value_ = "0" ;
+      ObSysVars[39].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_max_user_connections" ;
     ObSysVars[39].alias_ = "OB_SV_MAX_USER_CONNECTIONS" ;
     }();
 
@@ -743,11 +743,11 @@ static struct VarsInit{
       ObSysVars[42].min_val_ = "1024" ;
       ObSysVars[42].max_val_ = "1048576" ;
       ObSysVars[42].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::SESSION_READONLY ;
-      ObSysVars[42].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_net_buffer_length" ;
       ObSysVars[42].id_ = SYS_VAR_NET_BUFFER_LENGTH ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_NET_BUFFER_LENGTH)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_NET_BUFFER_LENGTH] = 42 ;
       ObSysVars[42].base_value_ = "16384" ;
+      ObSysVars[42].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_net_buffer_length" ;
     ObSysVars[42].alias_ = "OB_SV_NET_BUFFER_LENGTH" ;
     }();
 
@@ -784,12 +784,12 @@ static struct VarsInit{
       ObSysVars[45].info_ = "OFF = Do not cache or retrieve results. ON = Cache all results except SELECT SQL_NO_CACHE ... queries. DEMAND = Cache only SELECT SQL_CACHE ... queries(not used yet)" ;
       ObSysVars[45].name_ = "query_cache_type" ;
       ObSysVars[45].data_type_ = ObIntType ;
-      ObSysVars[45].enum_names_ = "[u'OFF', u'ON', u'DEMAND']" ;
       ObSysVars[45].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[45].id_ = SYS_VAR_QUERY_CACHE_TYPE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_QUERY_CACHE_TYPE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_QUERY_CACHE_TYPE] = 45 ;
       ObSysVars[45].base_value_ = "0" ;
+      ObSysVars[45].enum_names_ = "['OFF', 'ON', 'DEMAND']" ;
     ObSysVars[45].alias_ = "OB_SV_QUERY_CACHE_TYPE" ;
     }();
 
@@ -1359,12 +1359,12 @@ static struct VarsInit{
       ObSysVars[88].info_ = "set the binary logging format(not used yet, only sys var compatible)" ;
       ObSysVars[88].name_ = "binlog_format" ;
       ObSysVars[88].data_type_ = ObIntType ;
-      ObSysVars[88].enum_names_ = "[u'MIXED', u'STATEMENT', u'ROW']" ;
       ObSysVars[88].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[88].id_ = SYS_VAR_BINLOG_FORMAT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_BINLOG_FORMAT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_BINLOG_FORMAT] = 88 ;
       ObSysVars[88].base_value_ = "2" ;
+      ObSysVars[88].enum_names_ = "['MIXED', 'STATEMENT', 'ROW']" ;
     ObSysVars[88].alias_ = "OB_SV_BINLOG_FORMAT" ;
     }();
 
@@ -1425,14 +1425,14 @@ static struct VarsInit{
       ObSysVars[93].info_ = "The fixed storage engine exposed by seekdb" ;
       ObSysVars[93].name_ = "default_storage_engine" ;
       ObSysVars[93].data_type_ = ObVarcharType ;
-      ObSysVars[93].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_default_storage_engine" ;
       ObSysVars[93].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
-      ObSysVars[93].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_default_storage_engine" ;
-      ObSysVars[93].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_default_storage_engine" ;
       ObSysVars[93].id_ = SYS_VAR_DEFAULT_STORAGE_ENGINE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_DEFAULT_STORAGE_ENGINE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_DEFAULT_STORAGE_ENGINE] = 93 ;
       ObSysVars[93].base_value_ = "InnoDB" ;
+      ObSysVars[93].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_default_storage_engine" ;
+      ObSysVars[93].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_default_storage_engine" ;
+      ObSysVars[93].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_default_storage_engine" ;
     ObSysVars[93].alias_ = "OB_SV_DEFAULT_STORAGE_ENGINE" ;
     }();
 
@@ -1486,12 +1486,12 @@ static struct VarsInit{
       ObSysVars[97].info_ = "" ;
       ObSysVars[97].name_ = "profiling" ;
       ObSysVars[97].data_type_ = ObIntType ;
-      ObSysVars[97].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[97].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[97].id_ = SYS_VAR_PROFILING ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_PROFILING)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_PROFILING] = 97 ;
       ObSysVars[97].base_value_ = "0" ;
+      ObSysVars[97].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[97].alias_ = "OB_SV_PROFILING" ;
     }();
 
@@ -1527,11 +1527,11 @@ static struct VarsInit{
       ObSysVars[100].name_ = "ob_query_timeout" ;
       ObSysVars[100].data_type_ = ObIntType ;
       ObSysVars[100].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[100].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_timeout_too_large" ;
       ObSysVars[100].id_ = SYS_VAR_OB_QUERY_TIMEOUT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_OB_QUERY_TIMEOUT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_OB_QUERY_TIMEOUT] = 100 ;
       ObSysVars[100].base_value_ = "10000000" ;
+      ObSysVars[100].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_timeout_too_large" ;
     ObSysVars[100].alias_ = "OB_SV_QUERY_TIMEOUT" ;
     }();
 
@@ -1540,12 +1540,12 @@ static struct VarsInit{
       ObSysVars[101].info_ = "read consistency level: 3=STRONG, 2=WEAK, 1=FROZEN" ;
       ObSysVars[101].name_ = "ob_read_consistency" ;
       ObSysVars[101].data_type_ = ObIntType ;
-      ObSysVars[101].enum_names_ = "[u'', u'FROZEN', u'WEAK', u'STRONG']" ;
       ObSysVars[101].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE | ObSysVarFlag::INFLUENCE_PLAN ;
       ObSysVars[101].id_ = SYS_VAR_OB_READ_CONSISTENCY ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_OB_READ_CONSISTENCY)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_OB_READ_CONSISTENCY] = 101 ;
       ObSysVars[101].base_value_ = "3" ;
+      ObSysVars[101].enum_names_ = "['', 'FROZEN', 'WEAK', 'STRONG']" ;
     ObSysVars[101].alias_ = "OB_SV_READ_CONSISTENCY" ;
     }();
 
@@ -1568,11 +1568,11 @@ static struct VarsInit{
       ObSysVars[103].name_ = "ob_trx_timeout" ;
       ObSysVars[103].data_type_ = ObIntType ;
       ObSysVars[103].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[103].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_timeout_too_large" ;
       ObSysVars[103].id_ = SYS_VAR_OB_TRX_TIMEOUT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_OB_TRX_TIMEOUT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_OB_TRX_TIMEOUT] = 103 ;
       ObSysVars[103].base_value_ = "86400000000" ;
+      ObSysVars[103].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_timeout_too_large" ;
     ObSysVars[103].alias_ = "OB_SV_TRX_TIMEOUT" ;
     }();
 
@@ -1816,13 +1816,13 @@ static struct VarsInit{
       ObSysVars[121].info_ = "specifies the encryption algorithm used in the functions aes_encrypt and aes_decrypt" ;
       ObSysVars[121].name_ = "block_encryption_mode" ;
       ObSysVars[121].data_type_ = ObIntType ;
-      ObSysVars[121].enum_names_ = "[u'aes-128-ecb', u'aes-192-ecb', u'aes-256-ecb', u'aes-128-cbc', u'aes-192-cbc', u'aes-256-cbc', u'aes-128-cfb1', u'aes-192-cfb1', u'aes-256-cfb1', u'aes-128-cfb8', u'aes-192-cfb8', u'aes-256-cfb8', u'aes-128-cfb128', u'aes-192-cfb128', u'aes-256-cfb128', u'aes-128-ofb', u'aes-192-ofb', u'aes-256-ofb', u'sm4-ecb', u'sm4-cbc', u'sm4-cfb', u'sm4-ofb']" ;
       ObSysVars[121].flags_ = ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[121].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_block_encryption_mode" ;
       ObSysVars[121].id_ = SYS_VAR_BLOCK_ENCRYPTION_MODE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_BLOCK_ENCRYPTION_MODE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_BLOCK_ENCRYPTION_MODE] = 121 ;
       ObSysVars[121].base_value_ = "0" ;
+      ObSysVars[121].enum_names_ = "['aes-128-ecb', 'aes-192-ecb', 'aes-256-ecb', 'aes-128-cbc', 'aes-192-cbc', 'aes-256-cbc', 'aes-128-cfb1', 'aes-192-cfb1', 'aes-256-cfb1', 'aes-128-cfb8', 'aes-192-cfb8', 'aes-256-cfb8', 'aes-128-cfb128', 'aes-192-cfb128', 'aes-256-cfb128', 'aes-128-ofb', 'aes-192-ofb', 'aes-256-ofb', 'sm4-ecb', 'sm4-cbc', 'sm4-cfb', 'sm4-ofb']" ;
+      ObSysVars[121].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_block_encryption_mode" ;
     ObSysVars[121].alias_ = "OB_SV_BLOCK_ENCRYPTION_MODE" ;
     }();
 
@@ -1841,18 +1841,18 @@ static struct VarsInit{
 
     [&] (){
       ObSysVars[123].default_value_ = "READ-COMMITTED" ;
-      ObSysVars[123].on_update_func_ = "ObSysVarOnUpdateFuncs::update_tx_isolation" ;
-      ObSysVars[123].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_tx_isolation" ;
+      ObSysVars[123].info_ = "Transaction Isolcation Levels: READ-UNCOMMITTED READ-COMMITTED REPEATABLE-READ SERIALIZABLE" ;
       ObSysVars[123].name_ = "transaction_isolation" ;
       ObSysVars[123].data_type_ = ObVarcharType ;
-      ObSysVars[123].info_ = "Transaction Isolcation Levels: READ-UNCOMMITTED READ-COMMITTED REPEATABLE-READ SERIALIZABLE" ;
       ObSysVars[123].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[123].base_class_ = "ObSessionSpecialVarcharSysVar" ;
-      ObSysVars[123].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_tx_isolation" ;
       ObSysVars[123].id_ = SYS_VAR_TRANSACTION_ISOLATION ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_TRANSACTION_ISOLATION)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_TRANSACTION_ISOLATION] = 123 ;
       ObSysVars[123].base_value_ = "READ-COMMITTED" ;
+      ObSysVars[123].on_update_func_ = "ObSysVarOnUpdateFuncs::update_tx_isolation" ;
+      ObSysVars[123].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_tx_isolation" ;
+      ObSysVars[123].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_tx_isolation" ;
+      ObSysVars[123].base_class_ = "ObSessionSpecialVarcharSysVar" ;
     ObSysVars[123].alias_ = "OB_SV_TRANSACTION_ISOLATION" ;
     }();
 
@@ -1874,12 +1874,12 @@ static struct VarsInit{
       ObSysVars[125].info_ = "" ;
       ObSysVars[125].name_ = "validate_password_check_user_name" ;
       ObSysVars[125].data_type_ = ObIntType ;
-      ObSysVars[125].enum_names_ = "[u'on', u'off']" ;
       ObSysVars[125].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
       ObSysVars[125].id_ = SYS_VAR_VALIDATE_PASSWORD_CHECK_USER_NAME ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_VALIDATE_PASSWORD_CHECK_USER_NAME)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_VALIDATE_PASSWORD_CHECK_USER_NAME] = 125 ;
       ObSysVars[125].base_value_ = "0" ;
+      ObSysVars[125].enum_names_ = "['on', 'off']" ;
     ObSysVars[125].alias_ = "OB_SV_VALIDATE_PASSWORD_CHECK_USER_NAME" ;
     }();
 
@@ -1933,12 +1933,12 @@ static struct VarsInit{
       ObSysVars[129].info_ = "" ;
       ObSysVars[129].name_ = "validate_password_policy" ;
       ObSysVars[129].data_type_ = ObIntType ;
-      ObSysVars[129].enum_names_ = "[u'low', u'medium']" ;
       ObSysVars[129].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
       ObSysVars[129].id_ = SYS_VAR_VALIDATE_PASSWORD_POLICY ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_VALIDATE_PASSWORD_POLICY)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_VALIDATE_PASSWORD_POLICY] = 129 ;
       ObSysVars[129].base_value_ = "0" ;
+      ObSysVars[129].enum_names_ = "['low', 'medium']" ;
     ObSysVars[129].alias_ = "OB_SV_VALIDATE_PASSWORD_POLICY" ;
     }();
 
@@ -2045,28 +2045,28 @@ static struct VarsInit{
       ObSysVars[137].min_val_ = "0" ;
       ObSysVars[137].max_val_ = "9223372036854775807" ;
       ObSysVars[137].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[137].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_timeout_too_large" ;
       ObSysVars[137].id_ = SYS_VAR_OB_PL_BLOCK_TIMEOUT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_OB_PL_BLOCK_TIMEOUT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_OB_PL_BLOCK_TIMEOUT] = 137 ;
       ObSysVars[137].base_value_ = "3216672000000000" ;
+      ObSysVars[137].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_timeout_too_large" ;
     ObSysVars[137].alias_ = "OB_SV_PL_BLOCK_TIMEOUT" ;
     }();
 
     [&] (){
       ObSysVars[138].default_value_ = "0" ;
-      ObSysVars[138].on_update_func_ = "ObSysVarOnUpdateFuncs::update_tx_read_only_no_scope" ;
-      ObSysVars[138].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_tx_read_only" ;
+      ObSysVars[138].info_ = "Transaction access mode" ;
       ObSysVars[138].name_ = "transaction_read_only" ;
       ObSysVars[138].data_type_ = ObIntType ;
-      ObSysVars[138].info_ = "Transaction access mode" ;
       ObSysVars[138].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[138].base_class_ = "ObSessionSpecialBoolSysVar" ;
-      ObSysVars[138].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_tx_read_only" ;
       ObSysVars[138].id_ = SYS_VAR_TRANSACTION_READ_ONLY ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_TRANSACTION_READ_ONLY)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_TRANSACTION_READ_ONLY] = 138 ;
       ObSysVars[138].base_value_ = "0" ;
+      ObSysVars[138].on_update_func_ = "ObSysVarOnUpdateFuncs::update_tx_read_only_no_scope" ;
+      ObSysVars[138].session_special_update_func_ = "ObSysVarSessionSpecialUpdateFuncs::update_tx_read_only" ;
+      ObSysVars[138].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_tx_read_only" ;
+      ObSysVars[138].base_class_ = "ObSessionSpecialBoolSysVar" ;
     ObSysVars[138].alias_ = "OB_SV_TRANSACTION_READ_ONLY" ;
     }();
 
@@ -2114,12 +2114,12 @@ static struct VarsInit{
       ObSysVars[142].info_ = "whether needs to do parameterization? EXACT - query will not do parameterization; FORCE - query will do parameterization." ;
       ObSysVars[142].name_ = "cursor_sharing" ;
       ObSysVars[142].data_type_ = ObIntType ;
-      ObSysVars[142].enum_names_ = "[u'FORCE', u'EXACT']" ;
       ObSysVars[142].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE ;
       ObSysVars[142].id_ = SYS_VAR_CURSOR_SHARING ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_CURSOR_SHARING)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_CURSOR_SHARING] = 142 ;
       ObSysVars[142].base_value_ = "0" ;
+      ObSysVars[142].enum_names_ = "['FORCE', 'EXACT']" ;
     ObSysVars[142].alias_ = "OB_SV_CURSOR_SHARING" ;
     }();
 
@@ -2196,11 +2196,11 @@ static struct VarsInit{
       ObSysVars[148].name_ = "log_row_value_options" ;
       ObSysVars[148].data_type_ = ObVarcharType ;
       ObSysVars[148].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE ;
-      ObSysVars[148].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_log_row_value_option_is_valid" ;
       ObSysVars[148].id_ = SYS_VAR_LOG_ROW_VALUE_OPTIONS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_LOG_ROW_VALUE_OPTIONS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_LOG_ROW_VALUE_OPTIONS] = 148 ;
       ObSysVars[148].base_value_ = "" ;
+      ObSysVars[148].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_log_row_value_option_is_valid" ;
     ObSysVars[148].alias_ = "OB_SV_LOG_ROW_VALUE_OPTIONS" ;
     }();
 
@@ -2210,11 +2210,11 @@ static struct VarsInit{
       ObSysVars[149].name_ = "ob_max_read_stale_time" ;
       ObSysVars[149].data_type_ = ObIntType ;
       ObSysVars[149].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[149].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_timeout_too_large" ;
       ObSysVars[149].id_ = SYS_VAR_OB_MAX_READ_STALE_TIME ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_OB_MAX_READ_STALE_TIME)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_OB_MAX_READ_STALE_TIME] = 149 ;
       ObSysVars[149].base_value_ = "-1" ;
+      ObSysVars[149].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_and_convert_timeout_too_large" ;
     ObSysVars[149].alias_ = "OB_SV_MAX_READ_STALE_TIME" ;
     }();
 
@@ -2249,12 +2249,12 @@ static struct VarsInit{
       ObSysVars[152].info_ = "specifies whether automatic degree of parallelism will be enabled" ;
       ObSysVars[152].name_ = "parallel_degree_policy" ;
       ObSysVars[152].data_type_ = ObIntType ;
-      ObSysVars[152].enum_names_ = "[u'MANUAL', u'AUTO']" ;
       ObSysVars[152].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::INFLUENCE_PLAN ;
       ObSysVars[152].id_ = SYS_VAR_PARALLEL_DEGREE_POLICY ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_PARALLEL_DEGREE_POLICY)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_PARALLEL_DEGREE_POLICY] = 152 ;
       ObSysVars[152].base_value_ = "0" ;
+      ObSysVars[152].enum_names_ = "['MANUAL', 'AUTO']" ;
     ObSysVars[152].alias_ = "OB_SV_PARALLEL_DEGREE_POLICY" ;
     }();
 
@@ -2309,11 +2309,11 @@ static struct VarsInit{
       ObSysVars[156].name_ = "runtime_filter_type" ;
       ObSysVars[156].data_type_ = ObVarcharType ;
       ObSysVars[156].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::INFLUENCE_PLAN ;
-      ObSysVars[156].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_runtime_filter_type_is_valid" ;
       ObSysVars[156].id_ = SYS_VAR_RUNTIME_FILTER_TYPE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_RUNTIME_FILTER_TYPE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_RUNTIME_FILTER_TYPE] = 156 ;
       ObSysVars[156].base_value_ = "BLOOM_FILTER,RANGE,IN" ;
+      ObSysVars[156].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_runtime_filter_type_is_valid" ;
     ObSysVars[156].alias_ = "OB_SV_RUNTIME_FILTER_TYPE" ;
     }();
 
@@ -2390,11 +2390,11 @@ static struct VarsInit{
       ObSysVars[162].name_ = "ob_default_lob_inrow_threshold" ;
       ObSysVars[162].data_type_ = ObIntType ;
       ObSysVars[162].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE ;
-      ObSysVars[162].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_default_lob_inrow_threshold" ;
       ObSysVars[162].id_ = SYS_VAR_OB_DEFAULT_LOB_INROW_THRESHOLD ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_OB_DEFAULT_LOB_INROW_THRESHOLD)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_OB_DEFAULT_LOB_INROW_THRESHOLD] = 162 ;
       ObSysVars[162].base_value_ = "4096" ;
+      ObSysVars[162].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_default_lob_inrow_threshold" ;
     ObSysVars[162].alias_ = "OB_SV_DEFAULT_LOB_INROW_THRESHOLD" ;
     }();
 
@@ -2417,11 +2417,11 @@ static struct VarsInit{
       ObSysVars[164].name_ = "lc_time_names" ;
       ObSysVars[164].data_type_ = ObVarcharType ;
       ObSysVars[164].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::NEED_SERIALIZE ;
-      ObSysVars[164].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_locale_type_is_valid" ;
       ObSysVars[164].id_ = SYS_VAR_LC_TIME_NAMES ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_LC_TIME_NAMES)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_LC_TIME_NAMES] = 164 ;
       ObSysVars[164].base_value_ = "en_US" ;
+      ObSysVars[164].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_locale_type_is_valid" ;
     ObSysVars[164].alias_ = "OB_SV_LC_TIME_NAMES" ;
     }();
 
@@ -2443,12 +2443,12 @@ static struct VarsInit{
       ObSysVars[166].info_ = "Specifies whether InnoDB index statistics are persisted to disk." ;
       ObSysVars[166].name_ = "innodb_stats_persistent" ;
       ObSysVars[166].data_type_ = ObIntType ;
-      ObSysVars[166].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[166].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[166].id_ = SYS_VAR_INNODB_STATS_PERSISTENT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_STATS_PERSISTENT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_STATS_PERSISTENT] = 166 ;
       ObSysVars[166].base_value_ = "1" ;
+      ObSysVars[166].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[166].alias_ = "OB_SV_INNODB_STATS_PERSISTENT" ;
     }();
 
@@ -2601,12 +2601,12 @@ static struct VarsInit{
       ObSysVars[177].info_ = "Specifies the correlation model when the optimizer estimates cardinality" ;
       ObSysVars[177].name_ = "cardinality_estimation_model" ;
       ObSysVars[177].data_type_ = ObIntType ;
-      ObSysVars[177].enum_names_ = "[u'INDEPENDENT', u'PARTIAL', u'FULL']" ;
       ObSysVars[177].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::INFLUENCE_PLAN ;
       ObSysVars[177].id_ = SYS_VAR_CARDINALITY_ESTIMATION_MODEL ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_CARDINALITY_ESTIMATION_MODEL)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_CARDINALITY_ESTIMATION_MODEL] = 177 ;
       ObSysVars[177].base_value_ = "1" ;
+      ObSysVars[177].enum_names_ = "['INDEPENDENT', 'PARTIAL', 'FULL']" ;
     ObSysVars[177].alias_ = "OB_SV_CARDINALITY_ESTIMATION_MODEL" ;
     }();
 
@@ -2615,12 +2615,12 @@ static struct VarsInit{
       ObSysVars[178].info_ = "If ON, the server flushes (synchronizes) all changes to disk after each SQL statement" ;
       ObSysVars[178].name_ = "flush" ;
       ObSysVars[178].data_type_ = ObIntType ;
-      ObSysVars[178].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[178].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[178].id_ = SYS_VAR_FLUSH ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_FLUSH)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_FLUSH] = 178 ;
       ObSysVars[178].base_value_ = "0" ;
+      ObSysVars[178].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[178].alias_ = "OB_SV_FLUSH" ;
     }();
 
@@ -2644,12 +2644,12 @@ static struct VarsInit{
       ObSysVars[180].info_ = "specifies whether to dynamically adjust the rate of flushing dirty pages in the InnoDB buffer pool based on the workload" ;
       ObSysVars[180].name_ = "innodb_adaptive_flushing" ;
       ObSysVars[180].data_type_ = ObIntType ;
-      ObSysVars[180].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[180].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[180].id_ = SYS_VAR_INNODB_ADAPTIVE_FLUSHING ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_ADAPTIVE_FLUSHING)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_ADAPTIVE_FLUSHING] = 180 ;
       ObSysVars[180].base_value_ = "1" ;
+      ObSysVars[180].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[180].alias_ = "OB_SV_INNODB_ADAPTIVE_FLUSHING" ;
     }();
 
@@ -2673,12 +2673,12 @@ static struct VarsInit{
       ObSysVars[182].info_ = "Whether the InnoDB adaptive hash index is enabled or disabled. It may be desirable, depending on your workload, to dynamically enable or disable adaptive hash indexing to improve query performance" ;
       ObSysVars[182].name_ = "innodb_adaptive_hash_index" ;
       ObSysVars[182].data_type_ = ObIntType ;
-      ObSysVars[182].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[182].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[182].id_ = SYS_VAR_INNODB_ADAPTIVE_HASH_INDEX ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_ADAPTIVE_HASH_INDEX)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_ADAPTIVE_HASH_INDEX] = 182 ;
       ObSysVars[182].base_value_ = "1" ;
+      ObSysVars[182].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[182].alias_ = "OB_SV_INNODB_ADAPTIVE_HASH_INDEX" ;
     }();
 
@@ -2732,12 +2732,12 @@ static struct VarsInit{
       ObSysVars[186].info_ = "Enabling the innodb_background_drop_list_empty debug option helps avoid test case failures by delaying table creation until the background drop list is empty" ;
       ObSysVars[186].name_ = "innodb_background_drop_list_empty" ;
       ObSysVars[186].data_type_ = ObIntType ;
-      ObSysVars[186].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[186].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[186].id_ = SYS_VAR_INNODB_BACKGROUND_DROP_LIST_EMPTY ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_BACKGROUND_DROP_LIST_EMPTY)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_BACKGROUND_DROP_LIST_EMPTY] = 186 ;
       ObSysVars[186].base_value_ = "0" ;
+      ObSysVars[186].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[186].alias_ = "OB_SV_INNODB_BACKGROUND_DROP_LIST_EMPTY" ;
     }();
 
@@ -2746,12 +2746,12 @@ static struct VarsInit{
       ObSysVars[187].info_ = "Specifies whether to record the pages cached in the InnoDB buffer pool when the MySQL server is shut down, to shorten the warmup process at the next restart" ;
       ObSysVars[187].name_ = "innodb_buffer_pool_dump_at_shutdown" ;
       ObSysVars[187].data_type_ = ObIntType ;
-      ObSysVars[187].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[187].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[187].id_ = SYS_VAR_INNODB_BUFFER_POOL_DUMP_AT_SHUTDOWN ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_BUFFER_POOL_DUMP_AT_SHUTDOWN)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_BUFFER_POOL_DUMP_AT_SHUTDOWN] = 187 ;
       ObSysVars[187].base_value_ = "1" ;
+      ObSysVars[187].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[187].alias_ = "OB_SV_INNODB_BUFFER_POOL_DUMP_AT_SHUTDOWN" ;
     }();
 
@@ -2760,12 +2760,12 @@ static struct VarsInit{
       ObSysVars[188].info_ = "Immediately makes a record of pages cached in the InnoDB buffer pool" ;
       ObSysVars[188].name_ = "innodb_buffer_pool_dump_now" ;
       ObSysVars[188].data_type_ = ObIntType ;
-      ObSysVars[188].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[188].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[188].id_ = SYS_VAR_INNODB_BUFFER_POOL_DUMP_NOW ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_BUFFER_POOL_DUMP_NOW)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_BUFFER_POOL_DUMP_NOW] = 188 ;
       ObSysVars[188].base_value_ = "0" ;
+      ObSysVars[188].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[188].alias_ = "OB_SV_INNODB_BUFFER_POOL_DUMP_NOW" ;
     }();
 
@@ -2802,12 +2802,12 @@ static struct VarsInit{
       ObSysVars[191].info_ = "Interrupts the process of restoring InnoDB buffer pool contents triggered by innodb_buffer_pool_load_at_startup or innodb_buffer_pool_load_now" ;
       ObSysVars[191].name_ = "innodb_buffer_pool_load_abort" ;
       ObSysVars[191].data_type_ = ObIntType ;
-      ObSysVars[191].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[191].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[191].id_ = SYS_VAR_INNODB_BUFFER_POOL_LOAD_ABORT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_BUFFER_POOL_LOAD_ABORT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_BUFFER_POOL_LOAD_ABORT] = 191 ;
       ObSysVars[191].base_value_ = "0" ;
+      ObSysVars[191].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[191].alias_ = "OB_SV_INNODB_BUFFER_POOL_LOAD_ABORT" ;
     }();
 
@@ -2816,12 +2816,12 @@ static struct VarsInit{
       ObSysVars[192].info_ = "Immediately warms up the InnoDB buffer pool by loading data pages without waiting for a server restart" ;
       ObSysVars[192].name_ = "innodb_buffer_pool_load_now" ;
       ObSysVars[192].data_type_ = ObIntType ;
-      ObSysVars[192].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[192].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[192].id_ = SYS_VAR_INNODB_BUFFER_POOL_LOAD_NOW ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_BUFFER_POOL_LOAD_NOW)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_BUFFER_POOL_LOAD_NOW] = 192 ;
       ObSysVars[192].base_value_ = "0" ;
+      ObSysVars[192].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[192].alias_ = "OB_SV_INNODB_BUFFER_POOL_LOAD_NOW" ;
     }();
 
@@ -2860,12 +2860,12 @@ static struct VarsInit{
       ObSysVars[195].info_ = "Whether InnoDB performs change buffering, an optimization that delays write operations to secondary indexes so that the I/O operations can be performed sequentially" ;
       ObSysVars[195].name_ = "innodb_change_buffering" ;
       ObSysVars[195].data_type_ = ObIntType ;
-      ObSysVars[195].enum_names_ = "[u'none', u'inserts', u'deletes', u'changes', u'purges', u'all']" ;
       ObSysVars[195].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[195].id_ = SYS_VAR_INNODB_CHANGE_BUFFERING ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_CHANGE_BUFFERING)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_CHANGE_BUFFERING] = 195 ;
       ObSysVars[195].base_value_ = "5" ;
+      ObSysVars[195].enum_names_ = "['none', 'inserts', 'deletes', 'changes', 'purges', 'all']" ;
     ObSysVars[195].alias_ = "OB_SV_INNODB_CHANGE_BUFFERING" ;
     }();
 
@@ -2874,12 +2874,12 @@ static struct VarsInit{
       ObSysVars[196].info_ = "Specifies how to generate and verify the checksum stored in the disk blocks of InnoDB tablespaces" ;
       ObSysVars[196].name_ = "innodb_checksum_algorithm" ;
       ObSysVars[196].data_type_ = ObIntType ;
-      ObSysVars[196].enum_names_ = "[u'crc32', u'strict_crc32', u'innodb', u'strict_innodb', u'none', u'strict_none']" ;
       ObSysVars[196].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[196].id_ = SYS_VAR_INNODB_CHECKSUM_ALGORITHM ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_CHECKSUM_ALGORITHM)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_CHECKSUM_ALGORITHM] = 196 ;
       ObSysVars[196].base_value_ = "0" ;
+      ObSysVars[196].enum_names_ = "['crc32', 'strict_crc32', 'innodb', 'strict_innodb', 'none', 'strict_none']" ;
     ObSysVars[196].alias_ = "OB_SV_INNODB_CHECKSUM_ALGORITHM" ;
     }();
 
@@ -2888,12 +2888,12 @@ static struct VarsInit{
       ObSysVars[197].info_ = "Enables per-index compression-related statistics in the Information Schema INNODB_CMP_PER_INDEX table" ;
       ObSysVars[197].name_ = "innodb_cmp_per_index_enabled" ;
       ObSysVars[197].data_type_ = ObIntType ;
-      ObSysVars[197].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[197].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[197].id_ = SYS_VAR_INNODB_CMP_PER_INDEX_ENABLED ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_CMP_PER_INDEX_ENABLED)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_CMP_PER_INDEX_ENABLED] = 197 ;
       ObSysVars[197].base_value_ = "0" ;
+      ObSysVars[197].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[197].alias_ = "OB_SV_INNODB_CMP_PER_INDEX_ENABLED" ;
     }();
 
@@ -2977,12 +2977,12 @@ static struct VarsInit{
       ObSysVars[203].info_ = "The innodb_default_row_format option defines the default row format for InnoDB tables and user-created temporary tables" ;
       ObSysVars[203].name_ = "innodb_default_row_format" ;
       ObSysVars[203].data_type_ = ObIntType ;
-      ObSysVars[203].enum_names_ = "[u'REDUNDANT', u'COMPACT', u'DYNAMIC']" ;
       ObSysVars[203].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[203].id_ = SYS_VAR_INNODB_DEFAULT_ROW_FORMAT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_DEFAULT_ROW_FORMAT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_DEFAULT_ROW_FORMAT] = 203 ;
       ObSysVars[203].base_value_ = "2" ;
+      ObSysVars[203].enum_names_ = "['REDUNDANT', 'COMPACT', 'DYNAMIC']" ;
     ObSysVars[203].alias_ = "OB_SV_INNODB_DEFAULT_ROW_FORMAT" ;
     }();
 
@@ -2991,12 +2991,12 @@ static struct VarsInit{
       ObSysVars[204].info_ = "Disables the operating system file system cache for merge-sort temporary files. The effect is to open such files with the equivalent of O_DIRECT" ;
       ObSysVars[204].name_ = "innodb_disable_sort_file_cache" ;
       ObSysVars[204].data_type_ = ObIntType ;
-      ObSysVars[204].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[204].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[204].id_ = SYS_VAR_INNODB_DISABLE_SORT_FILE_CACHE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_DISABLE_SORT_FILE_CACHE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_DISABLE_SORT_FILE_CACHE] = 204 ;
       ObSysVars[204].base_value_ = "0" ;
+      ObSysVars[204].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[204].alias_ = "OB_SV_INNODB_DISABLE_SORT_FILE_CACHE" ;
     }();
 
@@ -3005,12 +3005,12 @@ static struct VarsInit{
       ObSysVars[205].info_ = "Enables an InnoDB file format for file-per-table tablespaces" ;
       ObSysVars[205].name_ = "innodb_file_format" ;
       ObSysVars[205].data_type_ = ObIntType ;
-      ObSysVars[205].enum_names_ = "[u'Antelope', u'Barracuda']" ;
       ObSysVars[205].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[205].id_ = SYS_VAR_INNODB_FILE_FORMAT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_FILE_FORMAT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_FILE_FORMAT] = 205 ;
       ObSysVars[205].base_value_ = "1" ;
+      ObSysVars[205].enum_names_ = "['Antelope', 'Barracuda']" ;
     ObSysVars[205].alias_ = "OB_SV_INNODB_FILE_FORMAT" ;
     }();
 
@@ -3019,12 +3019,12 @@ static struct VarsInit{
       ObSysVars[206].info_ = "At server startup, InnoDB sets the value of this variable to the file format tag in the system tablespace (for example, Antelope or Barracuda)" ;
       ObSysVars[206].name_ = "innodb_file_format_max" ;
       ObSysVars[206].data_type_ = ObIntType ;
-      ObSysVars[206].enum_names_ = "[u'Antelope', u'Barracuda']" ;
       ObSysVars[206].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[206].id_ = SYS_VAR_INNODB_FILE_FORMAT_MAX ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_FILE_FORMAT_MAX)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_FILE_FORMAT_MAX] = 206 ;
       ObSysVars[206].base_value_ = "1" ;
+      ObSysVars[206].enum_names_ = "['Antelope', 'Barracuda']" ;
     ObSysVars[206].alias_ = "OB_SV_INNODB_FILE_FORMAT_MAX" ;
     }();
 
@@ -3033,12 +3033,12 @@ static struct VarsInit{
       ObSysVars[207].info_ = "When innodb_file_per_table is enabled, tables are created in file-per-table tablespaces by default" ;
       ObSysVars[207].name_ = "innodb_file_per_table" ;
       ObSysVars[207].data_type_ = ObIntType ;
-      ObSysVars[207].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[207].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[207].id_ = SYS_VAR_INNODB_FILE_PER_TABLE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_FILE_PER_TABLE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_FILE_PER_TABLE] = 207 ;
       ObSysVars[207].base_value_ = "1" ;
+      ObSysVars[207].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[207].alias_ = "OB_SV_INNODB_FILE_PER_TABLE" ;
     }();
 
@@ -3062,12 +3062,12 @@ static struct VarsInit{
       ObSysVars[209].info_ = "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent" ;
       ObSysVars[209].name_ = "innodb_flush_neighbors" ;
       ObSysVars[209].data_type_ = ObIntType ;
-      ObSysVars[209].enum_names_ = "[u'0', u'1', u'2']" ;
       ObSysVars[209].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[209].id_ = SYS_VAR_INNODB_FLUSH_NEIGHBORS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_FLUSH_NEIGHBORS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_FLUSH_NEIGHBORS] = 209 ;
       ObSysVars[209].base_value_ = "1" ;
+      ObSysVars[209].enum_names_ = "['0', '1', '2']" ;
     ObSysVars[209].alias_ = "OB_SV_INNODB_FLUSH_NEIGHBORS" ;
     }();
 
@@ -3076,12 +3076,12 @@ static struct VarsInit{
       ObSysVars[210].info_ = "The innodb_flush_sync variable, which is enabled by default, causes the innodb_io_capacity setting to be ignored during bursts of I/O activity that occur at checkpoints" ;
       ObSysVars[210].name_ = "innodb_flush_sync" ;
       ObSysVars[210].data_type_ = ObIntType ;
-      ObSysVars[210].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[210].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[210].id_ = SYS_VAR_INNODB_FLUSH_SYNC ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_FLUSH_SYNC)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_FLUSH_SYNC] = 210 ;
       ObSysVars[210].base_value_ = "1" ;
+      ObSysVars[210].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[210].alias_ = "OB_SV_INNODB_FLUSH_SYNC" ;
     }();
 
@@ -3180,12 +3180,12 @@ static struct VarsInit{
       ObSysVars[217].info_ = "This is required on Unix for support of the DATA DIRECTORY and INDEX DIRECTORY table options" ;
       ObSysVars[217].name_ = "have_symlink" ;
       ObSysVars[217].data_type_ = ObIntType ;
-      ObSysVars[217].enum_names_ = "[u'NO', u'YES']" ;
       ObSysVars[217].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[217].id_ = SYS_VAR_HAVE_SYMLINK ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_HAVE_SYMLINK)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_HAVE_SYMLINK] = 217 ;
       ObSysVars[217].base_value_ = "1" ;
+      ObSysVars[217].enum_names_ = "['NO', 'YES']" ;
     ObSysVars[217].alias_ = "OB_SV_HAVE_SYMLINK" ;
     }();
 
@@ -3194,12 +3194,12 @@ static struct VarsInit{
       ObSysVars[218].info_ = "In earlier versions of MySQL, enabling this variable caused the server to behave as if the built-in InnoDB were not present, which enabled the InnoDB Plugin to be used instead" ;
       ObSysVars[218].name_ = "ignore_builtin_innodb" ;
       ObSysVars[218].data_type_ = ObIntType ;
-      ObSysVars[218].enum_names_ = "[u'NO', u'YES']" ;
       ObSysVars[218].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[218].id_ = SYS_VAR_IGNORE_BUILTIN_INNODB ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_IGNORE_BUILTIN_INNODB)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_IGNORE_BUILTIN_INNODB] = 218 ;
       ObSysVars[218].base_value_ = "0" ;
+      ObSysVars[218].enum_names_ = "['NO', 'YES']" ;
     ObSysVars[218].alias_ = "OB_SV_IGNORE_BUILTIN_INNODB" ;
     }();
 
@@ -3237,12 +3237,12 @@ static struct VarsInit{
       ObSysVars[221].info_ = "Specifies that, on MySQL server startup, the InnoDB buffer pool is automatically warmed up by loading the same pages it held at an earlier time" ;
       ObSysVars[221].name_ = "innodb_buffer_pool_load_at_startup" ;
       ObSysVars[221].data_type_ = ObIntType ;
-      ObSysVars[221].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[221].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[221].id_ = SYS_VAR_INNODB_BUFFER_POOL_LOAD_AT_STARTUP ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_BUFFER_POOL_LOAD_AT_STARTUP)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_BUFFER_POOL_LOAD_AT_STARTUP] = 221 ;
       ObSysVars[221].base_value_ = "1" ;
+      ObSysVars[221].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[221].alias_ = "OB_SV_INNODB_BUFFER_POOL_LOAD_AT_STARTUP" ;
     }();
 
@@ -3251,12 +3251,12 @@ static struct VarsInit{
       ObSysVars[222].info_ = "InnoDB can use checksum validation on all tablespace pages read from disk to ensure extra fault tolerance against hardware faults or corrupted data files" ;
       ObSysVars[222].name_ = "innodb_checksums" ;
       ObSysVars[222].data_type_ = ObIntType ;
-      ObSysVars[222].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[222].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[222].id_ = SYS_VAR_INNODB_CHECKSUMS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_CHECKSUMS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_CHECKSUMS] = 222 ;
       ObSysVars[222].base_value_ = "1" ;
+      ObSysVars[222].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[222].alias_ = "OB_SV_INNODB_CHECKSUMS" ;
     }();
 
@@ -3265,12 +3265,12 @@ static struct VarsInit{
       ObSysVars[223].info_ = "When enabled (the default), InnoDB stores all data twice, first to the doublewrite buffer, then to the actual data files" ;
       ObSysVars[223].name_ = "innodb_doublewrite" ;
       ObSysVars[223].data_type_ = ObIntType ;
-      ObSysVars[223].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[223].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[223].id_ = SYS_VAR_INNODB_DOUBLEWRITE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_DOUBLEWRITE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_DOUBLEWRITE] = 223 ;
       ObSysVars[223].base_value_ = "1" ;
+      ObSysVars[223].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[223].alias_ = "OB_SV_INNODB_DOUBLEWRITE" ;
     }();
 
@@ -3279,12 +3279,12 @@ static struct VarsInit{
       ObSysVars[224].info_ = "This variable can be set to 1 or 0 at server startup to enable or disable whether InnoDB checks the file format tag in the system tablespace (for example, Antelope or Barracuda)" ;
       ObSysVars[224].name_ = "innodb_file_format_check" ;
       ObSysVars[224].data_type_ = ObIntType ;
-      ObSysVars[224].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[224].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[224].id_ = SYS_VAR_INNODB_FILE_FORMAT_CHECK ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_FILE_FORMAT_CHECK)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_FILE_FORMAT_CHECK] = 224 ;
       ObSysVars[224].base_value_ = "1" ;
+      ObSysVars[224].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[224].alias_ = "OB_SV_INNODB_FILE_FORMAT_CHECK" ;
     }();
 
@@ -3293,12 +3293,12 @@ static struct VarsInit{
       ObSysVars[225].info_ = "Defines the method used to flush data to InnoDB data files and log files, which can affect I/O throughput" ;
       ObSysVars[225].name_ = "innodb_flush_method" ;
       ObSysVars[225].data_type_ = ObIntType ;
-      ObSysVars[225].enum_names_ = "[u'null', u'fsync', u'O_DSYNC', u'littlesync', u'nosync', u'O_DIRECT', u'O_DIRECT_NO_FSYNC']" ;
       ObSysVars[225].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[225].id_ = SYS_VAR_INNODB_FLUSH_METHOD ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_FLUSH_METHOD)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_FLUSH_METHOD] = 225 ;
       ObSysVars[225].base_value_ = "0" ;
+      ObSysVars[225].enum_names_ = "['null', 'fsync', 'O_DSYNC', 'littlesync', 'nosync', 'O_DIRECT', 'O_DIRECT_NO_FSYNC']" ;
     ObSysVars[225].alias_ = "OB_SV_INNODB_FLUSH_METHOD" ;
     }();
 
@@ -3307,12 +3307,12 @@ static struct VarsInit{
       ObSysVars[226].info_ = "Permits InnoDB to load tables at startup that are marked as corrupted" ;
       ObSysVars[226].name_ = "innodb_force_load_corrupted" ;
       ObSysVars[226].data_type_ = ObIntType ;
-      ObSysVars[226].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[226].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[226].id_ = SYS_VAR_INNODB_FORCE_LOAD_CORRUPTED ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_FORCE_LOAD_CORRUPTED)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_FORCE_LOAD_CORRUPTED] = 226 ;
       ObSysVars[226].base_value_ = "0" ;
+      ObSysVars[226].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[226].alias_ = "OB_SV_INNODB_FORCE_LOAD_CORRUPTED" ;
     }();
 
@@ -3321,12 +3321,12 @@ static struct VarsInit{
       ObSysVars[227].info_ = "Specifies the page size for InnoDB tablespaces. Values can be specified in bytes or kilobytes" ;
       ObSysVars[227].name_ = "innodb_page_size" ;
       ObSysVars[227].data_type_ = ObIntType ;
-      ObSysVars[227].enum_names_ = "[u'4096', u'8192', u'16384', u'32768', u'65536']" ;
       ObSysVars[227].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[227].id_ = SYS_VAR_INNODB_PAGE_SIZE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_PAGE_SIZE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_PAGE_SIZE] = 227 ;
       ObSysVars[227].base_value_ = "2" ;
+      ObSysVars[227].enum_names_ = "['4096', '8192', '16384', '32768', '65536']" ;
     ObSysVars[227].alias_ = "OB_SV_INNODB_PAGE_SIZE" ;
     }();
 
@@ -3335,12 +3335,12 @@ static struct VarsInit{
       ObSysVars[228].info_ = "The InnoDB version number" ;
       ObSysVars[228].name_ = "innodb_version" ;
       ObSysVars[228].data_type_ = ObIntType ;
-      ObSysVars[228].enum_names_ = "[u'5.7.38']" ;
       ObSysVars[228].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY | ObSysVarFlag::READONLY ;
       ObSysVars[228].id_ = SYS_VAR_INNODB_VERSION ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_VERSION)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_VERSION] = 228 ;
       ObSysVars[228].base_value_ = "0" ;
+      ObSysVars[228].enum_names_ = "['5.7.38']" ;
     ObSysVars[228].alias_ = "OB_SV_INNODB_VERSION" ;
     }();
 
@@ -3418,12 +3418,12 @@ static struct VarsInit{
       ObSysVars[234].info_ = "completion_type affects transactions that begin with START TRANSACTION or BEGIN and end with COMMIT or ROLLBACK. It does not apply when autocommit=1, merely simulates MySQL 5.7" ;
       ObSysVars[234].name_ = "completion_type" ;
       ObSysVars[234].data_type_ = ObIntType ;
-      ObSysVars[234].enum_names_ = "[u'NO_CHAIN', u'CHAIN', u'RELEASE']" ;
       ObSysVars[234].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[234].id_ = SYS_VAR_COMPLETION_TYPE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_COMPLETION_TYPE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_COMPLETION_TYPE] = 234 ;
       ObSysVars[234].base_value_ = "0" ;
+      ObSysVars[234].enum_names_ = "['NO_CHAIN', 'CHAIN', 'RELEASE']" ;
     ObSysVars[234].alias_ = "OB_SV_COMPLETION_TYPE" ;
     }();
 
@@ -3432,12 +3432,12 @@ static struct VarsInit{
       ObSysVars[235].info_ = "Depending on the value of this variable, the server enforces GTID consistency by allowing execution of only statements that can be safely logged using a GTID. You must set this variable to ON before enabling GTID based replication, merely simulates MySQL 5.7" ;
       ObSysVars[235].name_ = "enforce_gtid_consistency" ;
       ObSysVars[235].data_type_ = ObIntType ;
-      ObSysVars[235].enum_names_ = "[u'OFF', u'ON', u'WARN']" ;
       ObSysVars[235].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[235].id_ = SYS_VAR_ENFORCE_GTID_CONSISTENCY ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_ENFORCE_GTID_CONSISTENCY)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_ENFORCE_GTID_CONSISTENCY] = 235 ;
       ObSysVars[235].base_value_ = "0" ;
+      ObSysVars[235].enum_names_ = "['OFF', 'ON', 'WARN']" ;
     ObSysVars[235].alias_ = "OB_SV_ENFORCE_GTID_CONSISTENCY" ;
     }();
 
@@ -3461,12 +3461,12 @@ static struct VarsInit{
       ObSysVars[237].info_ = "Controls whether GTID based logging is enabled and what type of transactions the logs can contain, merely simulates MySQL 5.7" ;
       ObSysVars[237].name_ = "gtid_mode" ;
       ObSysVars[237].data_type_ = ObIntType ;
-      ObSysVars[237].enum_names_ = "[u'OFF', u'OFF_PERMISSIVE', u'ON_PERMISSIVE', u'ON']" ;
       ObSysVars[237].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[237].id_ = SYS_VAR_GTID_MODE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_GTID_MODE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_GTID_MODE] = 237 ;
       ObSysVars[237].base_value_ = "0" ;
+      ObSysVars[237].enum_names_ = "['OFF', 'OFF_PERMISSIVE', 'ON_PERMISSIVE', 'ON']" ;
     ObSysVars[237].alias_ = "OB_SV_GTID_MODE" ;
     }();
 
@@ -3475,12 +3475,12 @@ static struct VarsInit{
       ObSysVars[238].info_ = "This variable is used to specify whether and how the next GTID is obtained, merely simulates MySQL 5.7" ;
       ObSysVars[238].name_ = "gtid_next" ;
       ObSysVars[238].data_type_ = ObIntType ;
-      ObSysVars[238].enum_names_ = "[u'AUTOMATIC', u'ANONYMOUS']" ;
       ObSysVars[238].flags_ = ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[238].id_ = SYS_VAR_GTID_NEXT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_GTID_NEXT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_GTID_NEXT] = 238 ;
       ObSysVars[238].base_value_ = "0" ;
+      ObSysVars[238].enum_names_ = "['AUTOMATIC', 'ANONYMOUS']" ;
     ObSysVars[238].alias_ = "OB_SV_GTID_NEXT" ;
     }();
 
@@ -3532,12 +3532,12 @@ static struct VarsInit{
       ObSysVars[242].info_ = "Controls whether the server returns GTIDs to the client, enabling the client to use them to track the server state, merely simulates MySQL 5.7" ;
       ObSysVars[242].name_ = "session_track_gtids" ;
       ObSysVars[242].data_type_ = ObIntType ;
-      ObSysVars[242].enum_names_ = "[u'OFF', u'OWN_GTID', u'ALL_GTIDS']" ;
       ObSysVars[242].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[242].id_ = SYS_VAR_SESSION_TRACK_GTIDS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_SESSION_TRACK_GTIDS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_SESSION_TRACK_GTIDS] = 242 ;
       ObSysVars[242].base_value_ = "0" ;
+      ObSysVars[242].enum_names_ = "['OFF', 'OWN_GTID', 'ALL_GTIDS']" ;
     ObSysVars[242].alias_ = "OB_SV_SESSION_TRACK_GTIDS" ;
     }();
 
@@ -3546,12 +3546,12 @@ static struct VarsInit{
       ObSysVars[243].info_ = "Controls whether the server tracks the state and characteristics of transactions within the current session and notifies the client to make this information available, merely simulates MySQL 5.7" ;
       ObSysVars[243].name_ = "session_track_transaction_info" ;
       ObSysVars[243].data_type_ = ObIntType ;
-      ObSysVars[243].enum_names_ = "[u'OFF', u'STATE', u'CHARACTERISTICS']" ;
       ObSysVars[243].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[243].id_ = SYS_VAR_SESSION_TRACK_TRANSACTION_INFO ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_SESSION_TRACK_TRANSACTION_INFO)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_SESSION_TRACK_TRANSACTION_INFO] = 243 ;
       ObSysVars[243].base_value_ = "0" ;
+      ObSysVars[243].enum_names_ = "['OFF', 'STATE', 'CHARACTERISTICS']" ;
     ObSysVars[243].alias_ = "OB_SV_SESSION_TRACK_TRANSACTION_INFO" ;
     }();
 
@@ -3603,12 +3603,12 @@ static struct VarsInit{
       ObSysVars[247].info_ = "Defines the algorithm used to generate a hash identifying the writes associated with a transaction, merely simulates MySQL 5.7" ;
       ObSysVars[247].name_ = "transaction_write_set_extraction" ;
       ObSysVars[247].data_type_ = ObIntType ;
-      ObSysVars[247].enum_names_ = "[u'OFF', u'MURMUR32', u'XXHASH64']" ;
       ObSysVars[247].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[247].id_ = SYS_VAR_TRANSACTION_WRITE_SET_EXTRACTION ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_TRANSACTION_WRITE_SET_EXTRACTION)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_TRANSACTION_WRITE_SET_EXTRACTION] = 247 ;
       ObSysVars[247].base_value_ = "0" ;
+      ObSysVars[247].enum_names_ = "['OFF', 'MURMUR32', 'XXHASH64']" ;
     ObSysVars[247].alias_ = "OB_SV_TRANSACTION_WRITE_SET_EXTRACTION" ;
     }();
 
@@ -3729,12 +3729,12 @@ static struct VarsInit{
       ObSysVars[256].info_ = "Configures how Group Replication behaves when a server instance leaves the group unintentionally, for example after encountering an applier error, or in the case of a loss of majority, or when another member of the group expels it due to a suspicion timing out" ;
       ObSysVars[256].name_ = "group_replication_exit_state_action" ;
       ObSysVars[256].data_type_ = ObIntType ;
-      ObSysVars[256].enum_names_ = "[u'ABORT_SERVER', u'READ_ONLY']" ;
       ObSysVars[256].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[256].id_ = SYS_VAR_GROUP_REPLICATION_EXIT_STATE_ACTION ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_GROUP_REPLICATION_EXIT_STATE_ACTION)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_GROUP_REPLICATION_EXIT_STATE_ACTION] = 256 ;
       ObSysVars[256].base_value_ = "1" ;
+      ObSysVars[256].enum_names_ = "['ABORT_SERVER', 'READ_ONLY']" ;
     ObSysVars[256].alias_ = "OB_SV_GROUP_REPLICATION_EXIT_STATE_ACTION" ;
     }();
 
@@ -3773,12 +3773,12 @@ static struct VarsInit{
       ObSysVars[259].info_ = "Specifies the mode used for flow control. This variable can be changed without resetting Group Replication" ;
       ObSysVars[259].name_ = "group_replication_flow_control_mode" ;
       ObSysVars[259].data_type_ = ObIntType ;
-      ObSysVars[259].enum_names_ = "[u'DISABLED', u'QUOTA']" ;
       ObSysVars[259].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[259].id_ = SYS_VAR_GROUP_REPLICATION_FLOW_CONTROL_MODE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_GROUP_REPLICATION_FLOW_CONTROL_MODE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_GROUP_REPLICATION_FLOW_CONTROL_MODE] = 259 ;
       ObSysVars[259].base_value_ = "1" ;
+      ObSysVars[259].enum_names_ = "['DISABLED', 'QUOTA']" ;
     ObSysVars[259].alias_ = "OB_SV_GROUP_REPLICATION_FLOW_CONTROL_MODE" ;
     }();
 
@@ -3882,12 +3882,12 @@ static struct VarsInit{
       ObSysVars[267].info_ = "Recovery policies when handling cached transactions after state transfer" ;
       ObSysVars[267].name_ = "group_replication_recovery_complete_at" ;
       ObSysVars[267].data_type_ = ObIntType ;
-      ObSysVars[267].enum_names_ = "[u'TRANSACTIONS_CERTIFIED', u'TRANSACTIONS_APPLIED']" ;
       ObSysVars[267].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[267].id_ = SYS_VAR_GROUP_REPLICATION_RECOVERY_COMPLETE_AT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_GROUP_REPLICATION_RECOVERY_COMPLETE_AT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_GROUP_REPLICATION_RECOVERY_COMPLETE_AT] = 267 ;
       ObSysVars[267].base_value_ = "1" ;
+      ObSysVars[267].enum_names_ = "['TRANSACTIONS_CERTIFIED', 'TRANSACTIONS_APPLIED']" ;
     ObSysVars[267].alias_ = "OB_SV_GROUP_REPLICATION_RECOVERY_COMPLETE_AT" ;
     }();
 
@@ -4056,12 +4056,12 @@ static struct VarsInit{
       ObSysVars[280].info_ = "Specifies the security state of the connection between Group Replication members" ;
       ObSysVars[280].name_ = "group_replication_ssl_mode" ;
       ObSysVars[280].data_type_ = ObIntType ;
-      ObSysVars[280].enum_names_ = "[u'DISABLED', u'REQUIRED', u'VERIFY_CA', u'VERIFY_IDENTITY']" ;
       ObSysVars[280].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[280].id_ = SYS_VAR_GROUP_REPLICATION_SSL_MODE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_GROUP_REPLICATION_SSL_MODE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_GROUP_REPLICATION_SSL_MODE] = 280 ;
       ObSysVars[280].base_value_ = "0" ;
+      ObSysVars[280].enum_names_ = "['DISABLED', 'REQUIRED', 'VERIFY_CA', 'VERIFY_IDENTITY']" ;
     ObSysVars[280].alias_ = "OB_SV_GROUP_REPLICATION_SSL_MODE" ;
     }();
 
@@ -4182,12 +4182,12 @@ static struct VarsInit{
       ObSysVars[289].info_ = "For internal use by mysqlbinlog" ;
       ObSysVars[289].name_ = "rbr_exec_mode" ;
       ObSysVars[289].data_type_ = ObIntType ;
-      ObSysVars[289].enum_names_ = "[u'STRICT', u'IDEMPOTENT']" ;
       ObSysVars[289].flags_ = ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[289].id_ = SYS_VAR_RBR_EXEC_MODE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_RBR_EXEC_MODE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_RBR_EXEC_MODE] = 289 ;
       ObSysVars[289].base_value_ = "0" ;
+      ObSysVars[289].enum_names_ = "['STRICT', 'IDEMPOTENT']" ;
     ObSysVars[289].alias_ = "OB_SV_RBR_EXEC_MODE" ;
     }();
 
@@ -4293,12 +4293,12 @@ static struct VarsInit{
       ObSysVars[297].info_ = "This variable controls the point at which a semisynchronous source waits for replica acknowledgment of transaction receipt before returning a status to the client that committed the transaction" ;
       ObSysVars[297].name_ = "rpl_semi_sync_master_wait_point" ;
       ObSysVars[297].data_type_ = ObIntType ;
-      ObSysVars[297].enum_names_ = "[u'AFTER_SYNC', u'AFTER_COMMIT']" ;
       ObSysVars[297].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[297].id_ = SYS_VAR_RPL_SEMI_SYNC_MASTER_WAIT_POINT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_RPL_SEMI_SYNC_MASTER_WAIT_POINT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_RPL_SEMI_SYNC_MASTER_WAIT_POINT] = 297 ;
       ObSysVars[297].base_value_ = "0" ;
+      ObSysVars[297].enum_names_ = "['AFTER_SYNC', 'AFTER_COMMIT']" ;
     ObSysVars[297].alias_ = "OB_SV_RPL_SEMI_SYNC_MASTER_WAIT_POINT" ;
     }();
 
@@ -4406,12 +4406,12 @@ static struct VarsInit{
       ObSysVars[305].info_ = "Controls how a replication thread resolves conflicts and errors during replication" ;
       ObSysVars[305].name_ = "slave_exec_mode" ;
       ObSysVars[305].data_type_ = ObIntType ;
-      ObSysVars[305].enum_names_ = "[u'STRICT', u'IDEMPOTENT']" ;
       ObSysVars[305].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[305].id_ = SYS_VAR_SLAVE_EXEC_MODE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_SLAVE_EXEC_MODE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_SLAVE_EXEC_MODE] = 305 ;
       ObSysVars[305].base_value_ = "0" ;
+      ObSysVars[305].enum_names_ = "['STRICT', 'IDEMPOTENT']" ;
     ObSysVars[305].alias_ = "OB_SV_SLAVE_EXEC_MODE" ;
     }();
 
@@ -4450,12 +4450,12 @@ static struct VarsInit{
       ObSysVars[308].info_ = "When using a multithreaded replica (slave_parallel_workers is greater than 0), this variable specifies the policy used to decide which transactions are allowed to execute in parallel on the replica" ;
       ObSysVars[308].name_ = "slave_parallel_type" ;
       ObSysVars[308].data_type_ = ObIntType ;
-      ObSysVars[308].enum_names_ = "[u'DATABASE', u'LOGICAL_CLOCK']" ;
       ObSysVars[308].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[308].id_ = SYS_VAR_SLAVE_PARALLEL_TYPE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_SLAVE_PARALLEL_TYPE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_SLAVE_PARALLEL_TYPE] = 308 ;
       ObSysVars[308].base_value_ = "0" ;
+      ObSysVars[308].enum_names_ = "['DATABASE', 'LOGICAL_CLOCK']" ;
     ObSysVars[308].alias_ = "OB_SV_SLAVE_PARALLEL_TYPE" ;
     }();
 
@@ -4617,16 +4617,16 @@ static struct VarsInit{
       ObSysVars[320].info_ = "control default collation for utf8mb4" ;
       ObSysVars[320].name_ = "default_collation_for_utf8mb4" ;
       ObSysVars[320].data_type_ = ObIntType ;
-      ObSysVars[320].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_collation" ;
       ObSysVars[320].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::INFLUENCE_PLAN | ObSysVarFlag::NEED_SERIALIZE | ObSysVarFlag::MYSQL_ONLY ;
-      ObSysVars[320].base_class_ = "ObCharsetSysVar" ;
-      ObSysVars[320].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_collation" ;
-      ObSysVars[320].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_default_value_for_utf8mb4" ;
       ObSysVars[320].id_ = SYS_VAR_DEFAULT_COLLATION_FOR_UTF8MB4 ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_DEFAULT_COLLATION_FOR_UTF8MB4)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_DEFAULT_COLLATION_FOR_UTF8MB4] = 320 ;
-      ObSysVars[320].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
       ObSysVars[320].base_value_ = "45" ;
+      ObSysVars[320].on_check_and_convert_func_ = "ObSysVarOnCheckFuncs::check_default_value_for_utf8mb4" ;
+      ObSysVars[320].get_meta_type_func_ = "ObSysVarGetMetaTypeFuncs::get_meta_type_varchar" ;
+      ObSysVars[320].to_select_obj_func_ = "ObSysVarToObjFuncs::to_obj_collation" ;
+      ObSysVars[320].to_show_str_func_ = "ObSysVarToStrFuncs::to_str_collation" ;
+      ObSysVars[320].base_class_ = "ObCharsetSysVar" ;
     ObSysVars[320].alias_ = "OB_SV_DEFAULT_COLLATION_FOR_UTF8MB4" ;
     }();
 
@@ -4921,12 +4921,12 @@ static struct VarsInit{
       ObSysVars[343].info_ = "Controls what happens when the server encounters an error. Merely simulates MySQL 5.7." ;
       ObSysVars[343].name_ = "binlog_error_action" ;
       ObSysVars[343].data_type_ = ObIntType ;
-      ObSysVars[343].enum_names_ = "[u'IGNORE_ERROR', u'ABORT_SERVER']" ;
       ObSysVars[343].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[343].id_ = SYS_VAR_BINLOG_ERROR_ACTION ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_BINLOG_ERROR_ACTION)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_BINLOG_ERROR_ACTION] = 343 ;
       ObSysVars[343].base_value_ = "1" ;
+      ObSysVars[343].enum_names_ = "['IGNORE_ERROR', 'ABORT_SERVER']" ;
     ObSysVars[343].alias_ = "OB_SV_BINLOG_ERROR_ACTION" ;
     }();
 
@@ -5013,12 +5013,12 @@ static struct VarsInit{
       ObSysVars[350].info_ = "The source of dependency information that the source uses to determine which transactions can be executed in parallel by the replica's multithreaded applier. Merely simulates MySQL 5.7." ;
       ObSysVars[350].name_ = "binlog_transaction_dependency_tracking" ;
       ObSysVars[350].data_type_ = ObIntType ;
-      ObSysVars[350].enum_names_ = "[u'COMMIT_ORDER', u'WRITESET', u'WRITESET_SESSION']" ;
       ObSysVars[350].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[350].id_ = SYS_VAR_BINLOG_TRANSACTION_DEPENDENCY_TRACKING ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_BINLOG_TRANSACTION_DEPENDENCY_TRACKING)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_BINLOG_TRANSACTION_DEPENDENCY_TRACKING] = 350 ;
       ObSysVars[350].base_value_ = "0" ;
+      ObSysVars[350].enum_names_ = "['COMMIT_ORDER', 'WRITESET', 'WRITESET_SESSION']" ;
     ObSysVars[350].alias_ = "OB_SV_BINLOG_TRANSACTION_DEPENDENCY_TRACKING" ;
     }();
 
@@ -5654,12 +5654,12 @@ static struct VarsInit{
       ObSysVars[398].info_ = "mock for mysql5.7" ;
       ObSysVars[398].name_ = "default_tmp_storage_engine" ;
       ObSysVars[398].data_type_ = ObIntType ;
-      ObSysVars[398].enum_names_ = "[u'InnoDB']" ;
       ObSysVars[398].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[398].id_ = SYS_VAR_DEFAULT_TMP_STORAGE_ENGINE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_DEFAULT_TMP_STORAGE_ENGINE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_DEFAULT_TMP_STORAGE_ENGINE] = 398 ;
       ObSysVars[398].base_value_ = "0" ;
+      ObSysVars[398].enum_names_ = "['InnoDB']" ;
     ObSysVars[398].alias_ = "OB_SV_DEFAULT_TMP_STORAGE_ENGINE" ;
     }();
 
@@ -5776,12 +5776,12 @@ static struct VarsInit{
       ObSysVars[407].info_ = "When preparing batches of rows for row-based logging and replication, this variable controls how the rows are searched for matches" ;
       ObSysVars[407].name_ = "slave_rows_search_algorithms" ;
       ObSysVars[407].data_type_ = ObIntType ;
-      ObSysVars[407].enum_names_ = "[u'TABLE_SCAN,INDEX_SCAN', u'INDEX_SCAN,HASH_SCAN', u'TABLE_SCAN,HASH_SCAN', u'TABLE_SCAN,INDEX_SCAN,HASH_SCAN']" ;
       ObSysVars[407].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE ;
       ObSysVars[407].id_ = SYS_VAR_SLAVE_ROWS_SEARCH_ALGORITHMS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_SLAVE_ROWS_SEARCH_ALGORITHMS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_SLAVE_ROWS_SEARCH_ALGORITHMS] = 407 ;
       ObSysVars[407].base_value_ = "0" ;
+      ObSysVars[407].enum_names_ = "['TABLE_SCAN,INDEX_SCAN', 'INDEX_SCAN,HASH_SCAN', 'TABLE_SCAN,HASH_SCAN', 'TABLE_SCAN,INDEX_SCAN,HASH_SCAN']" ;
     ObSysVars[407].alias_ = "OB_SV_SLAVE_ROWS_SEARCH_ALGORITHMS" ;
     }();
 
@@ -5790,12 +5790,12 @@ static struct VarsInit{
       ObSysVars[408].info_ = "Controls the type conversion mode in effect on the replica when using row-based replication" ;
       ObSysVars[408].name_ = "slave_type_conversions" ;
       ObSysVars[408].data_type_ = ObIntType ;
-      ObSysVars[408].enum_names_ = "[u'ALL_LOSSY', u'ALL_NON_LOSSY', u'ALL_SIGNED', u'ALL_UNSIGNED']" ;
       ObSysVars[408].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE ;
       ObSysVars[408].id_ = SYS_VAR_SLAVE_TYPE_CONVERSIONS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_SLAVE_TYPE_CONVERSIONS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_SLAVE_TYPE_CONVERSIONS] = 408 ;
       ObSysVars[408].base_value_ = "0" ;
+      ObSysVars[408].enum_names_ = "['ALL_LOSSY', 'ALL_NON_LOSSY', 'ALL_SIGNED', 'ALL_UNSIGNED']" ;
     ObSysVars[408].alias_ = "OB_SV_SLAVE_TYPE_CONVERSIONS" ;
     }();
 
@@ -5910,12 +5910,12 @@ static struct VarsInit{
       ObSysVars[417].info_ = "mock for mysql5.7" ;
       ObSysVars[417].name_ = "ndb_default_column_format" ;
       ObSysVars[417].data_type_ = ObIntType ;
-      ObSysVars[417].enum_names_ = "[u'FIXED', u'DYNAMIC']" ;
       ObSysVars[417].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[417].id_ = SYS_VAR_NDB_DEFAULT_COLUMN_FORMAT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_NDB_DEFAULT_COLUMN_FORMAT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_NDB_DEFAULT_COLUMN_FORMAT] = 417 ;
       ObSysVars[417].base_value_ = "0" ;
+      ObSysVars[417].enum_names_ = "['FIXED', 'DYNAMIC']" ;
     ObSysVars[417].alias_ = "OB_SV_NDB_DEFAULT_COLUMN_FORMAT" ;
     }();
 
@@ -5937,12 +5937,12 @@ static struct VarsInit{
       ObSysVars[419].info_ = "mock for mysql5.7" ;
       ObSysVars[419].name_ = "ndb_distribution" ;
       ObSysVars[419].data_type_ = ObIntType ;
-      ObSysVars[419].enum_names_ = "[u'LINHASH', u'KEYHASH']" ;
       ObSysVars[419].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[419].id_ = SYS_VAR_NDB_DISTRIBUTION ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_NDB_DISTRIBUTION)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_NDB_DISTRIBUTION] = 419 ;
       ObSysVars[419].base_value_ = "1" ;
+      ObSysVars[419].enum_names_ = "['LINHASH', 'KEYHASH']" ;
     ObSysVars[419].alias_ = "OB_SV_NDB_DISTRIBUTION" ;
     }();
 
@@ -6250,12 +6250,12 @@ static struct VarsInit{
       ObSysVars[443].info_ = "mock for mysql5.7" ;
       ObSysVars[443].name_ = "ndb_slave_conflict_role" ;
       ObSysVars[443].data_type_ = ObIntType ;
-      ObSysVars[443].enum_names_ = "[u'NONE', u'PRIMARY', u'SECONDARY', u'PASS']" ;
       ObSysVars[443].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[443].id_ = SYS_VAR_NDB_SLAVE_CONFLICT_ROLE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_NDB_SLAVE_CONFLICT_ROLE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_NDB_SLAVE_CONFLICT_ROLE] = 443 ;
       ObSysVars[443].base_value_ = "0" ;
+      ObSysVars[443].enum_names_ = "['NONE', 'PRIMARY', 'SECONDARY', 'PASS']" ;
     ObSysVars[443].alias_ = "OB_SV_NDB_SLAVE_CONFLICT_ROLE" ;
     }();
 
@@ -6420,12 +6420,12 @@ static struct VarsInit{
       ObSysVars[456].info_ = "mock for mysql5.7" ;
       ObSysVars[456].name_ = "myisam_stats_method" ;
       ObSysVars[456].data_type_ = ObIntType ;
-      ObSysVars[456].enum_names_ = "[u'nulls_unequal', u'nulls_equal', u'nulls_ignored']" ;
       ObSysVars[456].flags_ = ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[456].id_ = SYS_VAR_MYISAM_STATS_METHOD ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_MYISAM_STATS_METHOD)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_MYISAM_STATS_METHOD] = 456 ;
       ObSysVars[456].base_value_ = "0" ;
+      ObSysVars[456].enum_names_ = "['nulls_unequal', 'nulls_equal', 'nulls_ignored']" ;
     ObSysVars[456].alias_ = "OB_SV_MYISAM_STATS_METHOD" ;
     }();
 
@@ -6720,12 +6720,12 @@ static struct VarsInit{
       ObSysVars[479].info_ = "mock for mysql5.7" ;
       ObSysVars[479].name_ = "internal_tmp_disk_storage_engine" ;
       ObSysVars[479].data_type_ = ObIntType ;
-      ObSysVars[479].enum_names_ = "[u'MYISAM', u'INNODB']" ;
       ObSysVars[479].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[479].id_ = SYS_VAR_INTERNAL_TMP_DISK_STORAGE_ENGINE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INTERNAL_TMP_DISK_STORAGE_ENGINE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INTERNAL_TMP_DISK_STORAGE_ENGINE] = 479 ;
       ObSysVars[479].base_value_ = "1" ;
+      ObSysVars[479].enum_names_ = "['MYISAM', 'INNODB']" ;
     ObSysVars[479].alias_ = "OB_SV_INTERNAL_TMP_DISK_STORAGE_ENGINE" ;
     }();
 
@@ -7007,12 +7007,12 @@ static struct VarsInit{
       ObSysVars[501].info_ = "mock for mysql5.7" ;
       ObSysVars[501].name_ = "log_timestamps" ;
       ObSysVars[501].data_type_ = ObIntType ;
-      ObSysVars[501].enum_names_ = "[u'UTC', u'SYSTEM']" ;
       ObSysVars[501].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[501].id_ = SYS_VAR_LOG_TIMESTAMPS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_LOG_TIMESTAMPS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_LOG_TIMESTAMPS] = 501 ;
       ObSysVars[501].base_value_ = "0" ;
+      ObSysVars[501].enum_names_ = "['UTC', 'SYSTEM']" ;
     ObSysVars[501].alias_ = "OB_SV_LOG_TIMESTAMPS" ;
     }();
 
@@ -8256,12 +8256,12 @@ static struct VarsInit{
       ObSysVars[597].info_ = "mock for mysql5.7" ;
       ObSysVars[597].name_ = "thread_handling" ;
       ObSysVars[597].data_type_ = ObIntType ;
-      ObSysVars[597].enum_names_ = "[u'no-threads', u'one-thread-per-connection', u'loaded-dynamically']" ;
       ObSysVars[597].flags_ = ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::READONLY | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[597].id_ = SYS_VAR_THREAD_HANDLING ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_THREAD_HANDLING)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_THREAD_HANDLING] = 597 ;
       ObSysVars[597].base_value_ = "1" ;
+      ObSysVars[597].enum_names_ = "['no-threads', 'one-thread-per-connection', 'loaded-dynamically']" ;
     ObSysVars[597].alias_ = "OB_SV_THREAD_HANDLING" ;
     }();
 
@@ -8543,12 +8543,12 @@ static struct VarsInit{
       ObSysVars[619].info_ = "This variable specifies how to use delayed key writes. It applies only to MyISAM tables. Delayed key writing causes key buffers not to be flushed between writes, merely simulates MySQL 5.7" ;
       ObSysVars[619].name_ = "delay_key_write" ;
       ObSysVars[619].data_type_ = ObIntType ;
-      ObSysVars[619].enum_names_ = "[u'ON', u'OFF', u'ALL']" ;
       ObSysVars[619].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[619].id_ = SYS_VAR_DELAY_KEY_WRITE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_DELAY_KEY_WRITE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_DELAY_KEY_WRITE] = 619 ;
       ObSysVars[619].base_value_ = "0" ;
+      ObSysVars[619].enum_names_ = "['ON', 'OFF', 'ALL']" ;
     ObSysVars[619].alias_ = "OB_SV_DELAY_KEY_WRITE" ;
     }();
 
@@ -8557,12 +8557,12 @@ static struct VarsInit{
       ObSysVars[620].info_ = "When this option is enabled, index key prefixes longer than 767 bytes (up to 3072 bytes) are allowed for InnoDB tables that use DYNAMIC or COMPRESSED row format, merely simulates MySQL 5.7" ;
       ObSysVars[620].name_ = "innodb_large_prefix" ;
       ObSysVars[620].data_type_ = ObIntType ;
-      ObSysVars[620].enum_names_ = "[u'ON', u'OFF']" ;
       ObSysVars[620].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[620].id_ = SYS_VAR_INNODB_LARGE_PREFIX ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_LARGE_PREFIX)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_LARGE_PREFIX] = 620 ;
       ObSysVars[620].base_value_ = "0" ;
+      ObSysVars[620].enum_names_ = "['ON', 'OFF']" ;
     ObSysVars[620].alias_ = "OB_SV_INNODB_LARGE_PREFIX" ;
     }();
 
@@ -8631,12 +8631,12 @@ static struct VarsInit{
       ObSysVars[625].info_ = "When this variable is enabled, the server does not use the optimized method of processing an ALTER TABLE operation, merely simulates MySQL 5.7" ;
       ObSysVars[625].name_ = "old_alter_table" ;
       ObSysVars[625].data_type_ = ObIntType ;
-      ObSysVars[625].enum_names_ = "[u'OFF', u'ON']" ;
       ObSysVars[625].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[625].id_ = SYS_VAR_OLD_ALTER_TABLE ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_OLD_ALTER_TABLE)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_OLD_ALTER_TABLE] = 625 ;
       ObSysVars[625].base_value_ = "0" ;
+      ObSysVars[625].enum_names_ = "['OFF', 'ON']" ;
     ObSysVars[625].alias_ = "OB_SV_OLD_ALTER_TABLE" ;
     }();
 
@@ -9224,12 +9224,12 @@ static struct VarsInit{
       ObSysVars[669].info_ = "How the server treats NULL values when collecting statistics about the distribution of index values for InnoDB tables" ;
       ObSysVars[669].name_ = "innodb_stats_method" ;
       ObSysVars[669].data_type_ = ObIntType ;
-      ObSysVars[669].enum_names_ = "[u'nulls_equal', u'nulls_unequal', u'nulls_ignored']" ;
       ObSysVars[669].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[669].id_ = SYS_VAR_INNODB_STATS_METHOD ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_INNODB_STATS_METHOD)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_INNODB_STATS_METHOD] = 669 ;
       ObSysVars[669].base_value_ = "0" ;
+      ObSysVars[669].enum_names_ = "['nulls_equal', 'nulls_unequal', 'nulls_ignored']" ;
     ObSysVars[669].alias_ = "OB_SV_INNODB_STATS_METHOD" ;
     }();
 
@@ -9402,12 +9402,12 @@ static struct VarsInit{
       ObSysVars[682].info_ = "This variable controls the password hashing method used by the PASSWORD() function. It also influences password hashing performed by CREATE USER and GRANT statements that specify a password using an IDENTIFIED BY clause" ;
       ObSysVars[682].name_ = "old_passwords" ;
       ObSysVars[682].data_type_ = ObIntType ;
-      ObSysVars[682].enum_names_ = "[u'0', u'1', u'2']" ;
       ObSysVars[682].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[682].id_ = SYS_VAR_OLD_PASSWORDS ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_OLD_PASSWORDS)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_OLD_PASSWORDS] = 682 ;
       ObSysVars[682].base_value_ = "0" ;
+      ObSysVars[682].enum_names_ = "['0', '1', '2']" ;
     ObSysVars[682].alias_ = "OB_SV_OLD_PASSWORDS" ;
     }();
 
@@ -9696,12 +9696,12 @@ static struct VarsInit{
       ObSysVars[703].info_ = "This variable controls whether updates to a view can be made when the view does not contain all columns of the primary key defined in the underlying table, if the update statement contains a LIMIT clause" ;
       ObSysVars[703].name_ = "updatable_views_with_limit" ;
       ObSysVars[703].data_type_ = ObIntType ;
-      ObSysVars[703].enum_names_ = "[u'OFF', u'ON', u'NO', u'YES']" ;
       ObSysVars[703].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[703].id_ = SYS_VAR_UPDATABLE_VIEWS_WITH_LIMIT ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_UPDATABLE_VIEWS_WITH_LIMIT)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_UPDATABLE_VIEWS_WITH_LIMIT] = 703 ;
       ObSysVars[703].base_value_ = "1" ;
+      ObSysVars[703].enum_names_ = "['OFF', 'ON', 'NO', 'YES']" ;
     ObSysVars[703].alias_ = "OB_SV_UPDATABLE_VIEWS_WITH_LIMIT" ;
     }();
 
@@ -9844,12 +9844,12 @@ static struct VarsInit{
       ObSysVars[714].info_ = "Control whether the optimizer considers the impact of rowgoal (such as the LIMIT operator, etc.) during cardinality estimation." ;
       ObSysVars[714].name_ = "enable_optimizer_rowgoal" ;
       ObSysVars[714].data_type_ = ObIntType ;
-      ObSysVars[714].enum_names_ = "[u'OFF', u'AUTO', u'ON']" ;
       ObSysVars[714].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE ;
       ObSysVars[714].id_ = SYS_VAR_ENABLE_OPTIMIZER_ROWGOAL ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_ENABLE_OPTIMIZER_ROWGOAL)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_ENABLE_OPTIMIZER_ROWGOAL] = 714 ;
       ObSysVars[714].base_value_ = "1" ;
+      ObSysVars[714].enum_names_ = "['OFF', 'AUTO', 'ON']" ;
     ObSysVars[714].alias_ = "OB_SV_ENABLE_OPTIMIZER_ROWGOAL" ;
     }();
 
@@ -9912,16 +9912,29 @@ static struct VarsInit{
     }();
 
     [&] (){
+      ObSysVars[719].default_value_ = "0" ;
+      ObSysVars[719].info_ = "Reject reads of an AI column while any row is not READY." ;
+      ObSysVars[719].name_ = "ai_column_strict_read" ;
+      ObSysVars[719].data_type_ = ObIntType ;
+      ObSysVars[719].flags_ = ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
       ObSysVars[719].id_ = SYS_VAR_AI_COLUMN_STRICT_READ ;
       cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_AI_COLUMN_STRICT_READ)) ;
       ObSysVarsIdToArrayIdx[SYS_VAR_AI_COLUMN_STRICT_READ] = 719 ;
-      ObSysVars[719].name_ = "ai_column_strict_read" ;
-      ObSysVars[719].default_value_ = "0" ;
       ObSysVars[719].base_value_ = "0" ;
-      ObSysVars[719].data_type_ = ObIntType ;
-      ObSysVars[719].info_ = "Reject reads of an AI column while any row is not READY." ;
-      ObSysVars[719].flags_ = ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::MYSQL_ONLY ;
     ObSysVars[719].alias_ = "OB_SV_AI_COLUMN_STRICT_READ" ;
+    }();
+
+    [&] (){
+      ObSysVars[720].default_value_ = "0" ;
+      ObSysVars[720].info_ = "enable file sql table functions and queries" ;
+      ObSysVars[720].name_ = "enable_file_sql" ;
+      ObSysVars[720].data_type_ = ObIntType ;
+      ObSysVars[720].flags_ = ObSysVarFlag::GLOBAL_SCOPE | ObSysVarFlag::SESSION_SCOPE | ObSysVarFlag::NEED_SERIALIZE ;
+      ObSysVars[720].id_ = SYS_VAR_ENABLE_FILE_SQL ;
+      cur_max_var_id = MAX(cur_max_var_id, static_cast<int64_t>(SYS_VAR_ENABLE_FILE_SQL)) ;
+      ObSysVarsIdToArrayIdx[SYS_VAR_ENABLE_FILE_SQL] = 720 ;
+      ObSysVars[720].base_value_ = "0" ;
+    ObSysVars[720].alias_ = "OB_SV_ENABLE_FILE_SQL" ;
     }();
 
     if (cur_max_var_id >= ObSysVarMeta::OB_MAX_SYS_VAR_ID) {
@@ -9930,7 +9943,7 @@ static struct VarsInit{
   }
 }vars_init;
 
-static int64_t var_amount = 720;
+static int64_t var_amount = 721;
 
 int64_t ObSysVariables::get_all_sys_var_count(){ return ObSysVarMeta::ALL_SYS_VARS_COUNT;}
 ObSysVarClassType ObSysVariables::get_sys_var_id(int64_t i){ return ObSysVars[i].id_;}

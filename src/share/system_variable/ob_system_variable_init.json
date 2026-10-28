@@ -10988,5 +10988,18 @@
     "info_cn": "AI列严格读取，整列就绪检查",
     "background_cn": "",
     "ref_url": ""
-}
+  },
+  "enable_file_sql": {
+    "id": 10755,
+    "name": "enable_file_sql",
+    "default_value": "0",
+    "base_value": "0",
+    "data_type": "bool",
+    "info": "enable file sql table functions and queries",
+    "flags": "GLOBAL | SESSION | NEED_SERIALIZE",
+    "publish_version": "1.0.0.0",
+    "info_cn": "是否启用文件即数据库功能",
+    "background_cn": "",
+    "ref_url": ""
+  }
 }

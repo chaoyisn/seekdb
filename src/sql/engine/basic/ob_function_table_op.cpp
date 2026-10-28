@@ -19,6 +19,7 @@
 #include "sql/engine/basic/ob_function_table_op.h"
 #include "sql/engine/ob_exec_context.h"
 #include "sql/engine/expr/ob_expr_lob_utils.h"
+#include "sql/engine/basic/ob_file_scan_utils.h"
 
 
 namespace oceanbase
@@ -40,6 +41,25 @@ int ObFunctionTableOp::inner_open()
     next_row_func_ = &ObFunctionTableOp::inner_get_next_row_udf;
   } else {
     next_row_func_ = &ObFunctionTableOp::inner_get_next_row_sys_func;
+    ObDatum *value = nullptr;
+    ObFileTableDef *file_def = nullptr;
+    if (OB_SUCC(MY_SPEC.value_expr_->eval(eval_ctx_, value)) &&
+        nullptr != value &&
+        ObFileScanUtils::extract_file_table_def_from_datum(*value, file_def) &&
+        nullptr != file_def) {
+      ObIFileScanner *scanner = nullptr;
+      if (OB_FAIL(ObFileScanUtils::create_file_scanner(
+              ctx_.get_allocator(), ctx_, *file_def, scanner))) {
+      } else if (OB_ISNULL(scanner)) {
+        ret = OB_ERR_UNEXPECTED;
+      } else if (OB_FAIL(scanner->open())) {
+        scanner->~ObIFileScanner();
+      } else {
+        value_table_ = reinterpret_cast<pl::ObPLCollection *>(scanner);
+        col_count_ = ObIFileScanner::FILE_SCANNER_SENTINEL;
+        already_calc_ = true;
+      }
+    }
   }
   return ret;
 }
@@ -48,6 +68,9 @@ int ObFunctionTableOp::inner_rescan()
 {
   int ret = OB_SUCCESS;
   if (OB_FAIL(ObOperator::inner_rescan())) {
+  } else if (ObIFileScanner::FILE_SCANNER_SENTINEL == col_count_ && nullptr != value_table_) {
+    ObIFileScanner *scanner = reinterpret_cast<ObIFileScanner *>(value_table_);
+    ret = scanner->rescan();
   } else {
     node_idx_ = 0;
     if (MY_SPEC.has_correlated_expr_) {
@@ -63,6 +86,11 @@ int ObFunctionTableOp::inner_rescan()
 int ObFunctionTableOp::inner_close()
 {
   int ret = OB_SUCCESS;
+  if (ObIFileScanner::FILE_SCANNER_SENTINEL == col_count_ && nullptr != value_table_) {
+    ObIFileScanner *scanner = reinterpret_cast<ObIFileScanner *>(value_table_);
+    ret = scanner->close();
+    scanner->~ObIFileScanner();
+  }
   node_idx_ = 0;
   row_count_ = 0;
   col_count_ = 0;
@@ -72,6 +100,13 @@ int ObFunctionTableOp::inner_close()
 
 void ObFunctionTableOp::destroy()
 {
+  if (ObIFileScanner::FILE_SCANNER_SENTINEL == col_count_ && nullptr != value_table_) {
+    ObIFileScanner *scanner = reinterpret_cast<ObIFileScanner *>(value_table_);
+    (void)scanner->close();
+    scanner->~ObIFileScanner();
+    value_table_ = NULL;
+    col_count_ = 0;
+  }
   ObOperator::destroy();
 }
 
@@ -206,6 +241,9 @@ int ObFunctionTableOp::inner_get_next_row_sys_func()
   if (OB_ISNULL(plan_ctx = ctx_.get_physical_plan_ctx())) {
     ret = OB_ERR_UNEXPECTED;
   } else if (OB_FAIL(ctx_.check_status())) {
+  } else if (ObIFileScanner::FILE_SCANNER_SENTINEL == col_count_ && nullptr != value_table_) {
+    ObIFileScanner *scanner = reinterpret_cast<ObIFileScanner *>(value_table_);
+    ret = scanner->get_next_row(MY_SPEC.column_exprs_, eval_ctx_);
   } else if (OB_FAIL(MY_SPEC.value_expr_->eval(eval_ctx_, value))) {
     if (OB_ITER_END != ret) {
     }

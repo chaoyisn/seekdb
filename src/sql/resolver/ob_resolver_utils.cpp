@@ -41,6 +41,7 @@
 #include "sql/engine/expr/ob_expr_cast.h"
 #include "sql/pl/ob_pl_dependency_util.h"
 #include "data_plane/transaction/ob_xa_id.h"
+#include "sql/engine/basic/ob_file_scan_utils.h"
 
 namespace oceanbase
 {
@@ -121,6 +122,13 @@ int ObResolverUtils::get_all_function_table_column_names(const TableItem &table_
                                                          ObIArray<ObString> &column_names)
 {
   int ret = OB_SUCCESS;
+  ObFileTableDef *file_table_def = NULL;
+  if (ObFileScanUtils::is_file_table_item(table_item, &file_table_def) && NULL != file_table_def) {
+    for (int64_t i = 0; OB_SUCC(ret) && i < file_table_def->columns_.count(); ++i) {
+      ret = column_names.push_back(file_table_def->columns_.at(i).name_);
+    }
+    return ret;
+  }
   ObRawExpr *table_expr = NULL;
   ObPLPackageGuard *package_guard = nullptr;
   const ObUserDefinedType *user_type = NULL;

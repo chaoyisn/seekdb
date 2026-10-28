@@ -20,6 +20,7 @@
 #include "lib/json/ob_json_print_utils.h"
 #include "sql/pl/ob_pl_resolver.h"
 #include "sql/resolver/dml/ob_inlist_resolver.h"
+#include "sql/engine/basic/ob_file_scan_utils.h"
 
 namespace oceanbase
 {
