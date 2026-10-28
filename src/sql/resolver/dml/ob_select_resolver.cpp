@@ -3235,7 +3235,7 @@ int ObSelectResolver::resolve_column_ref_expr(
   } else if (OB_SUCC(ret) && real_ref_expr != nullptr && real_ref_expr->is_column_ref_expr()) {
     const auto *expr = static_cast<const ObColumnRefRawExpr *>(real_ref_expr);
     const ColumnItem *column = nullptr;
-    for (const ObDMLResolver *cur = this; column == nullptr && cur != nullptr; cur = cur->get_parent_namespace_resolver()) {
+    for (ObDMLResolver *cur = this; column == nullptr && cur != nullptr; cur = cur->get_parent_namespace_resolver()) {
       if (cur->get_stmt() != nullptr) {
         column = cur->get_stmt()->get_column_item_by_id(expr->get_table_id(), expr->get_column_id());
       }
