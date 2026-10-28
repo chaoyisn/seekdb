@@ -11,6 +11,7 @@ class AiColumnResultTest : public ::testing::Test {
 protected:
   ObArenaAllocator allocator_;
   ObColumnSchemaV2 column_;
+  void SetUp() override { column_.set_collation_type(CS_TYPE_UTF8MB4_BIN); }
   int check(ObObjType type, const char *value, int64_t length = 1024) {
     column_.set_data_type(type);
     column_.set_data_length(length);
@@ -74,6 +75,19 @@ TEST_F(AiColumnResultTest, text_preserves_empty_and_enforces_capacity) {
   EXPECT_EQ(OB_SUCCESS,check(ObVarcharType,"four",4));
   EXPECT_NE(OB_SUCCESS,check(ObVarcharType,"longer",4));
   EXPECT_EQ(OB_SUCCESS,check(ObLongTextType,"a longtext response"));
+}
+TEST_F(AiColumnResultTest, text_counts_characters_and_rejects_unrepresentable_results) {
+  EXPECT_EQ(OB_SUCCESS,check(ObVarcharType,"中文",2));
+  EXPECT_NE(OB_SUCCESS,check(ObVarcharType,"中文多",2));
+  column_.set_data_type(ObVarcharType);
+  column_.set_data_length(2);
+  column_.set_collation_type(CS_TYPE_BINARY);
+  EXPECT_NE(OB_SUCCESS,AiColumnWorker::validate_result(column_,false,ObString::make_string("中文"),allocator_));
+  column_.set_collation_type(CS_TYPE_LATIN1_BIN);
+  EXPECT_NE(OB_SUCCESS,AiColumnWorker::validate_result(column_,false,ObString::make_string("中文"),allocator_));
+  column_.set_collation_type(CS_TYPE_UTF8MB4_BIN);
+  const char invalid[] = {static_cast<char>(0xc3),static_cast<char>(0x28)};
+  EXPECT_NE(OB_SUCCESS,AiColumnWorker::validate_result(column_,false,ObString(2,invalid),allocator_));
 }
 TEST_F(AiColumnResultTest, vector_checks_dimensions_and_numeric_elements) {
   EXPECT_EQ(OB_SUCCESS,vector("[1,2,3,4]"));

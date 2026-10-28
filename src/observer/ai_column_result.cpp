@@ -3,6 +3,7 @@
 #include "common/json_type/ob_json_parse.h"
 #include "share/json/ob_json_helper.h"
 #include "query/vector/ob_vector_index_util.h"
+#include "lib/charset/ob_charset.h"
 #include <charconv>
 #include <cmath>
 #include <limits>
@@ -46,7 +47,25 @@ int AiColumnWorker::validate_result(const ObColumnSchemaV2 &column, bool is_null
     if (column.get_data_type() == ObTextType) { limit = 65535; }
     if (column.get_data_type() == ObMediumTextType) { limit = 16777215; }
     if (column.get_data_type() == ObLongTextType) { limit = 4294967295LL; }
-    return value.length() <= limit ? OB_SUCCESS : OB_ERR_DATA_TOO_LONG;
+    int ret = OB_SUCCESS;
+    int64_t valid_bytes = 0;
+    OZ(ObCharset::well_formed_len(CS_TYPE_UTF8MB4_BIN, value.ptr(), value.length(), valid_bytes));
+    if (OB_SUCC(ret) && valid_bytes != value.length()) { ret = OB_INVALID_ARGUMENT; }
+    const ObCollationType target = column.get_collation_type();
+    int64_t max_bytes = 0;
+    OZ(ObCharset::get_mbmaxlen_by_coll(target, max_bytes));
+    const int64_t capacity = MAX(1L, value.length() * max_bytes);
+    if (OB_SUCC(ret) && capacity > UINT32_MAX) { ret = OB_SIZE_OVERFLOW; }
+    char *converted = OB_SUCC(ret) ? static_cast<char *>(allocator.alloc(capacity)) : nullptr;
+    if (OB_SUCC(ret) && converted == nullptr) { ret = OB_ALLOCATE_MEMORY_FAILED; }
+    uint32_t converted_bytes = 0;
+    OZ(ObCharset::charset_convert(CS_TYPE_UTF8MB4_BIN, value.ptr(), value.length(), target,
+                                 converted, capacity, converted_bytes, false, true));
+    const int64_t length = OB_FAIL(ret) ? 0 : ob_is_text_tc(column.get_data_type())
+        || target == CS_TYPE_BINARY ? converted_bytes
+        : ObCharset::strlen_char(target, converted, converted_bytes);
+    if (OB_SUCC(ret) && length > limit) { ret = OB_ERR_DATA_TOO_LONG; }
+    return ret;
   }
   while (first < last && (*first == ' ' || *first == '\n' || *first == '\r' || *first == '\t')) { ++first; }
   while (last > first && (last[-1] == ' ' || last[-1] == '\n' || last[-1] == '\r' || last[-1] == '\t')) { --last; }
