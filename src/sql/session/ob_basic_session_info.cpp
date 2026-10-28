@@ -4088,6 +4088,11 @@ int ObBasicSessionInfo::get_sql_safe_updates(bool &v) const
   return get_bool_sys_var(SYS_VAR_SQL_SAFE_UPDATES, v);
 }
 
+int ObBasicSessionInfo::get_enable_file_sql(bool &v) const
+{
+  return get_bool_sys_var(SYS_VAR_ENABLE_FILE_SQL, v);
+}
+
 int ObBasicSessionInfo::get_regexp_stack_limit(int64_t &v) const
 {
   return get_sys_variable(SYS_VAR_REGEXP_STACK_LIMIT, v);
