@@ -953,7 +953,7 @@ void ObFileScanUtils::logical_type_to_ob_meta(ObFileLogicalType logical_type,
       break;
     case OB_FILE_TYPE_DATETIME:
       meta.set_datetime();
-      accuracy.set_scale(6);
+      accuracy = ObAccuracy(19, 0);
       break;
     case OB_FILE_TYPE_VARCHAR:
     case OB_FILE_TYPE_NULL:
@@ -1968,6 +1968,7 @@ int ObFileScanUtils::infer_csv_schema(ObIAllocator &allocator, ObFileTableDef &t
   const int64_t num_cols = static_cast<int64_t>(fields.size());
   std::vector<ObFileLogicalType> col_types(num_cols, OB_FILE_TYPE_NULL);
   std::vector<bool> col_has_null(num_cols, false);
+  std::vector<int16_t> col_dt_scale(num_cols, 0);
   int64_t data_rows = 0;
 
   if (table_def.options_.header_) {
@@ -1994,7 +1995,14 @@ int ObFileScanUtils::infer_csv_schema(ObIAllocator &allocator, ObFileTableDef &t
         col_has_null[i] = true;
       } else {
         ObString val_str(static_cast<int32_t>(fields[i].value_.size()), fields[i].value_.data());
-        col_types[i] = merge_logical_types(col_types[i], infer_scalar_string_type(val_str, false, false));
+        ObFileLogicalType t = infer_scalar_string_type(val_str, false, false);
+        col_types[i] = merge_logical_types(col_types[i], t);
+        if (t == OB_FILE_TYPE_DATETIME && val_str.length() > 19 && val_str.ptr()[19] == '.') {
+          int16_t sc = static_cast<int16_t>(val_str.length() - 20);
+          if (sc > col_dt_scale[i]) {
+            col_dt_scale[i] = sc;
+          }
+        }
       }
     }
   }
@@ -2027,7 +2035,14 @@ int ObFileScanUtils::infer_csv_schema(ObIAllocator &allocator, ObFileTableDef &t
         col_has_null[i] = true;
       } else {
         ObString val_str(static_cast<int32_t>(fields[i].value_.size()), fields[i].value_.data());
-        col_types[i] = merge_logical_types(col_types[i], infer_scalar_string_type(val_str, false, false));
+        ObFileLogicalType t = infer_scalar_string_type(val_str, false, false);
+        col_types[i] = merge_logical_types(col_types[i], t);
+        if (t == OB_FILE_TYPE_DATETIME && val_str.length() > 19 && val_str.ptr()[19] == '.') {
+          int16_t sc = static_cast<int16_t>(val_str.length() - 20);
+          if (sc > col_dt_scale[i]) {
+            col_dt_scale[i] = sc;
+          }
+        }
       }
     }
   }
@@ -2038,6 +2053,9 @@ int ObFileScanUtils::infer_csv_schema(ObIAllocator &allocator, ObFileTableDef &t
       col.logical_type_ = (col_types[i] == OB_FILE_TYPE_NULL) ? OB_FILE_TYPE_VARCHAR : col_types[i];
       col.is_nullable_ = (data_rows == 0) ? true : col_has_null[i];
       logical_type_to_ob_meta(col.logical_type_, col.meta_, col.accuracy_);
+      if (col.logical_type_ == OB_FILE_TYPE_DATETIME && col_dt_scale[i] > 0) {
+        col.accuracy_.set_scale(std::min<int16_t>(col_dt_scale[i], 6));
+      }
     }
   }
   return ret;
@@ -2606,6 +2624,7 @@ int ObFileScanUtils::infer_jsonl_schema(ObIAllocator &allocator, ObFileTableDef 
     std::string raw_name_;
     ObFileLogicalType type_;
     int64_t non_null_cnt_;
+    int16_t max_dt_scale_;
   };
   std::vector<JsonColState> cols;
   std::vector<JsonFieldEntry> entries;
@@ -2635,6 +2654,7 @@ int ObFileScanUtils::infer_jsonl_schema(ObIAllocator &allocator, ObFileTableDef 
         st.raw_name_ = e.key_;
         st.type_ = OB_FILE_TYPE_NULL;
         st.non_null_cnt_ = 0;
+        st.max_dt_scale_ = 0;
         cols.push_back( std::move(st) );
       }
       ObFileLogicalType elem_type = OB_FILE_TYPE_NULL;
@@ -2651,6 +2671,12 @@ int ObFileScanUtils::infer_jsonl_schema(ObIAllocator &allocator, ObFileTableDef 
         } else {
           ObString sv(static_cast<int32_t>(e.str_val_.size()), e.str_val_.data());
           elem_type = infer_scalar_string_type(sv, false, true /*is_quoted_in_json*/);
+          if (elem_type == OB_FILE_TYPE_DATETIME && sv.length() > 19 && sv.ptr()[19] == '.') {
+            int16_t sc = static_cast<int16_t>(sv.length() - 20);
+            if (sc > cols[col_idx].max_dt_scale_) {
+              cols[col_idx].max_dt_scale_ = sc;
+            }
+          }
         }
       }
       cols[col_idx].type_ = merge_logical_types(cols[col_idx].type_, elem_type);
@@ -2674,6 +2700,9 @@ int ObFileScanUtils::infer_jsonl_schema(ObIAllocator &allocator, ObFileTableDef 
       col.logical_type_ = (cols[i].type_ == OB_FILE_TYPE_NULL) ? OB_FILE_TYPE_VARCHAR : cols[i].type_;
       col.is_nullable_ = (cols[i].non_null_cnt_ < total_rows);
       logical_type_to_ob_meta(col.logical_type_, col.meta_, col.accuracy_);
+      if (col.logical_type_ == OB_FILE_TYPE_DATETIME && cols[i].max_dt_scale_ > 0) {
+        col.accuracy_.set_scale(std::min<int16_t>(cols[i].max_dt_scale_, 6));
+      }
       ret = table_def.columns_.push_back(col);
     }
     if (OB_SUCC(ret)) {
@@ -4343,6 +4372,13 @@ int ObFileScanUtils::infer_parquet_schema(ObIAllocator &allocator, ObFileTableDe
     }
     col.is_nullable_ = (se.repetition_type_ != PQ_REQUIRED);
     logical_type_to_ob_meta(col.logical_type_, col.meta_, col.accuracy_);
+    if (col.logical_type_ == OB_FILE_TYPE_DATETIME) {
+      if (se.converted_type_ == PQ_CT_TIMESTAMP_MILLIS) {
+        col.accuracy_.set_scale(3);
+      } else if (se.converted_type_ == PQ_CT_TIMESTAMP_MICROS) {
+        col.accuracy_.set_scale(6);
+      }
+    }
     if (OB_FAIL(ob_write_string(allocator,
                                 ObString(static_cast<int32_t>(se.name_.size()), se.name_.data()),
                                 col.name_,
