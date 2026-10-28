@@ -43,6 +43,31 @@ int ObFTDictHub::init()
 int ObFTDictHub::destroy()
 {
   int ret = OB_SUCCESS;
+  if (OB_NOT_NULL(ik_dict_main_)) {
+    OB_DELETEx(ObFTRangeDict, &ik_dict_allocator_, ik_dict_main_);
+    ik_dict_main_ = nullptr;
+  }
+  if (OB_NOT_NULL(ik_dict_quan_)) {
+    OB_DELETEx(ObFTRangeDict, &ik_dict_allocator_, ik_dict_quan_);
+    ik_dict_quan_ = nullptr;
+  }
+  if (OB_NOT_NULL(ik_dict_stop_)) {
+    OB_DELETEx(ObFTRangeDict, &ik_dict_allocator_, ik_dict_stop_);
+    ik_dict_stop_ = nullptr;
+  }
+  if (OB_NOT_NULL(ik_main_container_)) {
+    OB_DELETEx(ObFTCacheRangeContainer, &ik_dict_allocator_, ik_main_container_);
+    ik_main_container_ = nullptr;
+  }
+  if (OB_NOT_NULL(ik_quan_container_)) {
+    OB_DELETEx(ObFTCacheRangeContainer, &ik_dict_allocator_, ik_quan_container_);
+    ik_quan_container_ = nullptr;
+  }
+  if (OB_NOT_NULL(ik_stop_container_)) {
+    OB_DELETEx(ObFTCacheRangeContainer, &ik_dict_allocator_, ik_stop_container_);
+    ik_stop_container_ = nullptr;
+  }
+  ik_dict_allocator_.reset();
   is_inited_ = false;
   return ret;
 }
@@ -114,6 +139,70 @@ int ObFTDictHub::load_cache(const ObFTDictDesc &desc, ObFTCacheRangeContainer &c
   return ret;
 }
 
+
+int ObFTDictHub::get_ik_dicts(ObIFTDict *&dict_main, ObIFTDict *&dict_quan, ObIFTDict *&dict_stop)
+{
+  int ret = OB_SUCCESS;
+  if (!is_inited_) {
+    ret = OB_NOT_INIT;
+  } else if (OB_LIKELY(nullptr != ik_dict_main_ && nullptr != ik_dict_quan_ && nullptr != ik_dict_stop_)) {
+    dict_main = ik_dict_main_;
+    dict_quan = ik_dict_quan_;
+    dict_stop = ik_dict_stop_;
+  } else {
+    common::SpinWLockGuard guard(ik_dict_lock_);
+    if (nullptr != ik_dict_main_ && nullptr != ik_dict_quan_ && nullptr != ik_dict_stop_) {
+      dict_main = ik_dict_main_;
+      dict_quan = ik_dict_quan_;
+      dict_stop = ik_dict_stop_;
+    } else {
+      ObFTDictDesc main_desc("main_dict",
+                             ObFTDictType::DICT_IK_MAIN,
+                             ObCharsetType::CHARSET_UTF8MB4,
+                             ObCollationType::CS_TYPE_UTF8MB4_BIN);
+      ObFTDictDesc quan_desc("quan_dict",
+                             ObFTDictType::DICT_IK_QUAN,
+                             ObCharsetType::CHARSET_UTF8MB4,
+                             ObCollationType::CS_TYPE_UTF8MB4_BIN);
+      ObFTDictDesc stop_desc("stopword",
+                             ObFTDictType::DICT_IK_STOP,
+                             ObCharsetType::CHARSET_UTF8MB4,
+                             ObCollationType::CS_TYPE_UTF8MB4_BIN);
+
+      if (OB_ISNULL(ik_main_container_ = OB_NEWx(ObFTCacheRangeContainer, &ik_dict_allocator_, ik_dict_allocator_))
+          || OB_ISNULL(ik_quan_container_ = OB_NEWx(ObFTCacheRangeContainer, &ik_dict_allocator_, ik_dict_allocator_))
+          || OB_ISNULL(ik_stop_container_ = OB_NEWx(ObFTCacheRangeContainer, &ik_dict_allocator_, ik_dict_allocator_))) {
+        ret = OB_ALLOCATE_MEMORY_FAILED;
+      } else {
+        auto load_or_build = [this](const ObFTDictDesc &desc, ObFTCacheRangeContainer &c) -> int {
+          int r = this->load_cache(desc, c);
+          if (OB_ENTRY_NOT_EXIST == r) {
+            r = this->build_cache(desc, c);
+          }
+          return r;
+        };
+
+        if (OB_FAIL(load_or_build(main_desc, *ik_main_container_))) {
+        } else if (OB_FAIL(load_or_build(quan_desc, *ik_quan_container_))) {
+        } else if (OB_FAIL(load_or_build(stop_desc, *ik_stop_container_))) {
+        } else {
+          ik_dict_main_ = OB_NEWx(ObFTRangeDict, &ik_dict_allocator_, ik_dict_allocator_, ik_main_container_, main_desc);
+          ik_dict_quan_ = OB_NEWx(ObFTRangeDict, &ik_dict_allocator_, ik_dict_allocator_, ik_quan_container_, quan_desc);
+          ik_dict_stop_ = OB_NEWx(ObFTRangeDict, &ik_dict_allocator_, ik_dict_allocator_, ik_stop_container_, stop_desc);
+          if (OB_ISNULL(ik_dict_main_) || OB_ISNULL(ik_dict_quan_) || OB_ISNULL(ik_dict_stop_)) {
+            ret = OB_ALLOCATE_MEMORY_FAILED;
+          } else if (OB_FAIL(ik_dict_main_->init()) || OB_FAIL(ik_dict_quan_->init()) || OB_FAIL(ik_dict_stop_->init())) {
+          } else {
+            dict_main = ik_dict_main_;
+            dict_quan = ik_dict_quan_;
+            dict_stop = ik_dict_stop_;
+          }
+        }
+      }
+    }
+  }
+  return ret;
+}
 
 int ObFTDictHub::get_dict_info(const ObFTDictInfoKey &key, ObFTDictInfo &info)
 {

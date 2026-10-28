@@ -36,7 +36,7 @@ ObIRIterLoserTreeItem::ObIRIterLoserTreeItem()
 
 ObIRIterLoserTreeCmp::ObIRIterLoserTreeCmp()
   : cmp_func_(), iter_doc_ids_(nullptr), datum_access_ctx_(nullptr),
-    is_inited_(false)
+    is_int64_(false), is_inited_(false)
 {
 }
 
@@ -55,6 +55,7 @@ int ObIRIterLoserTreeCmp::init(
   } else {
     iter_doc_ids_ = iter_doc_ids;
     datum_access_ctx_ = datum_access_ctx;
+    is_int64_ = (ObIntType == doc_id_meta.type_);
     common::ObDatumBasicFuncs *basic_funcs = ObDatumFuncs::get_basic_func(doc_id_meta.type_, doc_id_meta.cs_type_);
     cmp_func_ = basic_funcs->null_first_cmp_;
     if (OB_ISNULL(cmp_func_)) {
@@ -74,6 +75,10 @@ int ObIRIterLoserTreeCmp::cmp(
   int ret = OB_SUCCESS;
   if (IS_NOT_INIT) {
     ret = OB_NOT_INIT;
+  } else if (is_int64_) {
+    const int64_t l_doc = iter_doc_ids_->at(l.iter_idx_).get_datum().get_int();
+    const int64_t r_doc = iter_doc_ids_->at(r.iter_idx_).get_datum().get_int();
+    cmp_ret = (l_doc > r_doc) - (l_doc < r_doc);
   } else {
     int tmp_ret = 0;
     if (OB_FAIL(cmp_func_(

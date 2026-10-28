@@ -441,6 +441,44 @@ inline int ObFTCharUtil::is_ignore_single_cjk(ObCollationType coll_type,
   return ret;
 }
 
+template <>
+inline int ObFTCharUtil::do_classify<CHARSET_UTF8MB4>(const char *input, const uint8_t char_len, CharType &type)
+{
+  int ret = OB_SUCCESS;
+  type = CharType::USELESS;
+  if (OB_ISNULL(input)) {
+    ret = OB_INVALID_ARGUMENT;
+  } else {
+    const uint8_t u0 = static_cast<uint8_t>(*input);
+    if (OB_LIKELY(u0 < 0x80)) {
+      if ((u0 >= 'a' && u0 <= 'z') || (u0 >= 'A' && u0 <= 'Z')) {
+        type = CharType::ENGLISH_LETTER;
+      } else if (u0 >= '0' && u0 <= '9') {
+        type = CharType::ARABIC_LETTER;
+      } else {
+        type = CharType::USELESS;
+      }
+    } else {
+      ob_wc_t unicode = 0;
+      if (OB_FAIL(decode_unicode<CHARSET_UTF8MB4>(input, char_len, unicode))) {
+      } else if (ObUnicodeBlockUtils::is_chinese(unicode)) {
+        type = CharType::CHINESE;
+      } else if (ObUnicodeBlockUtils::is_alpha(unicode)) {
+        type = CharType::ENGLISH_LETTER;
+      } else if (ObUnicodeBlockUtils::is_arabic(unicode)) {
+        type = CharType::ARABIC_LETTER;
+      } else if (ObUnicodeBlockUtils::is_other_cjk(unicode)) {
+        type = CharType::OTHER_CJK;
+      } else if (ObUnicodeBlockUtils::check_high_surrogate(unicode)) {
+        type = CharType::SURROGATE_HIGH;
+      } else if (ObUnicodeBlockUtils::check_low_surrogate(unicode)) {
+        type = CharType::SURROGATE_LOW;
+      }
+    }
+  }
+  return ret;
+}
+
 template <ObCharsetType CS_TYPE>
 inline int ObFTCharUtil::do_classify(const char *input, const uint8_t char_len, CharType &type)
 {

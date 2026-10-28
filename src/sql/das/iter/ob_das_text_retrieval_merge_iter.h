@@ -61,6 +61,7 @@ private:
   common::ObDatumCmpFuncType cmp_func_;
   const ObIArray<ObDocIdExt> *iter_doc_ids_;
   const common::ObDatumAccessContext *datum_access_ctx_;
+  bool is_int64_;
   bool is_inited_;
 };
 typedef common::ObLoserTree<ObIRIterLoserTreeItem, ObIRIterLoserTreeCmp> ObIRIterLoserTree;

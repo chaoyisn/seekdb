@@ -381,24 +381,21 @@ int ObFTRangeDict::match_with_hit(const ObString &single_word,
 int ObFTRangeDict::find_first_char_range(const ObString &single_word, ObIFTDict *&dict) const
 {
   int ret = OB_SUCCESS;
-  bool found = false;
-  for (int i = 0; OB_SUCC(ret) && !found && i < range_dicts_.size(); ++i) {
-    if (ObCharset::strcmp(ObCollationType::CS_TYPE_UTF8MB4_BIN,
-                          range_dicts_[i].start_.get_word(),
-                          single_word)
-            <= 0
-        && ObCharset::strcmp(ObCollationType::CS_TYPE_UTF8MB4_BIN,
-                             range_dicts_[i].end_.get_word(),
-                             single_word)
-               >= 0) {
-      dict = range_dicts_[i].dict_;
-      found = true;
+  int64_t low = 0;
+  int64_t high = static_cast<int64_t>(range_dicts_.size()) - 1;
+  while (low <= high) {
+    int64_t mid = low + (high - low) / 2;
+    const ObFTRange &range = range_dicts_[mid];
+    if (single_word.compare(range.start_.get_word()) < 0) {
+      high = mid - 1;
+    } else if (single_word.compare(range.end_.get_word()) > 0) {
+      low = mid + 1;
+    } else {
+      dict = range.dict_;
+      return OB_SUCCESS;
     }
   }
-  if (!found) {
-    // not found, dis match
-    ret = OB_ENTRY_NOT_EXIST;
-  }
+  ret = OB_ENTRY_NOT_EXIST;
   return ret;
 }
 

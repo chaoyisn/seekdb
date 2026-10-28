@@ -17,9 +17,13 @@
 #ifndef _OCEANBASE_STORAGE_FTS_DICT_OB_FT_DICT_HUB_H_
 #define _OCEANBASE_STORAGE_FTS_DICT_OB_FT_DICT_HUB_H_
 
+#include "lib/allocator/page_arena.h"
 #include "lib/charset/ob_charset.h"
 #include "lib/lock/ob_bucket_lock.h"
+#include "lib/lock/ob_spin_rwlock.h"
+#include "storage/fts/dict/ob_ft_cache_container.h"
 #include "storage/fts/dict/ob_ft_dict_def.h"
+#include "storage/fts/dict/ob_ft_range_dict.h"
 
 namespace oceanbase
 {
@@ -96,7 +100,12 @@ class ObFTCacheRangeContainer;
 class ObFTDictHub
 {
 public:
-  ObFTDictHub() : is_inited_(false), dict_map_(), rw_dict_lock_() {}
+  ObFTDictHub()
+      : is_inited_(false), dict_map_(), rw_dict_lock_(),
+        ik_dict_lock_(), ik_dict_allocator_(lib::ObMemAttr("FTDictHub")),
+        ik_main_container_(nullptr), ik_quan_container_(nullptr), ik_stop_container_(nullptr),
+        ik_dict_main_(nullptr), ik_dict_quan_(nullptr), ik_dict_stop_(nullptr)
+  {}
   ~ObFTDictHub() {}
 
   int init();
@@ -106,6 +115,8 @@ public:
   int build_cache(const ObFTDictDesc &desc, ObFTCacheRangeContainer &container);
 
   int load_cache(const ObFTDictDesc &desc, ObFTCacheRangeContainer &container);
+
+  int get_ik_dicts(ObIFTDict *&dict_main, ObIFTDict *&dict_quan, ObIFTDict *&dict_stop);
 
 private:
   int get_dict_info(const ObFTDictInfoKey &key, ObFTDictInfo &info);
@@ -118,6 +129,16 @@ private:
   // holds info of dict
   hash::ObHashMap<ObFTDictInfoKey, ObFTDictInfo> dict_map_;
   ObBucketLock rw_dict_lock_;
+
+  // Cached immutable IK dictionaries for zero-allocation tokenization
+  common::SpinRWLock ik_dict_lock_;
+  common::ObArenaAllocator ik_dict_allocator_;
+  ObFTCacheRangeContainer *ik_main_container_;
+  ObFTCacheRangeContainer *ik_quan_container_;
+  ObFTCacheRangeContainer *ik_stop_container_;
+  ObFTRangeDict *ik_dict_main_;
+  ObFTRangeDict *ik_dict_quan_;
+  ObFTRangeDict *ik_dict_stop_;
 };
 
 } //  namespace storage
