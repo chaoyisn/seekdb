@@ -4,6 +4,7 @@
 #include "lib/utility/ob_defer.h"
 #include "observer/ob_inner_sql_connection.h"
 #include "sql/engine/dml/ob_table_modify_op.h"
+#include "sql/engine/dml/ob_dml_service.h"
 #include "sql/engine/expr/ob_expr_uuid.h"
 #include "share/schema/ob_ai_column_schema.h"
 #include "share/schema/ob_schema_getter_guard.h"
@@ -65,10 +66,17 @@ int column_changed(const ObDMLBaseCtDef &ctdef, uint64_t id,
   int ret = OB_SUCCESS;
   ObDatum *old_value = nullptr;
   ObDatum *new_value = nullptr;
-  ObExpr *expr = nullptr;
+  ObExpr *old_expr = nullptr, *new_expr = nullptr;
   changed = false;
-  if (OB_FAIL(find_datum(ctdef, ctdef.old_row_, id, ctx, old_value, expr))) {
-  } else if (OB_FAIL(find_datum(ctdef, ctdef.new_row_, id, ctx, new_value, expr))) {
+  if (OB_FAIL(find_datum(ctdef, ctdef.old_row_, id, ctx, old_value, old_expr))) {
+  } else if (OB_FAIL(find_datum(ctdef, ctdef.new_row_, id, ctx, new_value, new_expr))) {
+  } else if (!old_value->is_null() && !new_value->is_null()
+             && is_lob_storage(old_expr->datum_meta_.type_)
+             && is_lob_storage(new_expr->datum_meta_.type_)) {
+    int64_t difference = 0;
+    ret = ObDMLService::check_lob_column_changed(ctx, *old_expr, *old_value,
+                                               *new_expr, *new_value, difference);
+    changed = difference != 0;
   } else {
     changed = !ObDatum::binary_equal(*old_value, *new_value);
   }
