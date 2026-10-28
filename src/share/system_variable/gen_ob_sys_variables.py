@@ -61,14 +61,14 @@ file_head_annotation = """/*
 """
 
 def parse_json(json_file_name):
-  json_file = open(json_file_name,'r')
-  all_the_vars = json_file.read( )
+  import codecs
+  with codecs.open(json_file_name, 'r', encoding='utf-8') as json_file:
+    all_the_vars = json_file.read()
   json_Dict = json.loads(all_the_vars)
-  filtered_json = filter(lambda d: 'placeholder' not in d[1] or d[1]['placeholder'] is False, json_Dict.iteritems())
+  filtered_json = filter(lambda d: 'placeholder' not in d[1] or d[1]['placeholder'] is False, json_Dict.items())
   filtered_dict = dict(filtered_json)
-  list_sorted_by_name= sorted(filtered_dict.iteritems(), key=lambda d:d[0].lower())
-  list_sorted_by_id= sorted(filtered_dict.iteritems(), key=lambda d:d[1]['id'])
-  json_file.close()
+  list_sorted_by_name= sorted(filtered_dict.items(), key=lambda d:d[0].lower())
+  list_sorted_by_id= sorted(filtered_dict.items(), key=lambda d:d[1]['id'])
   return (json_Dict, list_sorted_by_name, list_sorted_by_id)
 
 def make_alias_file(pdir, alias_file_name, sorted_list):
@@ -255,7 +255,9 @@ def make_cpp_file(pdir, cpp_file_name, sorted_list):
     for required_attr in required_attrs:
       if required_attr not in attributes:
         sys.exit("attribute '" + str(required_attr) + "' is required for item '" + str(name) + "'")
-    for (attribute_key, attribute_value) in attributes.items():
+    key_order = ["default_value", "info", "name", "data_type", "min_val", "max_val", "flags", "id", "base_value", "enum_names", "on_check_and_convert", "on_update"]
+    ordered_items = sorted(attributes.items(), key=lambda x: key_order.index(x[0]) if x[0] in key_order else 99)
+    for (attribute_key, attribute_value) in ordered_items:
       if attribute_value == " ":
         attribute_value = str("")
       if attribute_key in ignored_attrs:

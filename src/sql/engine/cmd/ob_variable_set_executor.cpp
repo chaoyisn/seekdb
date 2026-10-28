@@ -154,13 +154,6 @@ int ObVariableSetExecutor::execute(ObExecContext &ctx, ObVariableSetStmt &stmt)
             if (OB_FAIL(ret)) {
             } else if (OB_FAIL(set_user_variable(value_obj, node.variable_name_, expr_ctx))) {
             }
-          } else if (0 == node.variable_name_.case_compare("enable_file_sql")) {
-            if (OB_FAIL(ObFileScanUtils::set_file_sql_enabled(
-                    session,
-                    node.set_scope_ == ObSetVar::SET_SCOPE_GLOBAL,
-                    node.is_set_default_,
-                    value_obj))) {
-            }
           } else {
             ObSetVar set_var(node.variable_name_, node.set_scope_, node.is_set_default_,
                              *expr_ctx.calc_buf_, *sql_proxy);

@@ -59,9 +59,6 @@ const char *const ObFileScanUtils::COPY_CSV_SPEC_PREFIX   = "\x01" "COPY_CSV:";
 namespace
 {
 
-static std::atomic<bool> g_enable_file_sql_global(false);
-static const char *const SESSION_ENABLE_FILE_SQL_VAR = "__ob_enable_file_sql__";
-
 static std::mutex g_secure_file_priv_mutex;
 static bool g_has_secure_file_priv_override = false;
 static std::string g_secure_file_priv_override;
@@ -243,17 +240,25 @@ static int snappy_decompress_buffer(const uint8_t *src,
 
 bool ObFileScanUtils::is_file_sql_enabled(const ObSQLSessionInfo *session, bool is_global)
 {
-  if (is_global || NULL == session) {
-    return g_enable_file_sql_global.load(std::memory_order_relaxed);
-  }
-  ObString var_name(SESSION_ENABLE_FILE_SQL_VAR);
-  ObObj val;
-  if (OB_SUCCESS == session->get_user_variable_value(var_name, val)) {
-    if (val.is_integer_type()) {
-      return val.get_int() != 0;
+  bool enabled = false;
+  if (OB_NOT_NULL(session)) {
+    if (is_global) {
+      ObObj val;
+      ObArenaAllocator alloc("FileSqlSysVar");
+      ObDataTypeCastParams dtc_params = session->get_dtc_params();
+      if (OB_SUCCESS == ObBasicSessionInfo::get_global_sys_variable(alloc, dtc_params, share::SYS_VAR_ENABLE_FILE_SQL, val)) {
+        int64_t int_val = 0;
+        if (OB_SUCCESS == val.get_int(int_val)) {
+          return int_val != 0;
+        }
+      }
+    } else {
+      if (OB_SUCCESS == session->get_enable_file_sql(enabled)) {
+        return enabled;
+      }
     }
   }
-  return g_enable_file_sql_global.load(std::memory_order_relaxed);
+  return false;
 }
 
 int ObFileScanUtils::set_file_sql_enabled(ObSQLSessionInfo *session,
@@ -279,15 +284,8 @@ int ObFileScanUtils::set_file_sql_enabled(ObSQLSessionInfo *session,
   } else {
     ret = OB_ERR_WRONG_VALUE_FOR_VAR;
   }
-  if (OB_SUCC(ret)) {
-    if (is_global) {
-      g_enable_file_sql_global.store(enabled, std::memory_order_relaxed);
-    } else if (OB_NOT_NULL(session)) {
-      ObSessionVariable sess_var;
-      sess_var.value_.set_int(enabled ? 1 : 0);
-      sess_var.meta_.set_int();
-      ret = session->replace_user_variable(ObString::make_string(SESSION_ENABLE_FILE_SQL_VAR), sess_var);
-    }
+  if (OB_SUCC(ret) && OB_NOT_NULL(session)) {
+    ret = session->update_sys_variable(share::SYS_VAR_ENABLE_FILE_SQL, enabled ? 1 : 0);
   }
   return ret;
 }
