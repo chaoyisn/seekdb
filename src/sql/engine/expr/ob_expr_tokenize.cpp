@@ -58,7 +58,7 @@ int ObExprTokenize::eval_tokenize(const ObExpr &expr, ObEvalCtx &ctx, ObDatum &e
   common::ObArenaAllocator &temp_allocator = tmp_alloc_g.get_allocator();
 
   ObIJsonBase *json_result = nullptr;
-  TokenizeParam param;
+  TokenizeParam param(temp_allocator);
 
   // check param num, which is checked in ObExprOperator::calc_result_typeN.
   if (OB_UNLIKELY(expr.arg_cnt_ < 1 || expr.arg_cnt_ > 3)) {
@@ -123,8 +123,8 @@ int ObExprTokenize::tokenize_fulltext(const TokenizeParam &param,
   return ret;
 }
 
-ObExprTokenize::TokenizeParam ::TokenizeParam()
-  : allocator_(ObMemAttr("TokenizeParam")),
+ObExprTokenize::TokenizeParam::TokenizeParam(ObArenaAllocator &allocator)
+  : allocator_(allocator),
     parser_name_(ObString(OB_DEFAULT_FULLTEXT_PARSER_NAME)),
     meta_(),
     fulltext_(),
@@ -203,9 +203,7 @@ int ObExprTokenize::parse_param(const ObExpr &expr,
   ObDatum *parser_params_datum;
   ObString raw_parser_name = ObString::make_string(OB_DEFAULT_FULLTEXT_PARSER_NAME);
 
-  ObEvalCtx::TempAllocGuard tmp_alloc_g(ctx);
-  
-  MultimodeAlloctor temp_allocator(tmp_alloc_g.get_allocator());
+  MultimodeAlloctor temp_allocator(allocator);
 
   if (OB_UNLIKELY(expr.arg_cnt_ < 1 || expr.arg_cnt_ > 3)) {
     ret = OB_INVALID_ARGUMENT;

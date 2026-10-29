@@ -134,3 +134,21 @@ DROP TABLE fts_partition_batch_guard;
 SELECT HEX(LOWER(CONVERT(0x41425A61627A0049C4B0C4B1C389CEA3F09F9880 USING utf8mb4) COLLATE utf8mb4_bin)) AS lower_hex;
 SELECT HEX(LOWER(CONVERT(0x41425A61627A0049C4B0C4B1C389CEA3F09F9880 USING utf8mb4) COLLATE utf8mb4_general_ci)) AS lower_hex;
 SELECT HEX(LOWER(CONVERT(0x41425A61627A0049C4B0C4B1C389CEA3F09F9880 USING utf8mb4) COLLATE utf8mb4_unicode_ci)) AS lower_hex;
+
+# TOKENIZE parameters share only the current evaluation's temporary arena.
+--disable_warnings
+DROP TABLE IF EXISTS fts_tokenize_arena_guard;
+--enable_warnings
+CREATE TABLE fts_tokenize_arena_guard(id INT PRIMARY KEY,parser VARCHAR(12),cfg JSON,doc VARCHAR(1000)) CHARSET=utf8mb4;
+INSERT INTO fts_tokenize_arena_guard VALUES
+(1,'space','[{"output":"all"},{"additional_args":[{"min_token_size":1},{"max_token_size":84}]}]','A alpha ALPHA beta'),
+(2,'ik','[{"output":"all"},{"additional_args":[{"ik_mode":"max_word"}]}]','中华人民共和国人民大会堂'),
+(3,'beng','[{"output":"all"}]','Database AUDIT audit café'),
+(4,'ngram','[{"additional_args":[{"ngram_token_size":1}]}]','全文索引'),
+(5,'ik','[]',''),(6,'space','[{"output":"all"}]',NULL);
+SELECT id,tokenize(doc,parser,cfg) AS tokens FROM fts_tokenize_arena_guard ORDER BY id;
+SELECT id,tokenize(CONCAT(doc,' extra'),parser,cfg) AS tokens FROM fts_tokenize_arena_guard ORDER BY id DESC;
+SELECT tokenize(CAST(tokenize('alpha BETA alpha','space') AS CHAR),'beng','[{"output":"all"}]') AS nested_tokens;
+SELECT JSON_LENGTH(tokenize(REPEAT('alpha beta gamma ',2000),'space')) AS long_tokens;
+SELECT tokenize('tail delta','space','[{"output":"all"}]') AS tail_tokens;
+DROP TABLE fts_tokenize_arena_guard;

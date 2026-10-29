@@ -549,3 +549,37 @@ lower_hex
 SELECT HEX(LOWER(CONVERT(0x41425A61627A0049C4B0C4B1C389CEA3F09F9880 USING utf8mb4) COLLATE utf8mb4_unicode_ci)) AS lower_hex;
 lower_hex
 61627A61627A006969C4B1C3A9CF83F09F9880
+DROP TABLE IF EXISTS fts_tokenize_arena_guard;
+CREATE TABLE fts_tokenize_arena_guard(id INT PRIMARY KEY,parser VARCHAR(12),cfg JSON,doc VARCHAR(1000)) CHARSET=utf8mb4;
+INSERT INTO fts_tokenize_arena_guard VALUES
+(1,'space','[{"output":"all"},{"additional_args":[{"min_token_size":1},{"max_token_size":84}]}]','A alpha ALPHA beta'),
+(2,'ik','[{"output":"all"},{"additional_args":[{"ik_mode":"max_word"}]}]','中华人民共和国人民大会堂'),
+(3,'beng','[{"output":"all"}]','Database AUDIT audit café'),
+(4,'ngram','[{"additional_args":[{"ngram_token_size":1}]}]','全文索引'),
+(5,'ik','[]',''),(6,'space','[{"output":"all"}]',NULL);
+SELECT id,tokenize(doc,parser,cfg) AS tokens FROM fts_tokenize_arena_guard ORDER BY id;
+id	tokens
+1	{"tokens": [{"alpha": 2}, {"beta": 1}], "doc_len": 3}
+2	{"tokens": [{"大会": 1}, {"人民大会堂": 1}, {"大会堂": 1}, {"共和国": 1}, {"人民大会": 1}, {"人民共和国": 1}, {"中华人民": 1}, {"共和": 1}, {"会堂": 1}, {"中华": 1}, {"中华人民共和国": 1}, {"国人": 1}, {"华人": 1}, {"人民": 2}], "doc_len": 15}
+3	{"tokens": [{"café": 1}, {"audit": 2}, {"database": 1}], "doc_len": 4}
+4	["文", "索", "引", "全"]
+5	[]
+6	{"tokens": [], "doc_len": 0}
+SELECT id,tokenize(CONCAT(doc,' extra'),parser,cfg) AS tokens FROM fts_tokenize_arena_guard ORDER BY id DESC;
+id	tokens
+6	{"tokens": [], "doc_len": 0}
+5	["extra"]
+4	["x", "文", "a", "索", "引", "t", "全", "r", "e"]
+3	{"tokens": [{"café": 1}, {"audit": 2}, {"database": 1}, {"extra": 1}], "doc_len": 5}
+2	{"tokens": [{"大会": 1}, {"人民大会堂": 1}, {"大会堂": 1}, {"共和国": 1}, {"人民大会": 1}, {"人民共和国": 1}, {"中华人民": 1}, {"共和": 1}, {"会堂": 1}, {"extra": 1}, {"中华": 1}, {"中华人民共和国": 1}, {"国人": 1}, {"华人": 1}, {"人民": 2}], "doc_len": 16}
+1	{"tokens": [{"alpha": 2}, {"extra": 1}, {"beta": 1}], "doc_len": 4}
+SELECT tokenize(CAST(tokenize('alpha BETA alpha','space') AS CHAR),'beng','[{"output":"all"}]') AS nested_tokens;
+nested_tokens
+{"tokens": [{"alpha": 1}, {"beta": 1}], "doc_len": 2}
+SELECT JSON_LENGTH(tokenize(REPEAT('alpha beta gamma ',2000),'space')) AS long_tokens;
+long_tokens
+3
+SELECT tokenize('tail delta','space','[{"output":"all"}]') AS tail_tokens;
+tail_tokens
+{"tokens": [{"delta": 1}, {"tail": 1}], "doc_len": 2}
+DROP TABLE fts_tokenize_arena_guard;

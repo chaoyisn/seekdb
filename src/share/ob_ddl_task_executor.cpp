@@ -351,10 +351,10 @@ int ObDDLLocalBuilder::push_task(ObAsyncTask &task)
 
 int64_t ObDDLLocalBuilder::get_thread_cnt_() const
 {
-  // FTS submits independent inverted and doc-word builds. A single worker
-  // serializes both complete scans/sorts even when CPU is available. Keep the
-  // mini pool bounded; SQL work areas still share the existing memory budget.
-  return lib::is_mini_mode() ? MIN(2L, MAX(1L, common::get_cpu_count())) : 16;
+  // FTS submits the doc-rowkey mapping and two independent token indexes.
+  // Let the three jobs overlap when CPU is available, while keeping the mini
+  // pool bounded and all SQL work areas within the existing memory budget.
+  return lib::is_mini_mode() ? MIN(3L, MAX(1L, common::get_cpu_count())) : 16;
 }
 
 }  // end namespace share

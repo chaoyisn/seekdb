@@ -90,6 +90,18 @@ int ObTextDaaTIter::get_next_rows(const int64_t capacity, int64_t &count)
     ObSRMergeItem candidate;
     ObSRMergeItem minimum;
     const int64_t dim_count = dim_iters_->count();
+    // init_daat_iter_param selects this collector for natural-language mode.
+    // Call the concrete implementation here, retaining its accumulation order
+    // and minimum_should_match check without per-dimension virtual dispatch.
+    auto *natural_collector =
+        static_cast<ObSRDaaTInnerProductRelevanceCollector *>(relevance_collector_);
+    const ObExpr *filter = iter_param_->filter_expr_;
+    const bool posting_implies_filter = !iter_param_->need_filter()
+        || (nullptr == iter_param_->relevance_expr_
+            && nullptr == iter_param_->dim_weights_ && 1.0 == iter_param_->field_boost_
+            && nullptr != filter && T_OP_BOOL == filter->type_ && 1 == filter->arg_cnt_
+            && nullptr != filter->args_
+            && filter->args_[0] == iter_param_->relevance_proj_expr_);
     ObTextRetrievalDaaTTokenIter *token_iters[SMALL_MERGE_MAX_DIMS];
     for (int64_t i = 0; i < dim_count; ++i) {
       token_iters[i] = static_cast<ObTextRetrievalDaaTTokenIter *>(dim_iters_->at(i));
@@ -144,12 +156,13 @@ int ObTextDaaTIter::get_next_rows(const int64_t capacity, int64_t &count)
           }
         }
         // Equal IDs are accumulated in iterator order, as in the loser tree.
-        for (int64_t i = 0; OB_SUCC(ret) && i < dim_count; ++i) {
-          if (0 != (matches & (1ULL << i))) {
-            if (OB_FAIL(relevance_collector_->collect_one_dim(i, active_scores_[i]))) {
-            } else {
-              next_round[next_round_cnt_++] = i;
-            }
+        uint64_t remaining_matches = matches;
+        while (OB_SUCC(ret) && 0 != remaining_matches) {
+          const int64_t i = __builtin_ctzll(remaining_matches);
+          remaining_matches &= remaining_matches - 1;
+          if (OB_FAIL(natural_collector->ObSRDaaTInnerProductRelevanceCollector::collect_one_dim(i, active_scores_[i]))) {
+          } else {
+            next_round[next_round_cnt_++] = i;
           }
         }
         active_mask_ &= ~matches;
@@ -157,9 +170,10 @@ int ObTextDaaTIter::get_next_rows(const int64_t capacity, int64_t &count)
         bool need_project = false;
         if (OB_SUCC(ret)) {
           const ObDatum &id = *domain_ids[minimum.iter_idx_];
-          if (OB_FAIL(relevance_collector_->get_result(relevance, need_project))) {
+          if (OB_FAIL(natural_collector->ObSRDaaTInnerProductRelevanceCollector::get_result(relevance, need_project))) {
           } else if (need_project && OB_FAIL(process_collected_row(id, relevance))) {
-          } else if (need_project && OB_FAIL(filter_on_demand(count, relevance, need_project))) {
+          } else if (need_project && !posting_implies_filter
+              && OB_FAIL(filter_on_demand(count, relevance, need_project))) {
           } else if (need_project && OB_FAIL(cache_result(count, id, relevance))) {
           }
         }
