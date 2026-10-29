@@ -496,6 +496,17 @@ int ObTextRetrievalDaaTTokenIter::get_next_row() {
   return ret;
 }
 
+int ObTextRetrievalDaaTTokenIter::get_next_row_with_info(
+    double &score, const ObDatum *&id_datum)
+{
+  int ret = OB_SUCCESS;
+  if (OB_FAIL(get_next_row())) {
+  } else if (OB_FAIL(get_curr_score(score))) {
+  } else if (OB_FAIL(get_curr_id(id_datum))) {
+  }
+  return ret;
+}
+
 int ObTextRetrievalDaaTTokenIter::save_relevances_and_docids()
 {
   int ret = OB_SUCCESS;

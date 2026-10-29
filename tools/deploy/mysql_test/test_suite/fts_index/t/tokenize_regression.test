@@ -28,6 +28,11 @@ INSERT INTO fts_batch_regression VALUES (1,1,'token00 token01 token02 token03 to
 ALTER TABLE fts_batch_regression ADD FULLTEXT INDEX ft(content) WITH PARSER space;
 SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00') ORDER BY tenant_id,id;
 SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token15 token16 token19') ORDER BY tenant_id,id;
+# Small posting-list merge, heap fallback, boolean fallback and function lookup.
+SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token01 token02 token03 token04 token05 token06 token07') ORDER BY tenant_id,id;
+SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token01 token02 token03 token04 token05 token06 token07 token08') ORDER BY tenant_id,id;
+SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('+token00 +token19' IN BOOLEAN MODE) ORDER BY tenant_id,id;
+SELECT tenant_id,id,MATCH(content) AGAINST('token00 token19')>0 AS is_match FROM fts_batch_regression WHERE tenant_id=2 AND id=2;
 UPDATE fts_batch_regression SET content='kiwi' WHERE tenant_id=1 AND id=1;
 SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token15 token16') ORDER BY tenant_id,id;
 DROP TABLE fts_batch_regression;
