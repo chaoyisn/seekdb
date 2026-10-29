@@ -18,3 +18,25 @@ INSERT INTO fts_word_map_reuse VALUES(8,'mango mango');
 SELECT id FROM fts_word_map_reuse WHERE MATCH(content) AGAINST('kiwi') ORDER BY id;
 SELECT id FROM fts_word_map_reuse WHERE MATCH(content) AGAINST('pear') ORDER BY id;
 DROP TABLE fts_word_map_reuse;
+
+# Batches must retain composite source keys and stop at a document boundary.
+--disable_warnings
+DROP TABLE IF EXISTS fts_batch_regression;
+--enable_warnings
+CREATE TABLE fts_batch_regression (tenant_id INT, id INT, content LONGTEXT, PRIMARY KEY(tenant_id,id)) CHARSET=utf8mb4 PARTITION BY HASH(tenant_id) PARTITIONS 4;
+INSERT INTO fts_batch_regression VALUES (1,1,'token00 token01 token02 token03 token04 token05 token06 token07 token08 token09 token10 token11 token12 token13 token14 token15 token16 token17 token18 token19'),(1,2,''),(2,1,NULL),(2,2,'token19 kiwi kiwi'),(3,1,'token00 pear');
+ALTER TABLE fts_batch_regression ADD FULLTEXT INDEX ft(content) WITH PARSER space;
+SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00') ORDER BY tenant_id,id;
+SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token15 token16 token19') ORDER BY tenant_id,id;
+UPDATE fts_batch_regression SET content='kiwi' WHERE tenant_id=1 AND id=1;
+SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token15 token16') ORDER BY tenant_id,id;
+DROP TABLE fts_batch_regression;
+# A single NUL must sort after the empty binary string, before longer strings.
+--disable_warnings
+DROP TABLE IF EXISTS fts_binary_sort_regression;
+--enable_warnings
+CREATE TABLE fts_binary_sort_regression(id INT PRIMARY KEY,s VARBINARY(32),n INT);
+INSERT INTO fts_binary_sort_regression VALUES(1,NULL,1),(2,X'',1),(3,0x00,1),(4,0x0000,1),(5,0x0001,1),(6,0x01,1),(7,0x61,1);
+SELECT /*+ OPT_PARAM('enable_newsort','true') */ id,CONCAT('[',HEX(s),']') AS binary_value FROM fts_binary_sort_regression ORDER BY s,n,id;
+SELECT /*+ OPT_PARAM('enable_newsort','true') */ id,CONCAT('[',HEX(s),']') AS binary_value FROM fts_binary_sort_regression ORDER BY s DESC,n,id;
+DROP TABLE fts_binary_sort_regression;

@@ -2202,6 +2202,77 @@ int ObTableScanOp::inner_get_next_batch(const int64_t max_row_cnt)
   if (OB_UNLIKELY(rand_scan_processor_.use_rand_scan())) {
     if (OB_FAIL(rand_scan_processor_.inner_get_next_batch(max_row_cnt))) {
     }
+  } else if (MY_SPEC.is_fts_ddl_ && nullptr == tsc_rtdef_.scan_rtdef_.sample_info_) {
+    clear_evaluated_flag();
+    brs_.size_ = 0;
+    brs_.end_ = false;
+    brs_.all_rows_active_ = true;
+    const int64_t capacity = MIN(max_row_cnt, MY_SPEC.max_batch_size_);
+    ObExpr *exprs[4] = {nullptr, nullptr, nullptr, nullptr};
+    const ObObjDatumMapType *types = MY_SPEC.is_fts_index_aux_
+        ? ObFTIndexRowCache::FTS_INDEX_TYPES : ObFTIndexRowCache::FTS_DOC_WORD_TYPES;
+    const ObExprOperatorType *expr_types = MY_SPEC.is_fts_index_aux_
+        ? ObFTIndexRowCache::FTS_INDEX_EXPR_TYPE : ObFTIndexRowCache::FTS_DOC_WORD_EXPR_TYPE;
+    ObEvalCtx::BatchInfoScopeGuard guard(eval_ctx_);
+    guard.set_batch_idx(0);
+    guard.set_batch_size(1);
+    blocksstable::ObDatumRow *row = nullptr;
+    if (OB_UNLIKELY(capacity <= 0)) {
+      ret = OB_INVALID_ARGUMENT;
+    } else if (OB_FAIL(ctx_.check_status())) {
+    } else if (OB_FAIL(do_init_before_get_row())) {
+    } else if (OB_FAIL(fts_index_.get_next_row(row))) {
+      if (OB_ITER_END == ret) {
+        if (OB_FAIL(fetch_next_fts_index_rows())) {
+          if (OB_ITER_END == ret) {
+            brs_.end_ = true;
+            ret = OB_SUCCESS;
+          }
+        } else if (OB_FAIL(fts_index_.get_next_row(row))) {
+        }
+      }
+    }
+    for (int64_t i = 0; OB_SUCC(ret) && !brs_.end_ && i < 4; ++i) {
+      if (OB_FAIL(get_output_fts_col_expr_by_type(expr_types[i], exprs[i]))) {
+      } else if (OB_UNLIKELY(!exprs[i]->is_batch_result())) {
+        ret = OB_ERR_UNEXPECTED;
+      } else {
+        exprs[i]->locate_datums_for_update(eval_ctx_, capacity);
+      }
+    }
+    // Keep a batch inside one document: the cached token strings remain valid
+    // until the next document is segmented, after this batch has been consumed.
+    while (OB_SUCC(ret) && !brs_.end_ && brs_.size_ < capacity) {
+      for (int64_t i = 0; OB_SUCC(ret) && i < 4; ++i) {
+        ObDatum &datum = exprs[i]->locate_batch_datums(eval_ctx_)[brs_.size_];
+        if (OB_FAIL(datum.from_storage_datum(row->storage_datums_[i], types[i]))) {
+        }
+      }
+      if (OB_SUCC(ret)) {
+        ++brs_.size_;
+        if (brs_.size_ < capacity && OB_FAIL(fts_index_.get_next_row(row))) {
+          if (OB_ITER_END == ret) {
+            ret = OB_SUCCESS;
+            break;
+          }
+        }
+      }
+    }
+    if (OB_SUCC(ret)) {
+      brs_.skip_->reset(brs_.size_);
+      for (int64_t i = 0; brs_.size_ > 0 && i < MY_SPEC.output_.count(); ++i) {
+        ObExpr *expr = MY_SPEC.output_.at(i);
+        if (expr != exprs[0] && expr != exprs[1] && expr != exprs[2] && expr != exprs[3]) {
+          // Source columns are constant across the tokens of this document.
+          ObDatum *datums = expr->locate_batch_datums(eval_ctx_);
+          for (int64_t j = 1; j < brs_.size_; ++j) {
+            datums[j] = datums[0];
+          }
+        }
+        expr->get_evaluated_flags(eval_ctx_).set_all(brs_.size_);
+        expr->set_evaluated_projected(eval_ctx_);
+      }
+    }
   } else if (OB_FAIL(inner_get_next_batch_for_tsc(max_row_cnt))) {
   }
 

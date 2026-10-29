@@ -643,8 +643,9 @@ int ObOrderPerservingEncoder::encode_tails(unsigned char *to, int64_t max_buf_le
   } else if (cs == CS_TYPE_COLLATION_FREE || cs == CS_TYPE_BINARY) {
     if (with_empty_str) {
       *to = 0x00;
-      to++;
-      to_len++;
+      *(to + 1) = 0x01;
+      to += 2;
+      to_len += 2;
     }
     *to = 0x00;
     *(to+1) = 0x00;

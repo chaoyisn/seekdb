@@ -6947,6 +6947,18 @@ int ObOptimizerUtil::check_can_encode_sortkey(const common::ObIArray<OrderItem> 
   bool has_hint = false;
   can_sort_opt = true;
   bool old_can_opt = false;
+  bool has_string_sortkey = false;
+  bool is_fts_build = false;
+  ObOptimizerContext &opt_ctx = plan.get_optimizer_context();
+  if (opt_ctx.is_insert_stmt_in_online_ddl() && nullptr != opt_ctx.get_sql_schema_guard()) {
+    const TableItem *table = opt_ctx.get_root_stmt()->get_table_item(0);
+    const ObTableSchema *schema = nullptr;
+    if (nullptr != table
+        && OB_SUCCESS == opt_ctx.get_sql_schema_guard()->get_table_schema(table->ddl_table_id_, schema)
+        && nullptr != schema) {
+      is_fts_build = schema->is_fts_index_aux() || schema->is_fts_doc_word_aux();
+    }
+  }
   const ObOptParamHint opt_params = plan.get_optimizer_context().get_global_hint().opt_params_;
   if (OB_FAIL(opt_params.has_opt_param(ObOptParamHint::ENABLE_NEWSORT, has_hint))) {
   } else if (has_hint) {
@@ -6956,12 +6968,23 @@ int ObOptimizerUtil::check_can_encode_sortkey(const common::ObIArray<OrderItem> 
     can_sort_opt &= config::_enable_newsort();
 
     for (int64_t i = 0; OB_SUCC(ret) && can_sort_opt && i < order_keys.count(); i++) {
+      const ObObjType type = order_keys.at(i).expr_->get_data_type();
+      // The encoder implements VARCHAR as well as CHAR. Index construction
+      // uses VARCHAR tokens, so apply the existing string-collation gate.
+      const ObCollationType cs = order_keys.at(i).expr_->get_collation_type();
+      const bool is_utf8_string = (ObVarcharType == type || ObCharType == type)
+          && (CS_TYPE_UTF8MB4_GENERAL_CI == cs || CS_TYPE_UTF8MB4_BIN == cs);
+      const ObObjType checked_type = is_fts_build
+          && ObVarcharType == type && (is_utf8_string || CS_TYPE_BINARY == cs)
+          ? ObCharType : type;
       if (!ObOrderPerservingEncoder::can_encode_sortkey(
-                            order_keys.at(i).expr_->get_data_type(),
+                            checked_type,
                             order_keys.at(i).expr_->get_collation_type())) {
         can_sort_opt = false;
       } else if (OB_FAIL(sort_keys.push_back(order_keys.at(i).expr_))) {
-      } else { /* do nothing */ }
+      } else {
+        has_string_sortkey |= is_utf8_string;
+      }
     }
     old_can_opt = can_sort_opt;
 
@@ -6970,6 +6993,10 @@ int ObOptimizerUtil::check_can_encode_sortkey(const common::ObIArray<OrderItem> 
       // do nothing
     } else if (!can_sort_opt) {
       // do nothing
+    } else if (is_fts_build && has_string_sortkey) {
+      // Source cardinality and full-text width describe documents, not the
+      // expanded token rows. Keep the type/collation gate above, but do not
+      // apply the source-row cost thresholds to the token sort.
     } else if (OB_FAIL(ObOptEstCost::estimate_width_for_exprs(plan.get_basic_table_metas(),
                                                               plan.get_selectivity_ctx(),
                                                               sort_keys,

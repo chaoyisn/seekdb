@@ -377,6 +377,11 @@ int ObExprTokenize::TokenizeParam::reform_parser_properties(const ObString &prop
   int ret = OB_SUCCESS;
   storage::ObFTParserJsonProps parser_properties;
 
+  if (properties.empty()) {
+    // The parser helper initializes built-in defaults directly. Custom
+    // properties still pass through the DDL validation below.
+    return OB_SUCCESS;
+  }
   if (OB_FAIL(parser_properties.init())) {
   } else if (OB_FAIL(parser_properties.parse_from_valid_str(properties))) {
     LOG_USER_ERROR(OB_INVALID_ARGUMENT, "parser properties invalid.");

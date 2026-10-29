@@ -51,7 +51,8 @@ private:
   ObObjMeta meta_;
 };
 
-typedef common::hash::ObHashMap<ObFTWord, int64_t> ObFTWordMap;
+// Each map belongs to one document's parser invocation; it is never shared.
+typedef common::hash::ObHashMap<ObFTWord, int64_t, common::hash::NoPthreadDefendMode> ObFTWordMap;
 
 class ObAddWordFlag final
 {
