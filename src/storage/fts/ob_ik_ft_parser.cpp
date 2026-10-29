@@ -134,12 +134,16 @@ int ObIKFTParser::process_one_char(TokenizeContext &ctx,
                                    const ObFTCharUtil::CharType type)
 {
   int ret = OB_SUCCESS;
-  // proces by char with all segmenters
-  for (ObList<ObIIKProcessor *, ObIAllocator>::iterator iter = segmenters_.begin();
-       OB_SUCC(ret) && iter != segmenters_.end();
-       iter++) {
-    if (OB_FAIL((*iter)->process(ctx, ch, char_len, type))) {
-    }
+  // Every processor sees every character, in the same order, to flush its
+  // pending state. Their concrete types are fixed by init_segmenter().
+  if (OB_FAIL(static_cast<ObIKLetterProcessor *>(segmenters_[0])
+                  ->ObIKLetterProcessor::do_process(ctx, ch, char_len, type))) {
+  } else if (OB_FAIL(static_cast<ObIKQuantifierProcessor *>(segmenters_[1])
+                         ->ObIKQuantifierProcessor::do_process(ctx, ch, char_len, type))) {
+  } else if (OB_FAIL(static_cast<ObIKCJKProcessor *>(segmenters_[2])
+                         ->ObIKCJKProcessor::do_process(ctx, ch, char_len, type))) {
+  } else if (OB_FAIL(static_cast<ObIKSurrogateProcessor *>(segmenters_[3])
+                         ->ObIKSurrogateProcessor::do_process(ctx, ch, char_len, type))) {
   }
   return ret;
 }
@@ -294,16 +298,13 @@ int ObIKFTParser::init_segmenter(const ObFTParserParam &param)
     ret = OB_ALLOCATE_MEMORY_FAILED;
   } else if (OB_ISNULL(surrogate_seg = OB_NEWx(ObIKSurrogateProcessor, &allocator_))) {
     ret = OB_ALLOCATE_MEMORY_FAILED;
-  } else if (OB_FAIL(segmenters_.push_back(letter_seg))) {
-  } else if (FALSE_IT(letter_seg = nullptr)) {
-  } else if (OB_FAIL(segmenters_.push_back(cnqsg))) {
-  } else if (FALSE_IT(cnqsg = nullptr)) {
-  } else if (OB_FAIL(segmenters_.push_back(cjksg))) {
-  } else if (FALSE_IT(cjksg = nullptr)) {
-  } else if (OB_FAIL(segmenters_.push_back(surrogate_seg))) {
-  } else if (OB_FALSE_IT(surrogate_seg = nullptr)) {
+  } else {
+    segmenters_[0] = letter_seg;
+    segmenters_[1] = cnqsg;
+    segmenters_[2] = cjksg;
+    segmenters_[3] = surrogate_seg;
   }
-  // push back by order, quantifier is before cjk
+  // Keep quantifier before CJK.
 
   if (OB_FAIL(ret)) {
     OB_DELETEx(ObIKLetterProcessor, &allocator_, letter_seg);
@@ -322,13 +323,13 @@ void ObIKFTParser::reset()
     ctx_ = nullptr;
   }
 
-  for (ObIIKProcessor *segmenter : segmenters_) {
+  for (ObIIKProcessor *&segmenter : segmenters_) {
     if (!OB_ISNULL(segmenter)) {
       segmenter->~ObIIKProcessor();
       allocator_.free(segmenter);
+      segmenter = nullptr;
     }
   }
-  segmenters_.clear();
 
   cache_main_.reset();
   cache_quan_.reset();

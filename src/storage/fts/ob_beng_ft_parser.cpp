@@ -35,25 +35,24 @@ int ObBEngFTParser::get_next_token(
   int ret = OB_SUCCESS;
   ObDatum token;
   int64_t token_freq = 0;
-  char *buf = nullptr;
   word = nullptr;
   word_len = 0;
   char_len = 0;
   word_freq = 0;
+  // With grouping and stop-word normalizers disabled in init(), the tail is
+  // the basic English normalizer. Allocate its output in the caller's arena.
   if (OB_UNLIKELY(!is_inited_)) {
     ret = OB_NOT_INIT;
   } else if (OB_ISNULL(token_stream_)) {
     ret = OB_ERR_UNEXPECTED;
-  } else if (OB_FAIL(token_stream_->get_next(token, token_freq))) {
+  } else if (OB_FAIL(static_cast<share::ObBasicEnglishNormalizer *>(token_stream_)
+                        ->get_next(token, token_freq, allocator_))) {
     if (OB_ITER_END != ret) {
     }
   } else if (OB_ISNULL(token.ptr_) || OB_UNLIKELY(0 >= token.len_ || 0 >= token_freq)) {
     ret = OB_INVALID_ARGUMENT;
-  } else if (OB_ISNULL(buf = static_cast<char *>(allocator_.alloc(token.len_)))) {
-    ret = OB_ALLOCATE_MEMORY_FAILED;
   } else {
-    MEMCPY(buf, token.ptr_, token.len_);
-    word = buf;
+    word = token.ptr_;
     word_len = token.len_;
     char_len = token.len_;
     word_freq = token_freq;

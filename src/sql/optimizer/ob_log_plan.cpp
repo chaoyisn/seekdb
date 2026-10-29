@@ -12056,6 +12056,23 @@ int ObLogPlan::prepare_text_retrieval_scan(const ObIArray<ObRawExpr *> &scan_mat
       }
     }
   }
+  const AccessPath *access_path = OB_SUCC(ret) ? table_scan->get_access_path() : nullptr;
+  if (OB_SUCC(ret) && !table_scan->get_index_back() && scan_filters.empty()
+      && nullptr != access_path && access_path->pushdown_filters_.empty()
+      && !access_path->domain_idx_info_.has_func_lookup()
+      && !access_path->vec_idx_info_.has_vec_index()) {
+    // Truth-only retrieval is supported for a covering MATCH scan. Index-back
+    // and extra-filter paths require the existing scored projection contract.
+    ObTextRetrievalInfo &tr_info = table_scan->get_text_retrieval_info();
+    ObSEArray<ObExprConstraint, 2> constraints;
+    if (OB_FAIL(ObTransformUtils::check_need_calc_match_score(get_optimizer_context().get_exec_ctx(),
+                                                              get_stmt(), match_against,
+                                                              tr_info.need_calc_relevance_, constraints))) {
+    } else if (!tr_info.need_calc_relevance_ &&
+               OB_FAIL(append_array_no_dup(get_optimizer_context().get_query_ctx()->all_expr_constraints_,
+                                            constraints))) {
+    }
+  }
   return ret;
 }
 

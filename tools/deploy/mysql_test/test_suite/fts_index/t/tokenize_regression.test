@@ -1,5 +1,8 @@
 # Unicode case folding and IK tokenization regression.
 SET NAMES utf8mb4;
+SELECT tokenize('cafe café CAFE Café' COLLATE utf8mb4_general_ci,'space','[{"output":"all"}]') AS tokens;
+SELECT tokenize('ALPHA beta ALPHA','beng','[{"output":"all"}]') AS tokens;
+SELECT tokenize('一百二十三公斤 A23.50kg中文，人民1. 😀𠮷','ik') AS tokens;
 SELECT tokenize('École', 'space') AS tokens;
 SELECT tokenize('中华人民共和国人民大会堂', 'ik') AS tokens;
 
@@ -33,6 +36,19 @@ SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('toke
 SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token01 token02 token03 token04 token05 token06 token07 token08') ORDER BY tenant_id,id;
 SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('+token00 +token19' IN BOOLEAN MODE) ORDER BY tenant_id,id;
 SELECT tenant_id,id,MATCH(content) AGAINST('token00 token19')>0 AS is_match FROM fts_batch_regression WHERE tenant_id=2 AND id=2;
+SELECT COUNT(*) FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 missing0000 missing0001 missing0002 missing0003 missing0004 missing0005 missing0006 missing0007 missing0008 missing0009 missing0010 missing0011 missing0012 missing0013 missing0014 missing0015 missing0016 missing0017 missing0018 missing0019 missing0020 missing0021 missing0022 missing0023 missing0024 missing0025 missing0026 missing0027 missing0028 missing0029 missing0030 missing0031 missing0032 missing0033 missing0034 missing0035 missing0036 missing0037 missing0038 missing0039 missing0040 missing0041 missing0042 missing0043 missing0044 missing0045 missing0046 missing0047 missing0048 missing0049 missing0050 missing0051 missing0052 missing0053 missing0054 missing0055 missing0056 missing0057 missing0058 missing0059 missing0060 missing0061 missing0062 missing0063 missing0064 missing0065 missing0066 missing0067 missing0068 missing0069 missing0070 missing0071 missing0072 missing0073 missing0074 missing0075 missing0076 missing0077 missing0078 missing0079 missing0080 missing0081 missing0082 missing0083 missing0084 missing0085 missing0086 missing0087 missing0088 missing0089 missing0090 missing0091 missing0092 missing0093 missing0094 missing0095 missing0096 missing0097 missing0098 missing0099 missing0100 missing0101 missing0102 missing0103 missing0104 missing0105 missing0106 missing0107 missing0108 missing0109 missing0110 missing0111 missing0112 missing0113 missing0114 missing0115 missing0116 missing0117 missing0118 missing0119 missing0120 missing0121 missing0122 missing0123 missing0124 missing0125 missing0126 missing0127 missing0128 missing0129 missing0130 missing0131 missing0132 missing0133 missing0134 missing0135 missing0136 missing0137 missing0138 missing0139 missing0140 missing0141 missing0142 missing0143 missing0144 missing0145 missing0146 missing0147 missing0148 missing0149 missing0150 missing0151 missing0152 missing0153 missing0154 missing0155 missing0156 missing0157 missing0158 missing0159 missing0160 missing0161 missing0162 missing0163 missing0164 missing0165 missing0166 missing0167 missing0168 missing0169 missing0170 missing0171 missing0172 missing0173 missing0174 missing0175 missing0176 missing0177 missing0178 missing0179 missing0180 missing0181 missing0182 missing0183 missing0184 missing0185 missing0186 missing0187 missing0188 missing0189 missing0190 missing0191 missing0192 missing0193 missing0194 missing0195 missing0196 missing0197 missing0198 missing0199 missing0200 missing0201 missing0202 missing0203 missing0204 missing0205 missing0206 missing0207 missing0208 missing0209 missing0210 missing0211 missing0212 missing0213 missing0214 missing0215 missing0216 missing0217 missing0218 missing0219 missing0220 missing0221 missing0222 missing0223 missing0224 missing0225 missing0226 missing0227 missing0228 missing0229 missing0230 missing0231 missing0232 missing0233 missing0234 missing0235 missing0236 missing0237 missing0238 missing0239 missing0240 missing0241 missing0242 missing0243 missing0244 missing0245 missing0246 missing0247 missing0248 missing0249 missing0250 missing0251 missing0252 missing0253 missing0254 missing0255 missing0256 missing0257 missing0258 missing0259 missing0260 missing0261 missing0262 missing0263 missing0264 missing0265 missing0266 missing0267 missing0268 missing0269 missing0270 missing0271 missing0272 missing0273 missing0274 missing0275 missing0276 missing0277 missing0278 missing0279 missing0280 missing0281 missing0282 missing0283 missing0284 missing0285 missing0286 missing0287 missing0288 missing0289 missing0290 missing0291 missing0292 missing0293 missing0294 missing0295 missing0296 missing0297 missing0298 missing0299');
+SELECT tenant_id,id,MATCH(content) AGAINST('token00 token19')>0 AS matched FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19') ORDER BY tenant_id,id;
+SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19') AND id%2=0 ORDER BY tenant_id,id;
+SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19') AND id<2 ORDER BY tenant_id,id;
+SELECT COUNT(*) FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19');
+SELECT COUNT(*) FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19')>0;
+SELECT COUNT(*) FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19')>100;
+SELECT COUNT(*) FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19')=0;
+SELECT COUNT(*) FROM fts_batch_regression WHERE id=2 OR MATCH(content) AGAINST('token00 token19');
+SELECT COUNT(*),SUM(MATCH(content) AGAINST('token00 token19'))>0 FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19');
+SELECT COUNT(*) FROM (SELECT id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19') LIMIT 1)t;
+SELECT COUNT(*) FROM (SELECT id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19') LIMIT 20)t;
+SELECT COUNT(*) FROM (SELECT id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token19') LIMIT 1 OFFSET 1)t;
 UPDATE fts_batch_regression SET content='kiwi' WHERE tenant_id=1 AND id=1;
 SELECT tenant_id,id FROM fts_batch_regression WHERE MATCH(content) AGAINST('token00 token15 token16') ORDER BY tenant_id,id;
 DROP TABLE fts_batch_regression;
@@ -45,3 +61,49 @@ INSERT INTO fts_binary_sort_regression VALUES(1,NULL,1),(2,X'',1),(3,0x00,1),(4,
 SELECT /*+ OPT_PARAM('enable_newsort','true') */ id,CONCAT('[',HEX(s),']') AS binary_value FROM fts_binary_sort_regression ORDER BY s,n,id;
 SELECT /*+ OPT_PARAM('enable_newsort','true') */ id,CONCAT('[',HEX(s),']') AS binary_value FROM fts_binary_sort_regression ORDER BY s DESC,n,id;
 DROP TABLE fts_binary_sort_regression;
+
+# Cardinality-only LIMIT and value-observing fallbacks.
+--disable_warnings
+DROP TABLE IF EXISTS fts_count_order_guard;
+--enable_warnings
+CREATE TABLE fts_count_order_guard(id INT PRIMARY KEY,v INT);
+INSERT INTO fts_count_order_guard VALUES(0,0),(1,NULL),(2,2),(3,NULL),(4,4),(5,NULL),(6,6),(7,NULL),(8,8),(9,NULL),(10,10),(11,NULL);
+SELECT COUNT(*) FROM (SELECT id,v FROM fts_count_order_guard ORDER BY id DESC LIMIT 5 OFFSET 2)t;
+SELECT COUNT(v) FROM (SELECT v FROM fts_count_order_guard ORDER BY id DESC LIMIT 5)t;
+SELECT SUM(v) FROM (SELECT v FROM fts_count_order_guard ORDER BY id DESC LIMIT 5)t;
+SELECT COUNT(*),SUM(v) FROM (SELECT v FROM fts_count_order_guard ORDER BY id DESC LIMIT 5)t;
+SELECT COUNT(*) FROM (SELECT v FROM fts_count_order_guard ORDER BY id DESC LIMIT 5)t WHERE v<8;
+SELECT COUNT(*) FROM (SELECT DISTINCT v FROM fts_count_order_guard ORDER BY v DESC LIMIT 5)t;
+SELECT COUNT(*) FROM (SELECT id,ROW_NUMBER() OVER(ORDER BY id) rn FROM fts_count_order_guard ORDER BY id DESC LIMIT 5)t;
+SELECT COUNT(*) FROM (SELECT id FROM fts_count_order_guard ORDER BY id DESC LIMIT 0)t;
+SET @fts_count_side_effect=0;
+SELECT COUNT(*) FROM (SELECT id FROM fts_count_order_guard ORDER BY (@fts_count_side_effect:=@fts_count_side_effect+1) LIMIT 3)t;
+SELECT @fts_count_side_effect;
+DROP TABLE fts_count_order_guard;
+# Out-row text and string source keys across document-cache reuse.
+--disable_warnings
+DROP TABLE IF EXISTS fts_cache_ngram;
+--enable_warnings
+CREATE TABLE fts_cache_ngram(id VARCHAR(20) PRIMARY KEY,content LONGTEXT) CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+INSERT INTO fts_cache_ngram VALUES('first',REPEAT('全文索引中文 ',1000)),('empty',''),('null',NULL),('tail','其他中文');
+ALTER TABLE fts_cache_ngram ADD FULLTEXT INDEX ft(content) WITH PARSER ngram;
+SELECT id FROM fts_cache_ngram WHERE MATCH(content) AGAINST('全文') ORDER BY id;
+SELECT id FROM fts_cache_ngram WHERE MATCH(content) AGAINST('中文') ORDER BY id;
+UPDATE fts_cache_ngram SET content='其他词' WHERE id='first';
+SELECT id FROM fts_cache_ngram WHERE MATCH(content) AGAINST('全文') ORDER BY id;
+SELECT id FROM fts_cache_ngram WHERE MATCH(content) AGAINST('中文') ORDER BY id;
+DROP TABLE fts_cache_ngram;
+
+# Projected IDs and extra predicates must keep the scored index-back path.
+--disable_warnings
+DROP TABLE IF EXISTS fts_truth_filter_guard;
+--enable_warnings
+CREATE TABLE fts_truth_filter_guard(id INT PRIMARY KEY,content VARCHAR(50)) CHARSET=utf8mb4;
+INSERT INTO fts_truth_filter_guard
+SELECT a.n+b.n*10+c.n*100+1,'alpha beta'
+FROM (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9)a
+CROSS JOIN (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9)b
+CROSS JOIN (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5)c;
+ALTER TABLE fts_truth_filter_guard ADD FULLTEXT INDEX ft(content) WITH PARSER space;
+SELECT id FROM fts_truth_filter_guard WHERE MATCH(content) AGAINST('alpha') AND id%2=0 ORDER BY id;
+DROP TABLE fts_truth_filter_guard;

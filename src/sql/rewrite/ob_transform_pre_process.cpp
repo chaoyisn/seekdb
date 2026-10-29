@@ -32,6 +32,76 @@ namespace oceanbase
 using namespace common;
 namespace sql
 {
+namespace
+{
+// COUNT(*) observes only the number of rows in a plain LIMIT view:
+// min(limit, max(input_rows - offset, 0)). Its ordering cannot change that
+// number. Keep value-observing, tie-sensitive and side-effecting shapes out.
+int check_count_only_limit_view(const ObSelectStmt &parent,
+                                const ObSelectStmt &view,
+                                bool &can_skip_order)
+{
+  int ret = OB_SUCCESS;
+  can_skip_order = false;
+  if (!parent.is_scala_group_by() || parent.get_aggr_item_size() != 1
+      || parent.get_select_item_size() != 1 || parent.get_from_item_size() != 1
+      || parent.get_condition_size() != 0 || parent.has_having()
+      || parent.has_distinct() || parent.has_window_function() || parent.is_set_stmt()
+      || parent.has_order_by() || parent.has_limit() || parent.has_for_update()
+      || parent.has_select_into() || parent.is_contains_assignment()
+      || parent.is_calc_found_rows()
+      || view.get_limit_expr() == nullptr || view.get_limit_percent_expr() != nullptr
+      || view.has_fetch() || view.is_fetch_with_ties()
+      || view.has_group_by() || view.has_distinct() || view.has_window_function()
+      || view.has_having() || view.is_set_stmt() || view.has_recursive_cte()
+      || view.has_for_update() || view.has_select_into() || view.is_calc_found_rows()
+      || view.is_contains_assignment() || view.has_ora_rowscn()
+      || !view.get_pseudo_column_like_exprs().empty()
+      || view.get_table_items().count() != 1 || view.get_from_item_size() != 1) {
+    // Keep the existing rule for other view shapes.
+  } else if (OB_ISNULL(parent.get_aggr_item(0)) || OB_ISNULL(view.get_table_item(0))) {
+    ret = OB_ERR_UNEXPECTED;
+  } else if (!view.get_table_item(0)->is_basic_table()) {
+  } else {
+    const ObAggFunRawExpr *count = parent.get_aggr_item(0);
+    bool counts_every_row = count->get_param_count() == 0;
+    if (count->get_param_count() == 1 && nullptr != count->get_param_expr(0)
+        && count->get_param_expr(0)->is_const_raw_expr()
+        && count->get_param_expr(0)->get_expr_type() != T_QUESTIONMARK) {
+      const ObObj &value = static_cast<const ObConstRawExpr *>(count->get_param_expr(0))->get_value();
+      counts_every_row = !value.is_null() && !value.is_unknown();
+    }
+    // Literal COUNT(1) has the same cardinality as COUNT(*).
+    can_skip_order = count->get_expr_type() == T_FUN_COUNT
+        && counts_every_row && !count->is_param_distinct()
+        && parent.get_select_item(0).expr_ == count;
+    for (int64_t i = 0; OB_SUCC(ret) && can_skip_order && i < view.get_select_item_size(); ++i) {
+      const ObRawExpr *expr = view.get_select_item(i).expr_;
+      if (OB_ISNULL(expr)) {
+        ret = OB_ERR_UNEXPECTED;
+      } else {
+        can_skip_order = expr->is_column_ref_expr() || expr->is_const_raw_expr();
+      }
+    }
+    ObSEArray<ObRawExpr *, 8> exprs;
+    if (OB_SUCC(ret) && can_skip_order && OB_FAIL(view.get_relation_exprs(exprs))) {
+    }
+    for (int64_t i = 0; OB_SUCC(ret) && can_skip_order && i < exprs.count(); ++i) {
+      const ObRawExpr *expr = exprs.at(i);
+      if (OB_ISNULL(expr)) {
+        ret = OB_ERR_UNEXPECTED;
+      } else if (expr->has_flag(CNT_SUB_QUERY) || expr->has_flag(CNT_STATE_FUNC)
+          || expr->has_flag(CNT_RAND_FUNC) || expr->has_flag(CNT_PL_UDF)
+          || expr->has_flag(CNT_DYNAMIC_USER_VARIABLE) || expr->has_flag(CNT_ASSIGN_EXPR)
+          || expr->has_flag(CNT_PSEUDO_COLUMN) || expr->has_flag(CNT_OP_PSEUDO_COLUMN)) {
+        can_skip_order = false;
+      }
+    }
+  }
+  return ret;
+}
+} // namespace
+
 int ObTransformPreProcess::transform_one_stmt(common::ObIArray<ObParentDMLStmt> &parent_stmts,
                                               ObDMLStmt *&stmt,
                                               bool &trans_happened)
@@ -178,9 +248,43 @@ int ObTransformPreProcess::transform_one_stmt(common::ObIArray<ObParentDMLStmt> 
       }
     }
     if (OB_SUCC(ret)) {
-      if (stmt->get_match_exprs().count() > 0 &&
+      bool count_only_limit = false;
+      if (stmt->is_select_stmt() && stmt->get_match_exprs().count() > 0
+          && !stmt->has_order_by() && !parent_stmts.empty()) {
+        ObDMLStmt *parent = parent_stmts.at(parent_stmts.count() - 1).stmt_;
+        if (nullptr != parent && parent->is_select_stmt() && parent->get_table_items().count() == 1) {
+          const TableItem *table = parent->get_table_item(0);
+          if (nullptr != table && table->is_generated_table() && table->ref_query_ == stmt
+              && OB_FAIL(check_count_only_limit_view(*static_cast<const ObSelectStmt *>(parent),
+                                                       *static_cast<const ObSelectStmt *>(stmt),
+                                                       count_only_limit))) {
+          } else if (count_only_limit) {
+            // No outer expression observes these values. Use the existing
+            // pruning helper to retain a dummy output and update column maps,
+            // so counting index entries does not fetch unused source columns.
+            ObSqlBitSet<> removed;
+            for (int64_t i = 0; OB_SUCC(ret) && i < static_cast<ObSelectStmt *>(stmt)->get_select_item_size(); ++i) {
+              ret = removed.add_member(i);
+            }
+            if (OB_SUCC(ret) && OB_FAIL(ObTransformUtils::remove_select_items(ctx_, table->table_id_,
+                                                                               *static_cast<ObSelectStmt *>(stmt),
+                                                                               *parent, removed))) {
+            } else {
+              trans_happened = true;
+            }
+          }
+        }
+      }
+      if (OB_FAIL(ret)) {
+      } else if (stmt->get_match_exprs().count() > 0 &&
           OB_FAIL(preserve_order_for_fulltext_search(stmt, is_happened))) {
       } else {
+        if (count_only_limit) {
+          // Retain the existing full-text expression validation; only its
+          // unobservable implicit ordering can be removed for this shape.
+          stmt->get_order_items().reuse();
+          is_happened = true;
+        }
         trans_happened |= is_happened;
       }
     }
