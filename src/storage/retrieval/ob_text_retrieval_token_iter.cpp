@@ -502,7 +502,12 @@ int ObTextRetrievalDaaTTokenIter::get_next_row_with_info(
     double &score, const ObDatum *&id_datum)
 {
   int ret = OB_SUCCESS;
-  if (OB_FAIL(get_next_row())) {
+  const int64_t next_idx = cur_idx_ + 1;
+  if (OB_LIKELY(next_idx < count_)) {
+    cur_idx_ = next_idx;
+    score = nullptr != relevance_expr_ ? relevance_[cur_idx_] : 1.0;
+    id_datum = &doc_id_[cur_idx_].get_datum();
+  } else if (OB_FAIL(get_next_row())) {
   } else if (OB_FAIL(get_curr_score(score))) {
   } else if (OB_FAIL(get_curr_id(id_datum))) {
   }

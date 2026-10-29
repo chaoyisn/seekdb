@@ -147,6 +147,21 @@ int ObCodeGenerator::detect_batch_size(
           exec_ctx->get_physical_plan_ctx()->get_original_param_cnt(),
           0);
       int64_t rowsets_max_rows = config::_rowsets_max_rows();
+      ObOptimizerContext &opt_ctx = log_plan.get_optimizer_context();
+      if (OB_SUCC(ret) && opt_ctx.is_insert_stmt_in_online_ddl()) {
+        const TableItem *table = opt_ctx.get_root_stmt()->get_table_item(0);
+        const share::schema::ObTableSchema *schema = nullptr;
+        CK(nullptr != table && nullptr != exec_ctx->get_sql_ctx()->schema_guard_);
+        OZ(exec_ctx->get_sql_ctx()->schema_guard_->get_table_schema(table->ddl_table_id_, schema));
+        CK(nullptr != schema);
+        if (OB_SUCC(ret) && (schema->is_fts_index_aux() || schema->is_fts_doc_word_aux())) {
+          // Scan cardinality describes source documents, not expanded token
+          // rows (and is often unknown during DDL). It cannot justify the
+          // small-scan clamp. Retain the normal expression/LOB/memory caps.
+          scan_cardinality = max(scan_cardinality,
+              static_cast<double>(ObStaticEngineExprCG::SMALL_SCAN_CARDINALITY));
+        }
+      }
       OZ(expr_cg.detect_batch_size(flattened_exprs, batch_size,
                                    rowsets_max_rows,
                                    config::_rowsets_target_maxsize(),

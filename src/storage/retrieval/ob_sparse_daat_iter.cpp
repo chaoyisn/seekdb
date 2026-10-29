@@ -39,7 +39,7 @@ int ObSRMergeCmp::init(
   if (OB_ISNULL(iter_ids)) {
     ret = OB_ERR_UNEXPECTED;
   } else {
-    iter_ids_ = iter_ids;
+    iter_ids_ = iter_ids->count() > 0 ? &iter_ids->at(0) : nullptr;
     is_binary_string_ = ObVarcharType == id_meta.type_ && CS_TYPE_BINARY == id_meta.cs_type_;
     common::ObDatumBasicFuncs *basic_funcs = ObDatumFuncs::get_basic_func(id_meta.type_, id_meta.cs_type_);
     cmp_func_ = basic_funcs->null_first_cmp_;

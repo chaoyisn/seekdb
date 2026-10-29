@@ -89,15 +89,23 @@ int ObTextDaaTIter::get_next_rows(const int64_t capacity, int64_t &count)
     const int64_t real_capacity = MIN(capacity, iter_param_->max_batch_size_);
     ObSRMergeItem candidate;
     ObSRMergeItem minimum;
+    const int64_t dim_count = dim_iters_->count();
+    ObTextRetrievalDaaTTokenIter *token_iters[SMALL_MERGE_MAX_DIMS];
+    for (int64_t i = 0; i < dim_count; ++i) {
+      token_iters[i] = static_cast<ObTextRetrievalDaaTTokenIter *>(dim_iters_->at(i));
+    }
+    // These fixed arrays are allocated once for the dimension count. Their
+    // storage stays valid while the posting iterators refill their own batches.
+    int64_t *next_round = &next_round_iter_idxes_.at(0);
+    const ObDatum **domain_ids = &iter_domain_ids_.at(0);
     while (OB_SUCC(ret) && count < real_capacity) {
       ObSRMergeItem item;
       for (int64_t i = 0; OB_SUCC(ret) && i < next_round_cnt_; ++i) {
-        const int64_t idx = next_round_iter_idxes_[i];
-        ObTextRetrievalDaaTTokenIter *iter =
-            static_cast<ObTextRetrievalDaaTTokenIter *>(dim_iters_->at(idx));
+        const int64_t idx = next_round[i];
+        ObTextRetrievalDaaTTokenIter *iter = token_iters[idx];
         if (OB_ISNULL(iter)) {
           ret = OB_ERR_UNEXPECTED;
-        } else if (OB_FAIL(iter->get_next_row_with_info(item.relevance_, iter_domain_ids_[idx]))) {
+        } else if (OB_FAIL(iter->get_next_row_with_info(item.relevance_, domain_ids[idx]))) {
           if (OB_ITER_END == ret) {
             active_mask_ &= ~(1ULL << idx);
             ret = OB_SUCCESS;
@@ -117,7 +125,7 @@ int ObTextDaaTIter::get_next_rows(const int64_t capacity, int64_t &count)
       } else {
         next_round_cnt_ = 0;
         uint64_t matches = 0;
-        for (int64_t i = 0; OB_SUCC(ret) && i < dim_iters_->count(); ++i) {
+        for (int64_t i = 0; OB_SUCC(ret) && i < dim_count; ++i) {
           const uint64_t bit = 1ULL << i;
           if (0 == (active_mask_ & bit)) {
           } else if (0 == matches) {
@@ -136,11 +144,11 @@ int ObTextDaaTIter::get_next_rows(const int64_t capacity, int64_t &count)
           }
         }
         // Equal IDs are accumulated in iterator order, as in the loser tree.
-        for (int64_t i = 0; OB_SUCC(ret) && i < dim_iters_->count(); ++i) {
+        for (int64_t i = 0; OB_SUCC(ret) && i < dim_count; ++i) {
           if (0 != (matches & (1ULL << i))) {
             if (OB_FAIL(relevance_collector_->collect_one_dim(i, active_scores_[i]))) {
             } else {
-              next_round_iter_idxes_[next_round_cnt_++] = i;
+              next_round[next_round_cnt_++] = i;
             }
           }
         }
@@ -148,7 +156,7 @@ int ObTextDaaTIter::get_next_rows(const int64_t capacity, int64_t &count)
         double relevance = 0.0;
         bool need_project = false;
         if (OB_SUCC(ret)) {
-          const ObDatum &id = *iter_domain_ids_[minimum.iter_idx_];
+          const ObDatum &id = *domain_ids[minimum.iter_idx_];
           if (OB_FAIL(relevance_collector_->get_result(relevance, need_project))) {
           } else if (need_project && OB_FAIL(process_collected_row(id, relevance))) {
           } else if (need_project && OB_FAIL(filter_on_demand(count, relevance, need_project))) {

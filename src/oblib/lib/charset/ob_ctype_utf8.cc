@@ -264,9 +264,23 @@ static size_t ob_casedn_utf8mb4(const ObCharsetInfo *cs,
   char *srcend = src + srclen, *dstend= dst + dstlen, *dst0= dst;
   ObUnicaseInfo *uni_plane= cs->caseinfo;
   ob_charset_assert(src != dst || cs->casedn_multiply == 1);
-  while ((src < srcend) &&
-         (srcres = ob_mb_wc_utf8mb4(cs, &w_char,
-                                   (unsigned char*) src, (unsigned char*) srcend)) > 0) {
+  while (src < srcend) {
+    // ASCII characters need no UTF-8 decode/encode. Use the same Unicode
+    // mapping as the general path; mappings such as Turkish I that expand
+    // beyond ASCII still go through the original encoder and bounds checks.
+    if (static_cast<unsigned char>(*src) < 0x80 && dst < dstend) {
+      w_char = static_cast<unsigned char>(*src);
+      ob_tolower_utf8mb4(uni_plane, &w_char);
+      if (w_char < 0x80) {
+        *dst++ = static_cast<char>(w_char);
+        ++src;
+        continue;
+      }
+    }
+    if ((srcres = ob_mb_wc_utf8mb4(cs, &w_char,
+                                 (unsigned char*) src, (unsigned char*) srcend)) <= 0) {
+      break;
+    }
     ob_tolower_utf8mb4(uni_plane, &w_char);
     if ((dstres = ob_wc_mb_utf8mb4(cs, w_char, (unsigned char*) dst, (unsigned char*) dstend)) <= 0) {
       break;
