@@ -136,6 +136,12 @@ int seekdb_cuvs_search(void* handle, const float* query, long nq, long topk,
     {
       size_t required_itopk = (size_t)topk * 4;
       if (required_itopk < 512) required_itopk = 512;
+      /* hipVS hard-caps itopk_size at 512 (detail/cagra/search_single_cta.cuh:139):
+       * a larger value aborts the search with a RAFT failure, and the observer
+       * answers a failed cuVS search with a CPU VSAG fallback.  Clamp instead of
+       * failing.  For every topk <= 128 this leaves the shipped behaviour
+       * byte-for-byte unchanged (topk*4 <= 512 there). */
+      if (required_itopk > 512) required_itopk = 512;
       if (sp->itopk_size < required_itopk) sp->itopk_size = required_itopk;
       sp->search_width = 4;
     }
