@@ -20,11 +20,17 @@ OUTPUT=${1:-$SCRIPT_DIR/libseekdb_cuvs_bridge.so}
 
 mkdir -p "$(dirname "$OUTPUT")"
 
+# [V2] Optional extra compile flags, used only by the instrumented build
+# (e.g. EXTRA_CFLAGS="-DOB_V2_PROFILE"). Empty by default, so the default
+# build is byte-for-byte the frozen V5 behaviour.
+EXTRA_CFLAGS=${EXTRA_CFLAGS:-}
+
 "$HIPCC" \
   -shared \
   -fPIC \
   -O2 \
   -D__HIP_PLATFORM_AMD__ \
+  $EXTRA_CFLAGS \
   -I"$HIPVS_ROOT/include" \
   -I"$ROCM_ROOT/include" \
   "$SCRIPT_DIR/seekdb_cuvs_bridge.c" \
