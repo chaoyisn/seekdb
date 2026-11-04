@@ -144,6 +144,14 @@ int seekdb_cuvs_search(void* handle, const float* query, long nq, long topk,
       if (required_itopk > 512) required_itopk = 512;
       if (sp->itopk_size < required_itopk) sp->itopk_size = required_itopk;
       sp->search_width = 4;
+      /* [V5-P1] cuvsCagraSearchParamsCreate() leaves `algo` zero-initialised
+       * (= SINGLE_CTA, the large-batch kernel; cagra_c.cpp:689).  On nq=1 it
+       * measured 3.6x slower than MULTI_CTA (5.47 vs 1.52 ms/call, SIFT250K
+       * gfx942; docs/V5_performance_audit.md Q1).  AUTO dispatches per query
+       * count (search_plan.cuh:145: nq >= num_sm*2 -> SINGLE_CTA, else
+       * MULTI_CTA), so single SQL queries take the fast path while batches
+       * keep the shipped SINGLE_CTA (probe nq=2000: within 0.1%). */
+      sp->algo = AUTO;
     }
     cuvsFilter f; f.type=NO_FILTER; f.addr=(uintptr_t)0;
     V2_T0();
