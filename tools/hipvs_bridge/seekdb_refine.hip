@@ -172,7 +172,12 @@ int seekdb_refine_round(cuvsResources_t res, const float* base, long n,
                         uint32_t* out_graph)
 {
   if (!res || !base || !in_graph || !out_graph || n <= 0 || dim <= 0) return 1;
-  const long tile_rows = n / 2 > 0 ? n / 2 : n;   /* two tiles per round */
+  /* VRAM budget: the trio must stack on the ~450 MiB floor the GNND stage
+   * leaves behind (code objects + lib globals, released only at process
+   * exit), so d_tile is capped at 16384 rows (16 MiB at degree 256) to keep
+   * the refine peak near base+stage (~370 MiB); D2H cost stays negligible
+   * (kernel-bound at ~6.3 s vs ~20 ms total transfers). */
+  const long tile_rows = n < 16384 ? n : 16384;
   const int  bitwords  = (int)((n + 31) / 32);
   const size_t smem    = (size_t)bitwords * 4 + (size_t)REFINE_CAP * 4 +
                          (size_t)REFINE_POSTS * 2 * 4 + (size_t)dim * 4;
