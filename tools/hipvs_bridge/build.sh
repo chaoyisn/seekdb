@@ -25,19 +25,68 @@ mkdir -p "$(dirname "$OUTPUT")"
 # build is byte-for-byte the frozen V5 behaviour.
 EXTRA_CFLAGS=${EXTRA_CFLAGS:-}
 
+# [V5-P4-S2] Vendored raft headers (third_party/, pinned per MANIFEST): the
+# prune stage calls the frozen library's public cagra::helpers::optimize, and
+# the hipVS install ships no raft headers of its own. GEN holds build-time
+# generated headers vendored verbatim.
+RAFT_INC="$SCRIPT_DIR/third_party/raft-include"
+RAFT_GEN="$SCRIPT_DIR/third_party/raft-gen-include"
+LOGGER_INC="$SCRIPT_DIR/third_party/rapids_logger-include"
+for d in "$RAFT_INC" "$RAFT_GEN" "$LOGGER_INC"; do
+  [[ -d "$d" ]] || { echo "vendored raft include missing: $d" >&2; exit 2; }
+done
+
+# GNND + prune + inject live in the C TU; the refine kernels and the C++
+# prune shim are separate TUs linked into the same .so.
 "$HIPCC" \
-  -shared \
   -fPIC \
   -O2 \
   -D__HIP_PLATFORM_AMD__ \
   $EXTRA_CFLAGS \
+  -I"$SCRIPT_DIR" \
   -I"$HIPVS_ROOT/include" \
   -I"$ROCM_ROOT/include" \
   "$SCRIPT_DIR/seekdb_cuvs_bridge.c" \
+  -c \
+  -o "$SCRIPT_DIR/.bridge.o.tmp"
+
+"$HIPCC" \
+  -fPIC \
+  -O2 \
+  -std=c++17 \
+  -D__HIP_PLATFORM_AMD__ \
+  $EXTRA_CFLAGS \
+  -I"$SCRIPT_DIR" \
+  -I"$HIPVS_ROOT/include" \
+  -I"$ROCM_ROOT/include" \
+  "$SCRIPT_DIR/seekdb_refine.hip" \
+  -c \
+  -o "$SCRIPT_DIR/.refine.o.tmp"
+
+"$HIPCC" \
+  -fPIC \
+  -O2 \
+  -std=c++17 \
+  -D__HIP_PLATFORM_AMD__ \
+  $EXTRA_CFLAGS \
+  -I"$SCRIPT_DIR" \
+  -I"$HIPVS_ROOT/include" \
+  -I"$RAFT_INC" \
+  -I"$RAFT_GEN" \
+  -I"$LOGGER_INC" \
+  -I"$ROCM_ROOT/include" \
+  "$SCRIPT_DIR/seekdb_prune.cpp" \
+  -c \
+  -o "$SCRIPT_DIR/.prune.o.tmp"
+
+"$HIPCC" -shared -o "$OUTPUT" \
+  "$SCRIPT_DIR/.bridge.o.tmp" \
+  "$SCRIPT_DIR/.refine.o.tmp" "$SCRIPT_DIR/.prune.o.tmp" \
   -L"$HIPVS_ROOT/lib" \
   -Wl,-soname,libseekdb_cuvs_bridge.so \
   -Wl,-rpath,"$HIPVS_ROOT/lib:$ROCM_ROOT/lib" \
-  -lcuvs_c \
-  -o "$OUTPUT"
+  -lcuvs_c -lcuvs
+
+rm -f "$SCRIPT_DIR/.refine.o.tmp" "$SCRIPT_DIR/.prune.o.tmp"
 
 echo "built $OUTPUT"

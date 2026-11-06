@@ -2,6 +2,7 @@
 #include "seekdb_cuvs_bridge.h"
 #include <cuvs/core/c_api.h>
 #include <cuvs/neighbors/cagra.h>
+#include <cuvs/neighbors/nn_descent.h>
 #include <dlpack/dlpack.h>
 #ifdef __HIP_PLATFORM_AMD__
 #include <cuvs/cuda_runtime.h>
@@ -10,7 +11,9 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "v2_profile.h"
+#include "seekdb_refine.h"
 
 #ifdef OB_V2_PROFILE
 /* One pair of process-wide events, created once. Every measured section
@@ -63,6 +66,11 @@ typedef struct {
 #ifndef SEEKDB_CUVS_NN_NITER
 #define SEEKDB_CUVS_NN_NITER 64
 #endif
+/* [V5-P4-S2] refine rounds run between GNND and the prune (1 = design
+ * baseline; multi-round re-reads the previous round's output). */
+#ifndef SEEKDB_REFINE_ROUNDS
+#define SEEKDB_REFINE_ROUNDS 1
+#endif
 #define SK_STR2(x) #x
 #define SK_STR(x) SK_STR2(x)
 void* seekdb_cuvs_build(const float* base, long n, long dim)
@@ -83,28 +91,134 @@ void* seekdb_cuvs_build(const float* base, long n, long dim)
   V2_T0();
   if (cuvsCagraIndexParamsCreate(&h->ip) != CUVS_SUCCESS) goto fail_res;
   V2_T1("ip_create", n, dim, "cuvsCagraIndexParamsCreate");
-  h->ip->build_algo = NN_DESCENT;
-  h->ip->graph_degree = 128;
-  h->ip->intermediate_graph_degree = 256;
-  h->ip->nn_descent_niter = SEEKDB_CUVS_NN_NITER;
-  fprintf(stderr, "[seekdb_cuvs_bridge] cagra build params: algo=NN_DESCENT "
-          "graph_degree=%d intermediate_graph_degree=%d nn_descent_niter=%d "
-          "n=%ld dim=%ld\n", h->ip->graph_degree,
-          h->ip->intermediate_graph_degree, h->ip->nn_descent_niter, n, dim);
-  V2_T0();
-  if (cuvsCagraIndexCreate(&h->idx)      != CUVS_SUCCESS) goto fail_ip;
-  V2_T1("idx_create", n, dim, "cuvsCagraIndexCreate");
-  V2_T0();
-  if (cuvsCagraBuild(h->res, h->ip, &dset, h->idx) != CUVS_SUCCESS) goto fail_idx;
-  V2_T1("cagra_build", n, dim, "cuvsCagraBuild NN_DESCENT deg=128 inter=256 "
-        "niter=" SK_STR(SEEKDB_CUVS_NN_NITER));
-  h->n = n; h->dim = dim;
-  return h;
 
-fail_idx: cuvsCagraIndexDestroy(h->idx);
-fail_ip:  cuvsCagraIndexParamsDestroy(h->ip);
-fail_res: cuvsResourcesDestroy(h->res); free(h);
+  /* [V5-P4-S2] Custom GPU graph pipeline (in-repo custom build allowed; the
+   * fixed hipVS/cuVS library is untouched):
+   *   1. official GNND stage via cuvsNNDescentBuild, gd=256 / igd=384 ->
+   *      n x 256 host graph (all columns filled; junk random-fill slots are
+   *      demoted by the exact ranking below);
+   *   2. in-repo HIP refine round(s) (seekdb_refine.hip): exact fp32 re-rank
+   *      over the 1-hop-expanded candidate set, 256-wide sorted output;
+   *   3. official cagra::helpers::optimize prune 256 -> 128 (seekdb_prune.cpp;
+   *      identical semantics to the frozen baseline's internal optimize);
+   *   4. official cuvsCagraIndexFromArgs injection.
+   * Snapshot/serialize/deserialize/search below stay on the official path;
+   * the serialized format depends only on the final index object. */
+  fprintf(stderr, "[seekdb_cuvs_bridge] S2 pipeline: nnd(gd=256 igd=384 "
+          "niter=%d) -> refine(rounds=%d) -> prune256to128 -> FromArgs inject "
+          "n=%ld dim=%ld\n", SEEKDB_CUVS_NN_NITER, SEEKDB_REFINE_ROUNDS, n, dim);
+
+  {
+    cuvsNNDescentIndexParams_t np = NULL;
+    cuvsNNDescentIndex_t nidx = NULL;
+    uint32_t* cur = NULL;   /* pinned: GNND output / current round input  */
+    uint32_t* nxt = NULL;   /* pinned: current round output              */
+    uint32_t* buf0 = NULL;  /* original allocations, freed exactly once  */
+    uint32_t* buf1 = NULL;
+    uint32_t* g128 = NULL;
+    long gshape[2];
+    DLManagedTensor g_t;
+    int round;
+
+    V2_T0();
+    if (cuvsNNDescentIndexParamsCreate(&np) != CUVS_SUCCESS) goto fail_s2;
+    np->metric = L2Expanded;
+    np->metric_arg = 0.f;
+    np->graph_degree = 256;
+    /* replicates the C++ ctor's 1.5x rule (nn_descent_index.cpp:23-29); the C
+     * struct has no implicit behaviour, the value must be explicit */
+    np->intermediate_graph_degree = 384;
+    np->max_iterations = SEEKDB_CUVS_NN_NITER;
+    np->termination_threshold = 0.0001f;
+    np->return_distances = false;
+    V2_T1("nnd_params", n, dim, "cuvsNNDescentIndexParamsCreate gd=256 igd=384");
+
+    if (hipHostMalloc((void**)&cur, (size_t)n * 256 * 4, 0) != hipSuccess ||
+        hipHostMalloc((void**)&nxt, (size_t)n * 256 * 4, 0) != hipSuccess) {
+      fprintf(stderr, "[seekdb_cuvs] S2 pinned graph buffers failed\n");
+      goto fail_s2;
+    }
+    buf0 = cur;
+    buf1 = nxt;
+    memset(cur, 0xFF, (size_t)n * 256 * 4);
+
+    gshape[0] = n; gshape[1] = 256;
+    memset(&g_t, 0, sizeof(g_t));
+    g_t.dl_tensor.data = cur;
+    g_t.dl_tensor.device.device_type = kDLCPU; g_t.dl_tensor.device.device_id = 0;
+    g_t.dl_tensor.ndim = 2;
+    g_t.dl_tensor.dtype.code = kDLUInt; g_t.dl_tensor.dtype.bits = 32; g_t.dl_tensor.dtype.lanes = 1;
+    g_t.dl_tensor.shape = gshape; g_t.dl_tensor.strides = 0; g_t.dl_tensor.byte_offset = 0;
+
+    V2_T0();
+    if (cuvsNNDescentIndexCreate(&nidx) != CUVS_SUCCESS) goto fail_s2;
+    if (cuvsNNDescentBuild(h->res, np, &dset, &g_t, nidx) != CUVS_SUCCESS) goto fail_s2;
+    V2_T1("gnnd_build", n, dim, "cuvsNNDescentBuild gd=256 igd=384 "
+          "niter=" SK_STR(SEEKDB_CUVS_NN_NITER));
+    cuvsNNDescentIndexDestroy(nidx);
+    nidx = NULL;
+
+    for (round = 0; round < SEEKDB_REFINE_ROUNDS; round++) {
+      V2_T0();
+      if (seekdb_refine_round(h->res, base, n, dim, cur, nxt) != 0) {
+        fprintf(stderr, "[seekdb_cuvs] refine round %d failed\n", round);
+        goto fail_s2;
+      }
+      V2_T1("refine_round", n, dim, "exact fp32 re-rank round");
+      { uint32_t* t = cur; cur = nxt; nxt = t; }
+    }
+
+    g128 = (uint32_t*)malloc((size_t)n * 128 * 4);
+    if (!g128) goto fail_s2;
+    V2_T0();
+    if (seekdb_prune256to128(cur, n, g128) != 0) {
+      fprintf(stderr, "[seekdb_cuvs] prune256to128 failed\n");
+      goto fail_s2;
+    }
+    V2_T1("prune256to128", n, dim, "helpers::optimize (official)");
+
+    V2_T0();
+    if (cuvsCagraIndexCreate(&h->idx) != CUVS_SUCCESS) goto fail_s2;
+    {
+      long gshape2[2]; DLManagedTensor g128_t;
+      gshape2[0] = n; gshape2[1] = 128;
+      memset(&g128_t, 0, sizeof(g128_t));
+      g128_t.dl_tensor.data = g128;
+      g128_t.dl_tensor.device.device_type = kDLCPU; g128_t.dl_tensor.device.device_id = 0;
+      g128_t.dl_tensor.ndim = 2;
+      g128_t.dl_tensor.dtype.code = kDLUInt; g128_t.dl_tensor.dtype.bits = 32;
+      g128_t.dl_tensor.dtype.lanes = 1;
+      g128_t.dl_tensor.shape = gshape2; g128_t.dl_tensor.strides = 0;
+      g128_t.dl_tensor.byte_offset = 0;
+      if (cuvsCagraIndexFromArgs(h->res, L2Expanded, &g128_t, &dset, h->idx)
+          != CUVS_SUCCESS) {
+        fprintf(stderr, "[seekdb_cuvs] inject failed: %s\n", cuvsGetLastErrorText());
+        goto fail_s2;
+      }
+    }
+    V2_T1("inject_fromargs", n, dim, "cuvsCagraIndexFromArgs 128-wide");
+    hipHostFree(buf0);
+    hipHostFree(buf1);
+    free(g128);
+    cuvsNNDescentIndexParamsDestroy(np);
+    h->n = n; h->dim = dim;
+    return h;
+
+  fail_s2:
+    fprintf(stderr, "[seekdb_cuvs] S2 build failed: %s\n", cuvsGetLastErrorText());
+    if (h->idx) { cuvsCagraIndexDestroy(h->idx); h->idx = NULL; }
+    if (nidx) cuvsNNDescentIndexDestroy(nidx);
+    if (np) cuvsNNDescentIndexParamsDestroy(np);
+    if (buf0) hipHostFree(buf0);
+    if (buf1) hipHostFree(buf1);
+    if (g128) free(g128);
+  }
+fail_ip:
+  cuvsCagraIndexParamsDestroy(h->ip);
+fail_res:
   fprintf(stderr, "[seekdb_cuvs] build failed: %s\n", cuvsGetLastErrorText());
+  cuvsResourcesDestroy(h->res);
+  free(h);
   return NULL;
 }
 
