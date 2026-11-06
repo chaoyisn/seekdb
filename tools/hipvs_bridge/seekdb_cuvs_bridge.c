@@ -64,7 +64,7 @@ typedef struct {
  * CAGRA build actually used, so a measured round can be tied to its
  * candidate without trusting file names. */
 #ifndef SEEKDB_CUVS_NN_NITER
-#define SEEKDB_CUVS_NN_NITER 64
+#define SEEKDB_CUVS_NN_NITER 32
 #endif
 /* [V5-P4-S2] refine rounds run between GNND and the prune (1 = design
  * baseline; multi-round re-reads the previous round's output). */
