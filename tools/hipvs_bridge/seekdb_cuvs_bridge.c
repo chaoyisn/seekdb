@@ -107,6 +107,12 @@ void* seekdb_cuvs_build(const float* base, long n, long dim)
   fprintf(stderr, "[seekdb_cuvs_bridge] S2 pipeline: nnd(gd=256 igd=384 "
           "niter=%d) -> refine(rounds=%d) -> prune256to128 -> FromArgs inject "
           "n=%ld dim=%ld\n", SEEKDB_CUVS_NN_NITER, SEEKDB_REFINE_ROUNDS, n, dim);
+  /* canonical params line: keeps the observer-log contract used by
+   * snapshot_check.py (PARAM_LINE + nn_descent_niter) and platform-side
+   * provenance greps; parameters below are the S2-effective ones */
+  fprintf(stderr, "[seekdb_cuvs_bridge] cagra build params: algo=NN_DESCENT "
+          "graph_degree=256 intermediate_graph_degree=384 nn_descent_niter=%d "
+          "n=%ld dim=%ld\n", SEEKDB_CUVS_NN_NITER, n, dim);
 
   {
     cuvsNNDescentIndexParams_t np = NULL;
