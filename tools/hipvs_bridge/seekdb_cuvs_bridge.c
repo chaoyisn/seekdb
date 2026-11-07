@@ -2,7 +2,6 @@
 #include "seekdb_cuvs_bridge.h"
 #include <cuvs/core/c_api.h>
 #include <cuvs/neighbors/cagra.h>
-#include <cuvs/neighbors/nn_descent.h>
 #include <dlpack/dlpack.h>
 #ifdef __HIP_PLATFORM_AMD__
 #include <cuvs/cuda_runtime.h>
@@ -11,9 +10,13 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "v2_profile.h"
+
+#ifdef SEEKDB_CUVS_ENABLE_S2
+#include <cuvs/neighbors/nn_descent.h>
+#include <string.h>
 #include "seekdb_refine.h"
+#endif
 
 #ifdef OB_V2_PROFILE
 /* One pair of process-wide events, created once. Every measured section
@@ -64,12 +67,18 @@ typedef struct {
  * CAGRA build actually used, so a measured round can be tied to its
  * candidate without trusting file names. */
 #ifndef SEEKDB_CUVS_NN_NITER
+#ifdef SEEKDB_CUVS_ENABLE_S2
 #define SEEKDB_CUVS_NN_NITER 32
+#else
+#define SEEKDB_CUVS_NN_NITER 64
 #endif
+#endif
+#ifdef SEEKDB_CUVS_ENABLE_S2
 /* [V5-P4-S2] refine rounds run between GNND and the prune (1 = design
  * baseline; multi-round re-reads the previous round's output). */
 #ifndef SEEKDB_REFINE_ROUNDS
 #define SEEKDB_REFINE_ROUNDS 1
+#endif
 #endif
 #define SK_STR2(x) #x
 #define SK_STR(x) SK_STR2(x)
@@ -92,6 +101,7 @@ void* seekdb_cuvs_build(const float* base, long n, long dim)
   if (cuvsCagraIndexParamsCreate(&h->ip) != CUVS_SUCCESS) goto fail_res;
   V2_T1("ip_create", n, dim, "cuvsCagraIndexParamsCreate");
 
+#ifdef SEEKDB_CUVS_ENABLE_S2
   /* [V5-P4-S2] Custom GPU graph pipeline (in-repo custom build allowed; the
    * fixed hipVS/cuVS library is untouched):
    *   1. official GNND stage via cuvsNNDescentBuild, gd=256 / igd=384 ->
@@ -226,6 +236,32 @@ fail_res:
   cuvsResourcesDestroy(h->res);
   free(h);
   return NULL;
+#else
+  /* Evaluators that compile this file alone use the P1 CAGRA path. */
+  h->ip->build_algo = NN_DESCENT;
+  h->ip->graph_degree = 128;
+  h->ip->intermediate_graph_degree = 256;
+  h->ip->nn_descent_niter = SEEKDB_CUVS_NN_NITER;
+  fprintf(stderr, "[seekdb_cuvs_bridge] cagra build params: algo=NN_DESCENT "
+          "graph_degree=%d intermediate_graph_degree=%d nn_descent_niter=%d "
+          "n=%ld dim=%ld\n", h->ip->graph_degree,
+          h->ip->intermediate_graph_degree, h->ip->nn_descent_niter, n, dim);
+  V2_T0();
+  if (cuvsCagraIndexCreate(&h->idx)      != CUVS_SUCCESS) goto fail_ip;
+  V2_T1("idx_create", n, dim, "cuvsCagraIndexCreate");
+  V2_T0();
+  if (cuvsCagraBuild(h->res, h->ip, &dset, h->idx) != CUVS_SUCCESS) goto fail_idx;
+  V2_T1("cagra_build", n, dim, "cuvsCagraBuild NN_DESCENT deg=128 inter=256 "
+        "niter=" SK_STR(SEEKDB_CUVS_NN_NITER));
+  h->n = n; h->dim = dim;
+  return h;
+
+fail_idx: cuvsCagraIndexDestroy(h->idx);
+fail_ip:  cuvsCagraIndexParamsDestroy(h->ip);
+fail_res: cuvsResourcesDestroy(h->res); free(h);
+  fprintf(stderr, "[seekdb_cuvs] build failed: %s\n", cuvsGetLastErrorText());
+  return NULL;
+#endif
 }
 
 int seekdb_cuvs_search(void* handle, const float* query, long nq, long topk,

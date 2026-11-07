@@ -21,8 +21,7 @@ OUTPUT=${1:-$SCRIPT_DIR/libseekdb_cuvs_bridge.so}
 mkdir -p "$(dirname "$OUTPUT")"
 
 # [V2] Optional extra compile flags, used only by the instrumented build
-# (e.g. EXTRA_CFLAGS="-DOB_V2_PROFILE"). Empty by default, so the default
-# build is byte-for-byte the frozen V5 behaviour.
+# (e.g. EXTRA_CFLAGS="-DOB_V2_PROFILE").
 EXTRA_CFLAGS=${EXTRA_CFLAGS:-}
 
 # [V5-P4-S2] Vendored raft headers (third_party/, pinned per MANIFEST): the
@@ -36,12 +35,12 @@ for d in "$RAFT_INC" "$RAFT_GEN" "$LOGGER_INC"; do
   [[ -d "$d" ]] || { echo "vendored raft include missing: $d" >&2; exit 2; }
 done
 
-# GNND + prune + inject live in the C TU; the refine kernels and the C++
-# prune shim are separate TUs linked into the same .so.
+# Enable S2 here because this script also links the refine and prune objects.
 "$HIPCC" \
   -fPIC \
   -O2 \
   -D__HIP_PLATFORM_AMD__ \
+  -DSEEKDB_CUVS_ENABLE_S2 \
   $EXTRA_CFLAGS \
   -I"$SCRIPT_DIR" \
   -I"$HIPVS_ROOT/include" \
